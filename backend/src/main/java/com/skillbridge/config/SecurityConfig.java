@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers("/skills/my").hasRole("EMPLOYEE")
                         .requestMatchers("/skills/pending").hasRole("MANAGER")
                         .requestMatchers("/skills/*/verify").hasRole("MANAGER")
+                        .requestMatchers("/skills/search").hasAnyRole("MANAGER", "HR")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
