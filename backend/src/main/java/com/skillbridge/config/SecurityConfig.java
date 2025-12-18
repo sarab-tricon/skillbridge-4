@@ -46,6 +46,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/assignments").hasAnyRole("HR", "MANAGER")
                         .requestMatchers("/assignments/*/end").hasAnyRole("HR", "MANAGER")
                         .requestMatchers("/assignments/my").hasRole("EMPLOYEE")
+                        .requestMatchers("/utilization/me").authenticated()
+                        .requestMatchers("/utilization/team").hasRole("MANAGER")
+                        .requestMatchers("/utilization/summary").hasRole("HR")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
