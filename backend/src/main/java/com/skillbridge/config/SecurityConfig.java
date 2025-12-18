@@ -4,6 +4,7 @@ import com.skillbridge.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -35,6 +36,10 @@ public class SecurityConfig {
                         .requestMatchers("/users/me").authenticated()
                         .requestMatchers("/users/team").hasRole("MANAGER")
                         .requestMatchers("/users/**").hasRole("HR")
+                        .requestMatchers(HttpMethod.POST, "/skills").hasRole("EMPLOYEE")
+                        .requestMatchers("/skills/my").hasRole("EMPLOYEE")
+                        .requestMatchers("/skills/pending").hasRole("MANAGER")
+                        .requestMatchers("/skills/*/verify").hasRole("MANAGER")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
