@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/utilization")
+@RequestMapping({ "/utilization", "/allocations" })
 @RequiredArgsConstructor
 public class UtilizationController {
 
     private final UtilizationService utilizationService;
 
-    @GetMapping("/me")
+    @GetMapping({ "/me", "/allocations/me" })
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<EmployeeUtilizationResponse> getMyUtilization() {
         return ResponseEntity.ok(utilizationService.getMyUtilization());
