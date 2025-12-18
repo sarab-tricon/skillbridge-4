@@ -41,6 +41,11 @@ public class SecurityConfig {
                         .requestMatchers("/skills/pending").hasRole("MANAGER")
                         .requestMatchers("/skills/*/verify").hasRole("MANAGER")
                         .requestMatchers("/skills/search").hasAnyRole("MANAGER", "HR")
+                        .requestMatchers("/projects/active").hasAnyRole("HR", "MANAGER")
+                        .requestMatchers("/projects/**").hasRole("HR")
+                        .requestMatchers(HttpMethod.POST, "/assignments").hasAnyRole("HR", "MANAGER")
+                        .requestMatchers("/assignments/*/end").hasAnyRole("HR", "MANAGER")
+                        .requestMatchers("/assignments/my").hasRole("EMPLOYEE")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

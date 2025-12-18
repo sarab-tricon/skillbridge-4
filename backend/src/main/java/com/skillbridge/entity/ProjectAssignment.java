@@ -1,0 +1,53 @@
+package com.skillbridge.entity;
+
+import com.skillbridge.enums.AssignmentStatus;
+import com.skillbridge.enums.BillingType;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+import java.util.UUID;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "project_assignments")
+public class ProjectAssignment {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @NotNull(message = "Employee ID is required")
+    @Column(nullable = false)
+    private UUID employeeId;
+
+    @NotNull(message = "Project ID is required")
+    @Column(nullable = false)
+    private UUID projectId;
+
+    @Enumerated(EnumType.STRING)
+    @NotNull(message = "Assignment status is required")
+    @Column(nullable = false)
+    private AssignmentStatus assignmentStatus;
+
+    @Enumerated(EnumType.STRING)
+    @NotNull(message = "Billing type is required")
+    @Column(nullable = false)
+    private BillingType billingType;
+
+    @NotNull(message = "Start date is required")
+    @Column(nullable = false)
+    private LocalDate startDate;
+
+    private LocalDate endDate;
+
+    @Version
+    private Long version;
+}
