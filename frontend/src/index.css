@@ -1,0 +1,44 @@
+:root {
+  --color-bg: #FCF6D9;
+  --color-primary: #9CC6DB;
+  --color-accent: #CF4B00;
+  --color-secondary: #DDBA7D;
+  --bs-body-font-family: 'Pompiere', cursive, sans-serif;
+  --bs-body-color: #333;
+  --bs-body-bg: var(--color-bg);
+}
+
+body {
+  font-family: 'Pompiere', cursive, sans-serif;
+  background-color: var(--color-bg);
+  font-size: 1.5rem; /* Increased font size as requested */
+  color: #333;
+}
+
+/* Typography tweaks */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 400; /* Pompiere is naturally bold-ish */
+  letter-spacing: 0.5px;
+}
+
+/* Button overrides for accent color */
+.btn-accent {
+  background-color: var(--color-accent);
+  color: white;
+  border: none;
+  font-size: 1.4rem;
+  padding: 0.5rem 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.btn-accent:hover {
+  background-color: #b54000;
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Navbar overrides */
+.navbar-brand {
+    font-size: 2rem;
+    color: #333 !important;
+}
