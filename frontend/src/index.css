@@ -3,21 +3,28 @@
   --color-primary: #9CC6DB;
   --color-accent: #CF4B00;
   --color-secondary: #DDBA7D;
-  --bs-body-font-family: 'Pompiere', cursive, sans-serif;
+  --bs-body-font-family: "Roboto Slab", serif;
   --bs-body-color: #333;
   --bs-body-bg: var(--color-bg);
 }
 
 body {
-  font-family: 'Pompiere', cursive, sans-serif;
+  font-family: "Roboto Slab", serif;
   background-color: var(--color-bg);
-  font-size: 1.5rem; /* Increased font size as requested */
+  font-size: 1.5rem;
+  /* Increased font size as requested */
   color: #333;
 }
 
 /* Typography tweaks */
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 400; /* Pompiere is naturally bold-ish */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 400;
+  /* Pompiere is naturally bold-ish */
   letter-spacing: 0.5px;
 }
 
@@ -39,6 +46,6 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Navbar overrides */
 .navbar-brand {
-    font-size: 2rem;
-    color: #333 !important;
+  font-size: 2rem;
+  color: #333 !important;
 }

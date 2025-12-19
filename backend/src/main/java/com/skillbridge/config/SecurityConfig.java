@@ -38,6 +38,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow preflight checks
                         .requestMatchers("/auth/**", "/h2-console/**").permitAll() // Whitelist auth and debugging
                         .requestMatchers("/users/me").authenticated()
                         .requestMatchers("/users/team").hasRole("MANAGER")
@@ -46,7 +47,7 @@ public class SecurityConfig {
                         .requestMatchers("/skills/my").hasRole("EMPLOYEE")
                         .requestMatchers("/skills/pending").hasRole("MANAGER")
                         .requestMatchers("/skills/*/verify").hasRole("MANAGER")
-                        .requestMatchers("/skills/search").hasAnyRole("MANAGER", "HR")
+                        .requestMatchers(HttpMethod.GET, "/skills/search").hasAnyRole("MANAGER", "HR")
                         .requestMatchers("/projects/active").hasAnyRole("HR", "MANAGER")
                         .requestMatchers("/projects/**").hasRole("HR")
                         .requestMatchers(HttpMethod.POST, "/assignments").hasAnyRole("HR", "MANAGER")

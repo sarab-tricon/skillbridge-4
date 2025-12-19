@@ -5,9 +5,9 @@ spring:
   application:
     name: skillbridge-backend
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5433/skillbridge_1}
+    url: ${DB_URL:jdbc:postgresql://localhost:5434/skillbridge_1}
     username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
+    password: ${DB_PASSWORD:admin}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

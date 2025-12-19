@@ -67,10 +67,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     // Extract role from JWT and map to authorities (as per user request: derived
                     // strictly from JWT)
                     String role = jwtService.extractRole(jwt);
+                    System.out.println("DEBUG: Extracted Role from JWT: " + role); // Debug Log
+
                     java.util.List<org.springframework.security.core.GrantedAuthority> authorities = java.util.Collections
                             .singletonList(
                                     new org.springframework.security.core.authority.SimpleGrantedAuthority(
                                             "ROLE_" + role));
+                    
+                    System.out.println("DEBUG: Assigned Authorities: " + authorities); // Debug Log
 
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
