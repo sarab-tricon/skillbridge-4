@@ -37,10 +37,22 @@ public class SkillController {
         return ResponseEntity.ok(skillService.getMySkills());
     }
 
-    @GetMapping("/pending")
-    @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<List<SkillResponse>> getPendingSkills() {
-        return ResponseEntity.ok(skillService.getPendingSkillsForManager());
+    @GetMapping("/pending/all")
+    @PreAuthorize("hasRole('HR')")
+    public ResponseEntity<List<SkillResponse>> getAllPendingSkills() {
+        return ResponseEntity.ok(skillService.getAllPendingSkills());
+    }
+
+    @PostMapping("/{id}/approve")
+    @PreAuthorize("hasAnyRole('MANAGER', 'HR')")
+    public ResponseEntity<SkillResponse> approveSkill(@PathVariable UUID id) {
+        return ResponseEntity.ok(skillService.approveSkill(id, null));
+    }
+
+    @PostMapping("/{id}/reject")
+    @PreAuthorize("hasAnyRole('MANAGER', 'HR')")
+    public ResponseEntity<SkillResponse> rejectSkill(@PathVariable UUID id) {
+        return ResponseEntity.ok(skillService.rejectSkill(id));
     }
 
     @PutMapping("/{id}/verify")

@@ -82,9 +82,25 @@ public class SkillService {
         EmployeeSkill skill = employeeSkillRepository.findById(skillId)
                 .orElseThrow(() -> new RuntimeException("Skill not found"));
 
-        skill.setStatus(request.getStatus());
+        skill.setStatus(SkillStatus.APPROVED);
         EmployeeSkill updated = employeeSkillRepository.save(skill);
         return mapToResponse(updated);
+    }
+
+    @Transactional
+    public SkillResponse rejectSkill(UUID skillId) {
+        EmployeeSkill skill = employeeSkillRepository.findById(skillId)
+                .orElseThrow(() -> new RuntimeException("Skill not found"));
+
+        skill.setStatus(SkillStatus.REJECTED);
+        EmployeeSkill savedSkill = employeeSkillRepository.save(skill);
+        return mapToResponse(savedSkill);
+    }
+
+    public List<SkillResponse> getAllPendingSkills() {
+        return employeeSkillRepository.findByStatus(SkillStatus.PENDING).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,6 +54,40 @@ public class ProjectService {
         return projectRepository.findByStatus(ProjectStatus.ACTIVE).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public ProjectResponse updateProject(UUID id, CreateProjectRequest request) {
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Project not found with id: " + id));
+
+        if (request.getStartDate().isAfter(request.getEndDate())) {
+            throw new RuntimeException("Start date must be before end date");
+        }
+
+        // Check for uniqueness if name changed
+        if (!project.getName().equalsIgnoreCase(request.getName())) {
+            if (projectRepository.existsByName(request.getName())) {
+                throw new RuntimeException("Project name must be unique");
+            }
+        }
+
+        project.setName(request.getName());
+        project.setCompanyName(request.getCompanyName());
+        project.setTechStack(request.getTechStack());
+        project.setStartDate(request.getStartDate());
+        project.setEndDate(request.getEndDate());
+        project.setStatus(request.getStatus());
+
+        return mapToResponse(projectRepository.save(project));
+    }
+
+    @Transactional
+    public void deleteProject(UUID id) {
+        if (!projectRepository.existsById(id)) {
+            throw new RuntimeException("Project not found with id: " + id);
+        }
+        projectRepository.deleteById(id);
     }
 
     private ProjectResponse mapToResponse(Project project) {

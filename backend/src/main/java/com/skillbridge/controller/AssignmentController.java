@@ -19,11 +19,13 @@ public class AssignmentController {
     private final AssignmentService assignmentService;
 
     @PostMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('HR', 'MANAGER')")
     public ResponseEntity<AssignmentResponse> assignEmployee(@Valid @RequestBody CreateAssignmentRequest request) {
         return new ResponseEntity<>(assignmentService.assignEmployeeToProject(request), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}/end")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('HR', 'MANAGER')")
     public ResponseEntity<Void> endAssignment(@PathVariable UUID id) {
         assignmentService.endAssignment(id);
         return ResponseEntity.noContent().build();
@@ -53,5 +55,19 @@ public class AssignmentController {
     public ResponseEntity<Void> rejectAssignment(@PathVariable UUID id) {
         assignmentService.rejectAssignment(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/all")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('HR')")
+    public ResponseEntity<java.util.List<AssignmentResponse>> getAllAssignments() {
+        return ResponseEntity.ok(assignmentService.getAllAssignments());
+    }
+
+    @PutMapping("/{id}/override")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('HR')")
+    public ResponseEntity<AssignmentResponse> overrideAssignment(
+            @PathVariable UUID id,
+            @Valid @RequestBody com.skillbridge.dto.OverrideAssignmentRequest request) {
+        return ResponseEntity.ok(assignmentService.overrideAssignment(id, request));
     }
 }

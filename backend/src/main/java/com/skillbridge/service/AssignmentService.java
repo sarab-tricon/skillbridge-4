@@ -143,6 +143,39 @@ public class AssignmentService {
     }
 
     @Transactional(readOnly = true)
+    public java.util.List<AssignmentResponse> getAllAssignments() {
+        return assignmentRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    @Transactional
+    public AssignmentResponse overrideAssignment(UUID id, com.skillbridge.dto.OverrideAssignmentRequest request) {
+        ProjectAssignment assignment = assignmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Assignment not found with ID: " + id));
+
+        if (request.getProjectId() != null) {
+            if (!projectRepository.existsById(request.getProjectId())) {
+                throw new RuntimeException("Project not found with ID: " + request.getProjectId());
+            }
+            assignment.setProjectId(request.getProjectId());
+        }
+
+        if (request.getBillingType() != null) {
+            assignment.setBillingType(request.getBillingType());
+        }
+
+        if (request.getAssignmentStatus() != null) {
+            assignment.setAssignmentStatus(request.getAssignmentStatus());
+            if (request.getAssignmentStatus() == AssignmentStatus.ENDED) {
+                assignment.setEndDate(LocalDate.now());
+            }
+        }
+
+        return mapToResponse(assignmentRepository.save(assignment));
+    }
+
+    @Transactional(readOnly = true)
     public AssignmentResponse getMyAssignment() {
         User currentUser = getAuthenticatedUser();
         // Return most relevant assignment (Active, else Pending, else Rejected)
