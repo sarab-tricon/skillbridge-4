@@ -75,12 +75,99 @@ public class AssignmentService {
         assignmentRepository.save(assignment);
     }
 
+    @Transactional
+    public AssignmentResponse requestAllocation(UUID projectId) {
+        User currentUser = getAuthenticatedUser();
+        
+        // 1. Validate project exists and is active
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found with ID: " + projectId));
+
+        if (project.getStatus() != ProjectStatus.ACTIVE) {
+            throw new RuntimeException("Cannot request allocation for a non-active project");
+        }
+
+        // 2. Check for existing active or pending assignment
+        assignmentRepository.findByEmployeeIdAndAssignmentStatus(currentUser.getId(), AssignmentStatus.ACTIVE)
+                .ifPresent(a -> { throw new IllegalStateException("Already have an active assignment"); });
+        
+        assignmentRepository.findByEmployeeIdAndAssignmentStatus(currentUser.getId(), AssignmentStatus.PENDING)
+                .ifPresent(a -> { throw new IllegalStateException("Already have a pending assignment request"); });
+
+        // 3. Create and save pending assignment
+        ProjectAssignment assignment = ProjectAssignment.builder()
+                .employeeId(currentUser.getId())
+                .projectId(projectId)
+                .assignmentStatus(AssignmentStatus.PENDING)
+                .billingType(null) // Not assigned yet
+                .startDate(LocalDate.now())
+                .build();
+
+        return mapToResponse(assignmentRepository.save(assignment));
+    }
+
+    @Transactional
+    public AssignmentResponse approveAssignment(UUID assignmentId, com.skillbridge.enums.BillingType billingType) {
+        ProjectAssignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new RuntimeException("Assignment request not found"));
+
+        if (assignment.getAssignmentStatus() != AssignmentStatus.PENDING) {
+            throw new IllegalStateException("Can only approve pending requests");
+        }
+
+        assignment.setAssignmentStatus(AssignmentStatus.ACTIVE);
+        assignment.setBillingType(billingType);
+        return mapToResponse(assignmentRepository.save(assignment));
+    }
+
+    @Transactional
+    public void rejectAssignment(UUID assignmentId) {
+        ProjectAssignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new RuntimeException("Assignment request not found"));
+
+        if (assignment.getAssignmentStatus() != AssignmentStatus.PENDING) {
+            throw new IllegalStateException("Can only reject pending requests");
+        }
+
+        assignment.setAssignmentStatus(AssignmentStatus.REJECTED);
+        assignmentRepository.save(assignment);
+    }
+
+    @Transactional(readOnly = true)
+    public java.util.List<AssignmentResponse> getPendingAssignments() {
+        // In a real system, we'd filter by manager's team members
+        return assignmentRepository.findAll().stream()
+                .filter(a -> a.getAssignmentStatus() == AssignmentStatus.PENDING)
+                .map(this::mapToResponse)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
     @Transactional(readOnly = true)
     public AssignmentResponse getMyAssignment() {
         User currentUser = getAuthenticatedUser();
-        return assignmentRepository.findByEmployeeIdAndAssignmentStatus(currentUser.getId(), AssignmentStatus.ACTIVE)
+        // Return most relevant assignment (Active, else Pending, else Rejected)
+        java.util.List<ProjectAssignment> assignments = assignmentRepository.findByEmployeeId(currentUser.getId());
+        
+        return assignments.stream()
+                .sorted((a1, a2) -> {
+                    // Quick priority: ACTIVE (0) > PENDING (1) > REJECTED (2) > ENDED (3)
+                    int p1 = getStatusPriority(a1.getAssignmentStatus());
+                    int p2 = getStatusPriority(a2.getAssignmentStatus());
+                    return Integer.compare(p1, p2);
+                })
+                .findFirst()
                 .map(this::mapToResponse)
                 .orElse(null);
+    }
+
+    private int getStatusPriority(AssignmentStatus status) {
+        switch (status) {
+            case ACTIVE: return 0;
+            case PENDING: return 1;
+            case REJECTED: return 2;
+            case ENDED: return 3;
+            default: return 4;
+        }
     }
 
     private User getAuthenticatedUser() {

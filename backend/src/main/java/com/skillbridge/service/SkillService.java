@@ -35,6 +35,11 @@ public class SkillService {
     public SkillResponse addSkill(AddSkillRequest request) {
         User employee = getCurrentUser();
 
+        // Check for uniqueness
+        if (employeeSkillRepository.existsByEmployeeIdAndSkillNameIgnoreCase(employee.getId(), request.getSkillName())) {
+            throw new RuntimeException("You have already added the skill: " + request.getSkillName());
+        }
+
         EmployeeSkill skill = EmployeeSkill.builder()
                 .employeeId(employee.getId())
                 .skillName(request.getSkillName())
@@ -73,33 +78,52 @@ public class SkillService {
     }
 
     @Transactional
-    public SkillResponse approveSkill(UUID skillId, SkillApprovalRequest request) {
-        User manager = getCurrentUser();
+    public SkillResponse updateSkill(UUID skillId, AddSkillRequest request) {
+        User employee = getCurrentUser();
         EmployeeSkill skill = employeeSkillRepository.findById(skillId)
                 .orElseThrow(() -> new RuntimeException("Skill not found"));
 
-        if (!SkillStatus.PENDING.equals(skill.getStatus())) {
-            throw new IllegalStateException("Only PENDING skills can be verified");
+        if (!Objects.equals(skill.getEmployeeId(), employee.getId())) {
+            throw new AccessDeniedException("You are not authorized to update this skill");
         }
 
-        User employee = userRepository.findById(skill.getEmployeeId())
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
-
-        // Strict Manager Validation
-        if (!Objects.equals(employee.getManagerId(), manager.getId())) {
-            throw new AccessDeniedException("You are not authorized to verify this skill");
+        // Check for uniqueness if name changed
+        if (!skill.getSkillName().equalsIgnoreCase(request.getSkillName())) {
+            if (employeeSkillRepository.existsByEmployeeIdAndSkillNameIgnoreCase(employee.getId(), request.getSkillName())) {
+                throw new RuntimeException("You already have a skill named: " + request.getSkillName());
+            }
         }
 
-        skill.setStatus(request.getStatus());
-        // @Version handles optimistic locking automatically
-        EmployeeSkill updatedSkill = employeeSkillRepository.save(skill);
+        skill.setSkillName(request.getSkillName());
+        skill.setProficiencyLevel(request.getProficiencyLevel());
+        skill.setStatus(SkillStatus.PENDING); // Reset status to PENDING on edit
 
-        return mapToResponse(updatedSkill);
+        EmployeeSkill updated = employeeSkillRepository.save(skill);
+        return mapToResponse(updated);
+    }
+
+    @Transactional
+    public void deleteSkill(UUID skillId) {
+        User employee = getCurrentUser();
+        EmployeeSkill skill = employeeSkillRepository.findById(skillId)
+                .orElseThrow(() -> new RuntimeException("Skill not found"));
+
+        if (!Objects.equals(skill.getEmployeeId(), employee.getId())) {
+            throw new AccessDeniedException("You are not authorized to delete this skill");
+        }
+
+        employeeSkillRepository.delete(skill);
     }
 
     private SkillResponse mapToResponse(EmployeeSkill skill) {
+        User employee = userRepository.findById(skill.getEmployeeId())
+                .orElse(null);
+        
         return SkillResponse.builder()
                 .id(skill.getId())
+                .employeeId(skill.getEmployeeId())
+                .employeeName(employee != null ? employee.getEmail().split("@")[0] : "Unknown") // Best effort for name
+                .employeeEmail(employee != null ? employee.getEmail() : "Unknown")
                 .skillName(skill.getSkillName())
                 .proficiencyLevel(skill.getProficiencyLevel())
                 .status(skill.getStatus())

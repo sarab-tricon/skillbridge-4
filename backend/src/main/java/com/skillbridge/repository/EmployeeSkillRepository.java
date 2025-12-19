@@ -12,6 +12,6 @@ public interface EmployeeSkillRepository extends JpaRepository<EmployeeSkill, UU
     List<EmployeeSkill> findByEmployeeId(UUID employeeId);
 
     List<EmployeeSkill> findByStatusAndEmployeeIdIn(SkillStatus status, List<UUID> employeeIds);
-
     List<EmployeeSkill> findBySkillNameIgnoreCaseAndStatus(String skillName, SkillStatus status);
+    boolean existsByEmployeeIdAndSkillNameIgnoreCase(UUID employeeId, String skillName);
 }
