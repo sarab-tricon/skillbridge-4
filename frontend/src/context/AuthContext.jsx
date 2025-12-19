@@ -1,5 +1,5 @@
 import { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { jwtDecode } from 'jwt-decode';
 
 const AuthContext = createContext();
@@ -16,30 +16,24 @@ export const AuthProvider = ({ children }) => {
             try {
                 const decoded = jwtDecode(token);
                 setUser(decoded);
-                // Assuming the backend puts the role in the "role" claim or "authorities". 
-                // Based on backend code: extraClaims.put("role", user.getRole());
                 setRole(decoded.role);
-                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             } catch (error) {
                 console.error("Invalid token", error);
                 logout();
             }
-        } else {
-            delete axios.defaults.headers.common['Authorization'];
         }
     }, [token]);
 
     const login = async (email, password) => {
         try {
-            const response = await axios.post('http://localhost:8080/auth/login', {
+            const response = await api.post('/auth/login', {
                 email,
                 password,
             });
-            const { token } = response.data;
-            localStorage.setItem('token', token);
-            setToken(token);
-            // Decode immediately to return role for redirect
-            const decoded = jwtDecode(token);
+            const { token: receivedToken } = response.data;
+            localStorage.setItem('token', receivedToken);
+            setToken(receivedToken);
+            const decoded = jwtDecode(receivedToken);
             return { success: true, role: decoded.role };
         } catch (error) {
             console.error("Login failed", error);
