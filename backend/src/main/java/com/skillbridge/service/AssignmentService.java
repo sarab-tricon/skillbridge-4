@@ -37,7 +37,7 @@ public class AssignmentService {
         // 2. Validate project exists and is active
         Project project = projectRepository.findById(request.getProjectId())
                 .orElseThrow(() -> new RuntimeException("Project not found with ID: " + request.getProjectId()));
-        
+
         if (project.getStatus() != ProjectStatus.ACTIVE) {
             throw new RuntimeException("Cannot assign employee to a non-active project");
         }

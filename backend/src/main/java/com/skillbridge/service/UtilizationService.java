@@ -81,7 +81,7 @@ public class UtilizationService {
 
     public UtilizationSummaryResponse getSummary() {
         List<User> employees = userRepository.findByRole(Role.EMPLOYEE);
-        
+
         long total = employees.size();
         long billable = 0;
         long investment = 0;
