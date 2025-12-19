@@ -50,4 +50,19 @@ public class SkillController {
             @Valid @RequestBody SkillApprovalRequest request) {
         return ResponseEntity.ok(skillService.approveSkill(id, request));
     }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    public ResponseEntity<SkillResponse> updateSkill(
+            @PathVariable UUID id,
+            @Valid @RequestBody AddSkillRequest request) {
+        return ResponseEntity.ok(skillService.updateSkill(id, request));
+    }
+
+    @org.springframework.web.bind.annotation.DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    public ResponseEntity<Void> deleteSkill(@PathVariable UUID id) {
+        skillService.deleteSkill(id);
+        return ResponseEntity.noContent().build();
+    }
 }

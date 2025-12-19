@@ -29,12 +29,29 @@ public class AssignmentController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/my")
-    public ResponseEntity<AssignmentResponse> getMyAssignment() {
-        AssignmentResponse response = assignmentService.getMyAssignment();
-        if (response == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(response);
+    @PostMapping("/request")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('EMPLOYEE')")
+    public ResponseEntity<AssignmentResponse> requestAllocation(@RequestBody java.util.Map<String, UUID> request) {
+        return new ResponseEntity<>(assignmentService.requestAllocation(request.get("projectId")), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/pending")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<java.util.List<AssignmentResponse>> getPendingAssignments() {
+        return ResponseEntity.ok(assignmentService.getPendingAssignments());
+    }
+
+    @PutMapping("/{id}/approve")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<AssignmentResponse> approveAssignment(@PathVariable UUID id, @RequestBody java.util.Map<String, String> request) {
+        com.skillbridge.enums.BillingType billingType = com.skillbridge.enums.BillingType.valueOf(request.get("billingType"));
+        return ResponseEntity.ok(assignmentService.approveAssignment(id, billingType));
+    }
+
+    @PutMapping("/{id}/reject")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<Void> rejectAssignment(@PathVariable UUID id) {
+        assignmentService.rejectAssignment(id);
+        return ResponseEntity.noContent().build();
     }
 }

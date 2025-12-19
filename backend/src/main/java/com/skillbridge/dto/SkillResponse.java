@@ -14,6 +14,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SkillResponse {
     private UUID id;
+    private UUID employeeId;
+    private String employeeName;
+    private String employeeEmail;
     private String skillName;
     private ProficiencyLevel proficiencyLevel;
     private SkillStatus status;
