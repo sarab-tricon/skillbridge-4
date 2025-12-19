@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 public class SkillSearchResponse {
     private UUID userId;
     private String email;
+    private String employeeName;
     private String skillName;
     private ProficiencyLevel proficiencyLevel;
     private UUID managerId;

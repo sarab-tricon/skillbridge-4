@@ -78,6 +78,7 @@ public class SkillSearchService {
                     return SkillSearchResponse.builder()
                             .userId(employee.getId())
                             .email(employee.getEmail())
+                            .employeeName(employee.getEmail()) // Fallback to email as name is missing in User entity
                             .skillName(skill.getSkillName())
                             .proficiencyLevel(skill.getProficiencyLevel())
                             .managerId(employee.getManagerId())
