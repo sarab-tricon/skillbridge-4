@@ -78,16 +78,6 @@ public class SkillService {
     }
 
     @Transactional
-    public SkillResponse approveSkill(UUID skillId, SkillApprovalRequest request) {
-        EmployeeSkill skill = employeeSkillRepository.findById(skillId)
-                .orElseThrow(() -> new RuntimeException("Skill not found"));
-
-        skill.setStatus(request.getStatus());
-        EmployeeSkill updated = employeeSkillRepository.save(skill);
-        return mapToResponse(updated);
-    }
-
-    @Transactional
     public SkillResponse updateSkill(UUID skillId, AddSkillRequest request) {
         User employee = getCurrentUser();
         EmployeeSkill skill = employeeSkillRepository.findById(skillId)
