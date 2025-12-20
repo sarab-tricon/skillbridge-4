@@ -36,6 +36,10 @@ public class JwtService {
         return extractClaim(token, claims -> claims.get("role", String.class));
     }
 
+    public java.util.List<String> extractAuthorities(String token) {
+        return extractClaim(token, claims -> (java.util.List<String>) claims.get("authorities"));
+    }
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
@@ -45,6 +49,7 @@ public class JwtService {
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("userId", user.getId());
         extraClaims.put("role", user.getRole());
+        extraClaims.put("authorities", java.util.List.of("ROLE_" + user.getRole().name()));
         // JTI is generated automatically by UUID here to ensure structure,
         // but for single session enforcement we will pass the jti explicitly or
         // generate it here.
@@ -65,6 +70,7 @@ public class JwtService {
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("userId", user.getId());
         extraClaims.put("role", user.getRole());
+        extraClaims.put("authorities", java.util.List.of("ROLE_" + user.getRole().name()));
         return generateToken(extraClaims, user, jti);
     }
 
@@ -92,7 +98,7 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    private Claims extractAllClaims(String token) {
+    public Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getSignInKey())
                 .build()

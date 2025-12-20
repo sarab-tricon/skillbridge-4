@@ -19,7 +19,7 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @PostMapping
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('HR')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ROLE_HR')")
     public ResponseEntity<ProjectResponse> createProject(@Valid @RequestBody CreateProjectRequest request) {
         return new ResponseEntity<>(projectService.createProject(request), HttpStatus.CREATED);
     }
