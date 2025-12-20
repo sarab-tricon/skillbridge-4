@@ -10,16 +10,28 @@ const ProjectManagement = () => {
     const [formData, setFormData] = useState({
         name: '',
         companyName: '',
-        techStack: '',
+        techStack: [],
         startDate: '',
         endDate: '',
         employeesRequired: 1,
         status: 'ACTIVE'
     });
 
+    const [catalogSkills, setCatalogSkills] = useState([]);
+
     useEffect(() => {
         fetchProjects();
+        fetchCatalog();
     }, []);
+
+    const fetchCatalog = async () => {
+        try {
+            const response = await api.get('/catalog/skills');
+            setCatalogSkills(response.data);
+        } catch (err) {
+            console.error('Failed to load skill catalog', err);
+        }
+    };
 
     const fetchProjects = async () => {
         setLoading(true);
@@ -45,16 +57,12 @@ const ProjectManagement = () => {
         setSuccess(null);
 
         try {
-            const payload = {
-                ...formData,
-                techStack: formData.techStack.split(',').map(s => s.trim()).filter(s => s !== '')
-            };
-            await api.post('/projects', payload);
+            await api.post('/projects', formData);
             setSuccess('Project created successfully!');
             setFormData({
                 name: '',
                 companyName: '',
-                techStack: '',
+                techStack: [],
                 startDate: '',
                 endDate: '',
                 employeesRequired: 1,
@@ -119,17 +127,41 @@ const ProjectManagement = () => {
                                     />
                                 </div>
                                 <div className="mb-3">
-                                    <label className="form-label fw-bold">Tech Stack (comma separated)</label>
-                                    <input
-                                        type="text"
-                                        name="techStack"
-                                        className="form-control"
-                                        placeholder="Java, React, PostgreSQL"
-                                        required
-                                        value={formData.techStack}
-                                        onChange={handleInputChange}
+                                    <label className="form-label fw-bold">Tech Stack</label>
+                                    <div className="d-flex flex-wrap gap-2 mb-2 p-2 border rounded" style={{ minHeight: '38px', backgroundColor: '#f8f9fa' }}>
+                                        {formData.techStack.length === 0 ? (
+                                            <span className="text-muted small align-self-center">No skills selected</span>
+                                        ) : (
+                                            formData.techStack.map(tech => (
+                                                <span key={tech} className="badge bg-secondary d-flex align-items-center gap-2">
+                                                    {tech}
+                                                    <button
+                                                        type="button"
+                                                        className="btn-close btn-close-white"
+                                                        style={{ fontSize: '0.5rem' }}
+                                                        onClick={() => setFormData(prev => ({ ...prev, techStack: prev.techStack.filter(t => t !== tech) }))}
+                                                    ></button>
+                                                </span>
+                                            ))
+                                        )}
+                                    </div>
+                                    <select
+                                        className="form-select"
                                         style={{ border: '2px solid #9CC6DB' }}
-                                    />
+                                        onChange={(e) => {
+                                            const selectedSkill = e.target.value;
+                                            if (selectedSkill && !formData.techStack.includes(selectedSkill)) {
+                                                setFormData(prev => ({ ...prev, techStack: [...prev.techStack, selectedSkill] }));
+                                            }
+                                            e.target.value = ''; // Reset select
+                                        }}
+                                    >
+                                        <option value="">+ Add Skill from Catalog</option>
+                                        {catalogSkills.map(skill => (
+                                            <option key={skill.id} value={skill.name}>{skill.name}</option>
+                                        ))}
+                                    </select>
+                                    <div className="form-text text-muted small">Select skills from the catalog to build your stack.</div>
                                 </div>
                                 <div className="row">
                                     <div className="col-md-6 mb-3">

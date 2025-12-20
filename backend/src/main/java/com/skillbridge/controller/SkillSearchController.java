@@ -21,9 +21,12 @@ public class SkillSearchController {
 
     @org.springframework.web.bind.annotation.GetMapping("/search")
     @PreAuthorize("hasAnyRole('MANAGER', 'HR')")
-    public ResponseEntity<List<SkillSearchResponse>> searchSkills(@org.springframework.web.bind.annotation.RequestParam("skill") String skillName) {
+    public ResponseEntity<List<SkillSearchResponse>> searchSkills(
+            @org.springframework.web.bind.annotation.RequestParam(value = "skills", required = false) List<String> skillNames,
+            @org.springframework.web.bind.annotation.RequestParam(value = "skill", required = false) String skillName) {
         SkillSearchRequest request = SkillSearchRequest.builder()
                 .skillName(skillName)
+                .skillNames(skillNames)
                 .build();
         return ResponseEntity.ok(skillSearchService.searchSkills(request));
     }

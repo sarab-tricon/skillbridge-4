@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SkillSearchRequest {
     private String skillName;
+    private java.util.List<String> skillNames;
     private ProficiencyLevel minProficiencyLevel;
 }
