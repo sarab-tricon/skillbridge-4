@@ -78,10 +78,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     .map(org.springframework.security.core.GrantedAuthority.class::cast)
                                     .toList();
 
-                    // 3. Build authentication using userEmail as principal (strictly per logic
-                    // request)
+                    // 3. Build authentication using userDetails as principal to match Service
+                    // expectation
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            userEmail,
+                            userDetails,
                             null,
                             authorities);
 

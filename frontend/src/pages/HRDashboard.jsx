@@ -21,7 +21,8 @@ const HRDashboard = () => {
     const [onboardingSuccess, setOnboardingSuccess] = useState(null);
     const [onboardingError, setOnboardingError] = useState(null);
 
-    const [searchSkill, setSearchSkill] = useState('');
+    const [searchSkills, setSearchSkills] = useState([]); // Changed from searchSkill string
+    const [catalogSkills, setCatalogSkills] = useState([]);
     const [talentResults, setTalentResults] = useState(null);
     const [talentLoading, setTalentLoading] = useState(false);
     const [talentError, setTalentError] = useState(null);
@@ -30,8 +31,18 @@ const HRDashboard = () => {
     useEffect(() => {
         if (role === 'HR') {
             fetchManagers();
+            fetchCatalog();
         }
     }, [role]);
+
+    const fetchCatalog = async () => {
+        try {
+            const response = await api.get('/catalog/skills');
+            setCatalogSkills(response.data);
+        } catch (err) {
+            console.error('Failed to load skill catalog', err);
+        }
+    };
 
     // -- API Calls --
     const fetchManagers = async () => {
@@ -78,14 +89,15 @@ const HRDashboard = () => {
 
     const handleTalentSearch = async (e) => {
         e.preventDefault();
-        if (!searchSkill.trim()) return;
+        if (searchSkills.length === 0) return;
 
         setTalentLoading(true);
         setTalentError(null);
         setTalentResults([]);
 
         try {
-            const response = await api.get(`/skills/search?skill=${encodeURIComponent(searchSkill)}`);
+            const skillsQuery = searchSkills.map(s => `skills=${encodeURIComponent(s)}`).join('&');
+            const response = await api.get(`/skills/search?${skillsQuery}`);
             setTalentResults(response.data);
         } catch (err) {
             console.error('Failed to search talent:', err);
@@ -222,22 +234,48 @@ const HRDashboard = () => {
                 </h3>
 
                 <form onSubmit={handleTalentSearch} className="mb-4">
+                    <label className="form-label fw-bold">Search by Skills</label>
+                    <div className="d-flex flex-wrap gap-2 mb-2 p-2 border rounded bg-light" style={{ minHeight: '38px' }}>
+                        {searchSkills.length === 0 ? (
+                            <span className="text-muted small align-self-center">Select skills to search...</span>
+                        ) : (
+                            searchSkills.map(skill => (
+                                <span key={skill} className="badge bg-secondary d-flex align-items-center gap-2">
+                                    {skill}
+                                    <button
+                                        type="button"
+                                        className="btn-close btn-close-white"
+                                        style={{ fontSize: '0.5rem' }}
+                                        onClick={() => setSearchSkills(prev => prev.filter(s => s !== skill))}
+                                    ></button>
+                                </span>
+                            ))
+                        )}
+                    </div>
                     <div className="input-group">
-                        <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Search skill (e.g. Java)..."
-                            value={searchSkill}
-                            onChange={(e) => setSearchSkill(e.target.value)}
+                        <select
+                            className="form-select"
                             style={{ border: '2px solid #9CC6DB' }}
-                        />
+                            onChange={(e) => {
+                                const selected = e.target.value;
+                                if (selected && !searchSkills.includes(selected)) {
+                                    setSearchSkills(prev => [...prev, selected]);
+                                }
+                                e.target.value = '';
+                            }}
+                        >
+                            <option value="">+ Add Skill to Search</option>
+                            {catalogSkills.map(skill => (
+                                <option key={skill.id} value={skill.name}>{skill.name}</option>
+                            ))}
+                        </select>
                         <button
                             type="submit"
-                            className="btn text-white"
+                            className="btn text-white fw-bold"
                             style={{ backgroundColor: '#CF4B00' }}
-                            disabled={talentLoading || !searchSkill.trim()}
+                            disabled={talentLoading || searchSkills.length === 0}
                         >
-                            Search
+                            <i className="bi bi-search me-2"></i>Search Talent
                         </button>
                     </div>
                 </form>
@@ -254,6 +292,7 @@ const HRDashboard = () => {
                                     <th>Name</th>
                                     <th>Skill</th>
                                     <th>Level</th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -261,7 +300,20 @@ const HRDashboard = () => {
                                     <tr key={idx}>
                                         <td>{res.employeeName}</td>
                                         <td>{res.skillName}</td>
-                                        <td>{res.proficiencyLevel}</td>
+                                        <td>
+                                            <span className={`badge ${res.proficiencyLevel === 'ADVANCED' ? 'bg-success' :
+                                                    res.proficiencyLevel === 'INTERMEDIATE' ? 'bg-info text-dark' : 'bg-secondary'
+                                                }`}>
+                                                {res.proficiencyLevel}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span className={`badge ${res.status === 'APPROVED' ? 'bg-success' :
+                                                    res.status === 'PENDING' ? 'bg-warning text-dark' : 'bg-danger'
+                                                }`}>
+                                                {res.status}
+                                            </span>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>

@@ -1,6 +1,7 @@
 package com.skillbridge.dto;
 
 import com.skillbridge.enums.ProficiencyLevel;
+import com.skillbridge.enums.SkillStatus;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,5 +18,6 @@ public class SkillSearchResponse {
     private String employeeName;
     private String skillName;
     private ProficiencyLevel proficiencyLevel;
+    private SkillStatus status;
     private UUID managerId;
 }

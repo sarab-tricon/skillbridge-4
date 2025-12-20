@@ -4,7 +4,7 @@ import com.skillbridge.dto.SkillSearchRequest;
 import com.skillbridge.dto.SkillSearchResponse;
 import com.skillbridge.entity.EmployeeSkill;
 import com.skillbridge.entity.User;
-import com.skillbridge.enums.ProficiencyLevel;
+
 import com.skillbridge.enums.Role;
 import com.skillbridge.enums.SkillStatus;
 import com.skillbridge.repository.EmployeeSkillRepository;
@@ -33,11 +33,17 @@ public class SkillSearchService {
         User currentUser = getAuthenticatedUser();
         Role currentUserRole = currentUser.getRole();
 
-        // 1. Fetch APPROVED skills by skill name
-        List<EmployeeSkill> skills = employeeSkillRepository.findBySkillNameIgnoreCaseAndStatus(
-                request.getSkillName(),
-                SkillStatus.APPROVED
-        );
+        // 1. Fetch skills
+        List<EmployeeSkill> skills;
+        if (request.getSkillNames() != null && !request.getSkillNames().isEmpty()) {
+            skills = employeeSkillRepository.findBySkillNameInIgnoreCaseAndStatus(
+                    request.getSkillNames(),
+                    SkillStatus.APPROVED);
+        } else {
+            skills = employeeSkillRepository.findBySkillNameIgnoreCaseAndStatus(
+                    request.getSkillName(),
+                    SkillStatus.APPROVED);
+        }
 
         if (skills.isEmpty()) {
             return List.of();
@@ -47,44 +53,86 @@ public class SkillSearchService {
         Set<UUID> employeeIds = skills.stream()
                 .map(EmployeeSkill::getEmployeeId)
                 .collect(Collectors.toSet());
-        
+
         // Optimize: Fetch all users in one query
         Map<UUID, User> userMap = userRepository.findAllById(employeeIds).stream()
                 .collect(Collectors.toMap(User::getId, user -> user));
 
-        // 3. Filter & Map
-        return skills.stream()
-                .filter(skill -> {
-                    // Filter by proficiency
+        // 3. For multi-skill search: Group by employee and filter for employees with
+        // ALL requested skills
+        Map<UUID, List<EmployeeSkill>> skillsByEmployee = skills.stream()
+                .collect(Collectors.groupingBy(EmployeeSkill::getEmployeeId));
+
+        // If searching for multiple skills, filter to only employees who have ALL of
+        // them
+        if (request.getSkillNames() != null && request.getSkillNames().size() > 1) {
+            Set<String> requestedSkillsLower = request.getSkillNames().stream()
+                    .map(String::toLowerCase)
+                    .collect(Collectors.toSet());
+
+            skillsByEmployee = skillsByEmployee.entrySet().stream()
+                    .filter(entry -> {
+                        Set<String> employeeSkillsLower = entry.getValue().stream()
+                                .map(s -> s.getSkillName().toLowerCase())
+                                .collect(Collectors.toSet());
+                        return employeeSkillsLower.containsAll(requestedSkillsLower);
+                    })
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        }
+
+        // 4. Filter & Map - one entry per employee with combined skills
+        return skillsByEmployee.entrySet().stream()
+                .filter(entry -> {
+                    // Filter by role
+                    User employee = userMap.get(entry.getKey());
+                    if (employee == null)
+                        return false;
+
+                    if (currentUserRole == Role.MANAGER) {
+                        return currentUser.getId().equals(employee.getManagerId());
+                    }
+                    return currentUserRole == Role.HR;
+                })
+                .filter(entry -> {
+                    // Filter by proficiency if specified
                     if (request.getMinProficiencyLevel() != null) {
-                        return skill.getProficiencyLevel().ordinal() >= request.getMinProficiencyLevel().ordinal();
+                        return entry.getValue().stream()
+                                .anyMatch(skill -> skill.getProficiencyLevel().ordinal() >= request
+                                        .getMinProficiencyLevel().ordinal());
                     }
                     return true;
                 })
-                .filter(skill -> {
-                    // Filter by Role Logic
-                    User employee = userMap.get(skill.getEmployeeId());
-                    if (employee == null) return false;
+                .map(entry -> {
+                    UUID employeeId = entry.getKey();
+                    List<EmployeeSkill> employeeSkills = entry.getValue();
+                    User employee = userMap.get(employeeId);
 
-                    if (currentUserRole == Role.MANAGER) {
-                        // Manager can only see their direct reportees
-                        return currentUser.getId().equals(employee.getManagerId());
-                    }
-                    // HR can see all
-                    return currentUserRole == Role.HR; 
-                })
-                .map(skill -> {
-                    User employee = userMap.get(skill.getEmployeeId());
+                    // Combine skill names
+                    String combinedSkills = employeeSkills.stream()
+                            .map(EmployeeSkill::getSkillName)
+                            .distinct()
+                            .collect(Collectors.joining(", "));
+
+                    // Get highest proficiency level
+                    com.skillbridge.enums.ProficiencyLevel highestLevel = employeeSkills.stream()
+                            .map(EmployeeSkill::getProficiencyLevel)
+                            .max(Comparator.comparingInt(Enum::ordinal))
+                            .orElse(com.skillbridge.enums.ProficiencyLevel.BEGINNER);
+
+                    // Get first status (all should be APPROVED anyway)
+                    SkillStatus status = employeeSkills.get(0).getStatus();
+
                     return SkillSearchResponse.builder()
                             .userId(employee.getId())
                             .email(employee.getEmail())
-                            .employeeName(employee.getEmail()) // Fallback to email as name is missing in User entity
-                            .skillName(skill.getSkillName())
-                            .proficiencyLevel(skill.getProficiencyLevel())
+                            .employeeName(employee.getEmail())
+                            .skillName(combinedSkills)
+                            .proficiencyLevel(highestLevel)
+                            .status(status)
                             .managerId(employee.getManagerId())
                             .build();
                 })
-                .sorted(Comparator.comparing(SkillSearchResponse::getProficiencyLevel).reversed()) // ADVANCED > INTERMEDIATE > BEGINNER
+                .sorted(Comparator.comparing(SkillSearchResponse::getProficiencyLevel).reversed())
                 .collect(Collectors.toList());
     }
 
