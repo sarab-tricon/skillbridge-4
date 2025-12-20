@@ -38,7 +38,18 @@ const EmployeeDashboard = () => {
         fetchAllocation();
         fetchUtilization();
         fetchAvailableProjects();
+        fetchCatalog();
     }, []);
+
+    const [catalogSkills, setCatalogSkills] = useState([]);
+    const fetchCatalog = async () => {
+        try {
+            const response = await api.get('/catalog/skills');
+            setCatalogSkills(response.data);
+        } catch (err) {
+            console.error('Failed to load catalog', err);
+        }
+    };
 
     const fetchSkills = async () => {
         setLoadingSkills(true);
@@ -233,17 +244,21 @@ const EmployeeDashboard = () => {
                             <form onSubmit={editingSkill ? handleUpdateSkill : handleAddSkill}>
                                 <div className="mb-3">
                                     <label className="form-label small text-muted text-uppercase fw-bold">Skill Name</label>
-                                    <input
-                                        type="text"
-                                        className="form-control border-2 shadow-none"
-                                        placeholder="Enter skill name (e.g. Java, AWS)"
+                                    <label className="form-label small text-muted text-uppercase fw-bold">Skill Name</label>
+                                    <select
+                                        className="form-select border-2 shadow-none"
                                         value={editingSkill ? editingSkill.skillName : newSkill.skillName}
                                         onChange={(e) => editingSkill
                                             ? setEditingSkill({ ...editingSkill, skillName: e.target.value })
                                             : setNewSkill({ ...newSkill, skillName: e.target.value })
                                         }
                                         required
-                                    />
+                                    >
+                                        <option value="">Select a skill...</option>
+                                        {catalogSkills.map(s => (
+                                            <option key={s.id} value={s.name}>{s.name}</option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div className="mb-4">
                                     <label className="form-label small text-muted text-uppercase fw-bold">Proficiency Level</label>

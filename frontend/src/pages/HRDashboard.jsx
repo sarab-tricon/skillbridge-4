@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import BenchAllocation from '../components/BenchAllocation';
 import ProjectManagement from '../components/ProjectManagement';
+import SkillCatalog from '../components/SkillCatalog';
 
 const HRDashboard = () => {
     const { user, role } = useAuth();
@@ -303,6 +304,13 @@ const HRDashboard = () => {
                                 <i className="bi bi-people me-2"></i> Bench & Allocation
                             </button>
                             <button
+                                onClick={() => setActiveSection('catalog')}
+                                className={`list-group-item list-group-item-action border-0 py-3 ${activeSection === 'catalog' ? 'active' : ''}`}
+                                style={activeSection === 'catalog' ? { backgroundColor: '#9CC6DB', color: '#fff' } : {}}
+                            >
+                                <i className="bi bi-list-check me-2"></i> Skill Catalog
+                            </button>
+                            <button
                                 onClick={() => setActiveSection('talent')}
                                 className={`list-group-item list-group-item-action border-0 py-3 ${activeSection === 'talent' ? 'active' : ''}`}
                                 style={activeSection === 'talent' ? { backgroundColor: '#9CC6DB', color: '#fff' } : {}}
@@ -323,6 +331,7 @@ const HRDashboard = () => {
                             {activeSection === 'onboarding' && 'User Onboarding'}
                             {activeSection === 'projects' && 'Project Management'}
                             {activeSection === 'bench' && 'Bench Management & Allocation'}
+                            {activeSection === 'catalog' && 'Skill Catalog'}
                             {activeSection === 'talent' && 'Talent Discovery'}
                         </h1>
                         <p className="lead text-muted">Manage your organization's workforce and projects from one place.</p>
@@ -332,6 +341,7 @@ const HRDashboard = () => {
                         {activeSection === 'onboarding' && renderOnboarding()}
                         {activeSection === 'projects' && <ProjectManagement />}
                         {activeSection === 'bench' && <BenchAllocation />}
+                        {activeSection === 'catalog' && <SkillCatalog />}
                         {activeSection === 'talent' && renderTalentDiscovery()}
                     </div>
                 </div>
