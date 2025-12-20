@@ -28,25 +28,25 @@ public class UserController {
     }
 
     @GetMapping("/team")
-    @PreAuthorize("hasRole('MANAGER')") // Also enforced in SecurityConfig
+    @PreAuthorize("hasAuthority('ROLE_MANAGER')") // Also enforced in SecurityConfig
     public ResponseEntity<List<UserProfileResponse>> getTeam() {
         return ResponseEntity.ok(userService.getTeamMembers());
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('HR')")
+    @PreAuthorize("hasAuthority('ROLE_HR')")
     public ResponseEntity<UserProfileResponse> createUser(@RequestBody @Valid CreateUserRequest request) {
         return ResponseEntity.ok(userService.createUser(request));
     }
 
     @GetMapping("/managers")
-    @PreAuthorize("hasRole('HR')")
+    @PreAuthorize("hasAuthority('ROLE_HR')")
     public ResponseEntity<List<UserProfileResponse>> getManagers() {
         return ResponseEntity.ok(userService.getManagers());
     }
 
     @GetMapping("/bench")
-    @PreAuthorize("hasRole('HR')")
+    @PreAuthorize("hasAuthority('ROLE_HR')")
     public ResponseEntity<List<UserProfileResponse>> getBenchUsers() {
         return ResponseEntity.ok(userService.getBenchUsers());
     }

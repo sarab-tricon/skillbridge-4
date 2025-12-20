@@ -17,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -64,24 +65,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         }
                     }
 
-                    // Extract role from JWT and map to authorities (as per user request: derived
-                    // strictly from JWT)
-                    String role = jwtService.extractRole(jwt);
-                    System.out.println("DEBUG: Extracted Role from JWT: " + role); // Debug Log
+                    // 1. Extract all claims
+                    io.jsonwebtoken.Claims claims = jwtService.extractAllClaims(jwt);
 
-                    java.util.List<org.springframework.security.core.GrantedAuthority> authorities = java.util.Collections
-                            .singletonList(
-                                    new org.springframework.security.core.authority.SimpleGrantedAuthority(
-                                            "ROLE_" + role));
-                    
-                    System.out.println("DEBUG: Assigned Authorities: " + authorities); // Debug Log
+                    // 2. Explicit authority extraction as requested
+                    java.util.List<String> authorityStrings = claims.get("authorities", java.util.List.class);
 
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,
+                    java.util.List<org.springframework.security.core.GrantedAuthority> authorities = authorityStrings == null
+                            ? java.util.List.of()
+                            : authorityStrings.stream()
+                                    .map(org.springframework.security.core.authority.SimpleGrantedAuthority::new)
+                                    .map(org.springframework.security.core.GrantedAuthority.class::cast)
+                                    .toList();
+
+                    // 3. Build authentication using userEmail as principal (strictly per logic
+                    // request)
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userEmail,
                             null,
                             authorities);
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    // 4. Set security context
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    // 5. Mandatory Log - Verification that ROLE_HR exists
+                    log.info("FINAL AUTHORITIES IN CONTEXT: {}",
+                            SecurityContextHolder.getContext()
+                                    .getAuthentication()
+                                    .getAuthorities());
                 }
             }
         } catch (Exception e) {

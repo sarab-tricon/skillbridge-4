@@ -35,7 +35,7 @@ public class Project {
     private String companyName;
 
     @NotEmpty(message = "Tech stack cannot be empty")
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "project_tech_stack", joinColumns = @JoinColumn(name = "project_id"))
     @Column(name = "tech")
     private List<String> techStack;
