@@ -38,26 +38,33 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        // 1. PUBLIC
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/auth/**", "/h2-console/**").permitAll()
-                        .requestMatchers("/users/me").authenticated()
-                        .requestMatchers("/users/team").hasAuthority("ROLE_MANAGER")
-                        .requestMatchers("/users/bench/**").hasAuthority("ROLE_HR")
-                        .requestMatchers("/users/**").hasAuthority("ROLE_HR")
-                        .requestMatchers(HttpMethod.POST, "/skills").hasAuthority("ROLE_EMPLOYEE")
+
+                        // 2. EMPLOYEE + MANAGER ACCESS (Specific matchers FIRST)
+                        .requestMatchers("/allocations/me").hasAnyAuthority("ROLE_EMPLOYEE", "ROLE_MANAGER")
+                        .requestMatchers("/assignments/my").hasAuthority("ROLE_EMPLOYEE")
+                        .requestMatchers("/utilization/me").authenticated()
+                        .requestMatchers("/projects/active").hasAnyAuthority("ROLE_HR", "ROLE_MANAGER", "ROLE_EMPLOYEE")
                         .requestMatchers("/skills/my").hasAuthority("ROLE_EMPLOYEE")
+                        .requestMatchers(HttpMethod.POST, "/skills").hasAuthority("ROLE_EMPLOYEE")
+
+                        // 3. MANAGER ACCESS
+                        .requestMatchers("/users/team").hasAuthority("ROLE_MANAGER")
+                        .requestMatchers("/utilization/team").hasAuthority("ROLE_MANAGER")
                         .requestMatchers("/skills/pending").hasAuthority("ROLE_MANAGER")
                         .requestMatchers("/skills/*/verify").hasAuthority("ROLE_MANAGER")
-                        .requestMatchers(HttpMethod.GET, "/skills/search").hasAnyAuthority("ROLE_MANAGER", "ROLE_HR")
-                        .requestMatchers("/projects/active").hasAnyAuthority("ROLE_HR", "ROLE_MANAGER", "ROLE_EMPLOYEE")
-                        .requestMatchers("/projects/**").hasAuthority("ROLE_HR")
-                        .requestMatchers(HttpMethod.POST, "/assignments").hasAnyAuthority("ROLE_HR", "ROLE_MANAGER")
-                        .requestMatchers("/assignments/*/end").hasAnyAuthority("ROLE_HR", "ROLE_MANAGER")
+
+                        // 4. HR-ONLY ACCESS (Broad matchers LAST)
+                        .requestMatchers("/users/bench/**").hasAuthority("ROLE_HR")
+                        .requestMatchers("/users/**").hasAuthority("ROLE_HR")
                         .requestMatchers("/assignments/**").hasAuthority("ROLE_HR")
-                        .requestMatchers("/assignments/my").hasAuthority("ROLE_EMPLOYEE")
-                        .requestMatchers("/utilization/me", "/allocations/me").authenticated()
-                        .requestMatchers("/utilization/team").hasAuthority("ROLE_MANAGER")
+                        .requestMatchers("/projects/**").hasAuthority("ROLE_HR")
                         .requestMatchers("/utilization/summary").hasAuthority("ROLE_HR")
+                        .requestMatchers(HttpMethod.GET, "/skills/search").hasAnyAuthority("ROLE_MANAGER", "ROLE_HR")
+
+                        // 5. GLOBAL FALLBACK
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

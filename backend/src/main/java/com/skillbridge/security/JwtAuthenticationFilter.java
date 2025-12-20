@@ -71,12 +71,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     // 2. Explicit authority extraction as requested
                     java.util.List<String> authorityStrings = claims.get("authorities", java.util.List.class);
 
-                    java.util.List<org.springframework.security.core.GrantedAuthority> authorities = authorityStrings == null
-                            ? java.util.List.of()
-                            : authorityStrings.stream()
-                                    .map(org.springframework.security.core.authority.SimpleGrantedAuthority::new)
-                                    .map(org.springframework.security.core.GrantedAuthority.class::cast)
-                                    .toList();
+                    if (authorityStrings == null || authorityStrings.isEmpty()) {
+                        String role = claims.get("role", String.class);
+                        if (role != null) {
+                            authorityStrings = java.util.List.of("ROLE_" + role);
+                        } else {
+                            authorityStrings = java.util.List.of();
+                        }
+                    }
+
+                    java.util.List<org.springframework.security.core.GrantedAuthority> authorities = authorityStrings
+                            .stream()
+                            .map(org.springframework.security.core.authority.SimpleGrantedAuthority::new)
+                            .map(org.springframework.security.core.GrantedAuthority.class::cast)
+                            .toList();
 
                     // 3. Build authentication using userEmail as principal (strictly per logic
                     // request)
@@ -90,8 +98,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     // 4. Set security context
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                    // 5. Mandatory Log - Verification that ROLE_HR exists
-                    log.info("FINAL AUTHORITIES IN CONTEXT: {}",
+                    // 5. Mandatory Log - Verification that ROLE_HR/ROLE_EMPLOYEE exists
+                    log.info("AUTH AUTHORITIES: {}",
                             SecurityContextHolder.getContext()
                                     .getAuthentication()
                                     .getAuthorities());
