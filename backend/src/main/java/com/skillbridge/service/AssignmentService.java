@@ -78,7 +78,7 @@ public class AssignmentService {
     @Transactional
     public AssignmentResponse requestAllocation(UUID projectId) {
         User currentUser = getAuthenticatedUser();
-        
+
         // 1. Validate project exists and is active
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Project not found with ID: " + projectId));
@@ -89,10 +89,14 @@ public class AssignmentService {
 
         // 2. Check for existing active or pending assignment
         assignmentRepository.findByEmployeeIdAndAssignmentStatus(currentUser.getId(), AssignmentStatus.ACTIVE)
-                .ifPresent(a -> { throw new IllegalStateException("Already have an active assignment"); });
-        
+                .ifPresent(a -> {
+                    throw new IllegalStateException("Already have an active assignment");
+                });
+
         assignmentRepository.findByEmployeeIdAndAssignmentStatus(currentUser.getId(), AssignmentStatus.PENDING)
-                .ifPresent(a -> { throw new IllegalStateException("Already have a pending assignment request"); });
+                .ifPresent(a -> {
+                    throw new IllegalStateException("Already have a pending assignment request");
+                });
 
         // 3. Create and save pending assignment
         ProjectAssignment assignment = ProjectAssignment.builder()
@@ -147,7 +151,7 @@ public class AssignmentService {
         User currentUser = getAuthenticatedUser();
         // Return most relevant assignment (Active, else Pending, else Rejected)
         java.util.List<ProjectAssignment> assignments = assignmentRepository.findByEmployeeId(currentUser.getId());
-        
+
         return assignments.stream()
                 .sorted((a1, a2) -> {
                     // Quick priority: ACTIVE (0) > PENDING (1) > REJECTED (2) > ENDED (3)
@@ -157,16 +161,25 @@ public class AssignmentService {
                 })
                 .findFirst()
                 .map(this::mapToResponse)
-                .orElse(null);
+                .orElse(AssignmentResponse.builder()
+                        .projectName("Bench")
+                        .assignmentStatus(AssignmentStatus.ENDED)
+                        .utilization("BENCH")
+                        .build());
     }
 
     private int getStatusPriority(AssignmentStatus status) {
         switch (status) {
-            case ACTIVE: return 0;
-            case PENDING: return 1;
-            case REJECTED: return 2;
-            case ENDED: return 3;
-            default: return 4;
+            case ACTIVE:
+                return 0;
+            case PENDING:
+                return 1;
+            case REJECTED:
+                return 2;
+            case ENDED:
+                return 3;
+            default:
+                return 4;
         }
     }
 
@@ -179,12 +192,19 @@ public class AssignmentService {
     }
 
     private AssignmentResponse mapToResponse(ProjectAssignment assignment) {
+        Project project = projectRepository.findById(assignment.getProjectId()).orElse(null);
+        String projectName = project != null ? project.getName() : "Unknown Project";
+
+        String billingStr = assignment.getBillingType() != null ? assignment.getBillingType().name() : "NONE";
+
         return AssignmentResponse.builder()
                 .assignmentId(assignment.getId())
                 .employeeId(assignment.getEmployeeId())
                 .projectId(assignment.getProjectId())
+                .projectName(projectName)
                 .billingType(assignment.getBillingType())
                 .assignmentStatus(assignment.getAssignmentStatus())
+                .utilization(billingStr) // String as requested
                 .startDate(assignment.getStartDate())
                 .endDate(assignment.getEndDate())
                 .build();

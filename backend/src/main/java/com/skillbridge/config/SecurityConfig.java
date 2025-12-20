@@ -48,7 +48,7 @@ public class SecurityConfig {
                         .requestMatchers("/skills/pending").hasRole("MANAGER")
                         .requestMatchers("/skills/*/verify").hasRole("MANAGER")
                         .requestMatchers(HttpMethod.GET, "/skills/search").hasAnyRole("MANAGER", "HR")
-                        .requestMatchers("/projects/active").hasAnyRole("HR", "MANAGER")
+                        .requestMatchers("/projects/active").hasAnyRole("HR", "MANAGER", "EMPLOYEE")
                         .requestMatchers("/projects/**").hasRole("HR")
                         .requestMatchers(HttpMethod.POST, "/assignments").hasAnyRole("HR", "MANAGER")
                         .requestMatchers("/assignments/*/end").hasAnyRole("HR", "MANAGER")
@@ -91,8 +91,7 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "http://localhost:5174",
                 "http://localhost:5175",
-                "http://localhost:5176"
-        ));
+                "http://localhost:5176"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);

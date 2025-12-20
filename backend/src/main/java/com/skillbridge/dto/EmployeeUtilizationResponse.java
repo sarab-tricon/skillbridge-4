@@ -11,7 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EmployeeUtilizationResponse {
-    private String allocationStatus; // BILLABLE, INVESTMENT, BENCH
-    private UUID projectId;
     private String projectName;
+    private String assignmentStatus;
+    private String billingType;
+    private String utilization;
+    private UUID projectId;
+    private String allocationStatus; // Kept for backward compatibility if needed
 }

@@ -35,6 +35,7 @@ public class DataSeeder {
 
                                 // 1. Create HR
                                 User hr = User.builder()
+                                                .id(UUID.fromString("11111111-1111-1111-1111-111111111111"))
                                                 .email("hr@skillbridge.com")
                                                 .password(passwordEncoder.encode("password"))
                                                 .role(Role.HR)
@@ -43,14 +44,16 @@ public class DataSeeder {
 
                                 // 2. Create Manager
                                 User manager = User.builder()
+                                                .id(UUID.fromString("22222222-2222-2222-2222-222222222222"))
                                                 .email("manager@skillbridge.com")
                                                 .password(passwordEncoder.encode("password"))
                                                 .role(Role.MANAGER)
                                                 .build();
                                 manager = userRepository.save(manager);
 
-                                // 3. Create Employee (linked to Manager)
+                                // 3. Create Employee
                                 employee = User.builder()
+                                                .id(UUID.fromString("33333333-3333-3333-3333-333333333333"))
                                                 .email("employee@skillbridge.com")
                                                 .password(passwordEncoder.encode("password"))
                                                 .role(Role.EMPLOYEE)
@@ -59,50 +62,40 @@ public class DataSeeder {
                                 employee = userRepository.save(employee);
                         }
 
-                        // At this point, employee definitely exists in DB
-                        // Check if they have skills. If not, seed them using the ACTUAL employee ID.
+                        // Seed skills if missing
                         if (skillRepository.findByEmployeeId(employee.getId()).isEmpty()) {
                                 System.out.println("Seeding missing skills for employee@skillbridge.com...");
-
-                                EmployeeSkill s1 = EmployeeSkill.builder()
-                                                .employeeId(employee.getId())
-                                                .skillName("Java")
-                                                .proficiencyLevel(ProficiencyLevel.ADVANCED)
-                                                .status(SkillStatus.APPROVED)
-                                                .build();
-
-                                EmployeeSkill s2 = EmployeeSkill.builder()
-                                                .employeeId(employee.getId())
-                                                .skillName("React")
-                                                .proficiencyLevel(ProficiencyLevel.INTERMEDIATE)
-                                                .status(SkillStatus.APPROVED)
-                                                .build();
-
-                                EmployeeSkill s3 = EmployeeSkill.builder()
-                                                .employeeId(employee.getId())
-                                                .skillName("Docker")
-                                                .proficiencyLevel(ProficiencyLevel.BEGINNER)
-                                                .status(SkillStatus.PENDING)
-                                                .build();
-
-                                skillRepository.saveAll(List.of(s1, s2, s3));
+                                skillRepository.saveAll(List.of(
+                                                EmployeeSkill.builder()
+                                                                .employeeId(employee.getId())
+                                                                .skillName("Java")
+                                                                .proficiencyLevel(ProficiencyLevel.ADVANCED)
+                                                                .status(SkillStatus.APPROVED)
+                                                                .build(),
+                                                EmployeeSkill.builder()
+                                                                .employeeId(employee.getId())
+                                                                .skillName("React")
+                                                                .proficiencyLevel(ProficiencyLevel.INTERMEDIATE)
+                                                                .status(SkillStatus.APPROVED)
+                                                                .build()));
                         }
 
-                        // Check if they have assignments. If not, seed them.
+                        // Seed project and assignment if missing
                         if (assignmentRepository.findByEmployeeId(employee.getId()).isEmpty()) {
-                                System.out.println(
-                                                "Seeding missing project assignment for employee@skillbridge.com...");
-
-                                Project project = projectRepository.findByName("SkillBridge Platform")
-                                                .orElseGet(() -> projectRepository.save(Project.builder()
-                                                                .name("SkillBridge Platform")
-                                                                .companyName("Tricon InfoTech")
-                                                                .status(ProjectStatus.ACTIVE)
-                                                                .startDate(LocalDate.now().minusMonths(2))
-                                                                .endDate(LocalDate.now().plusMonths(6))
-                                                                .techStack(List.of("Java", "Spring Boot", "React",
-                                                                                "PostgreSQL"))
-                                                                .build()));
+                                Project project = projectRepository.findByName("SkillBridge Platform").orElse(null);
+                                if (project == null) {
+                                        project = Project.builder()
+                                                        .id(UUID.fromString("44444444-4444-4444-4444-444444444444"))
+                                                        .name("SkillBridge Platform")
+                                                        .companyName("Tricon InfoTech")
+                                                        .status(ProjectStatus.ACTIVE)
+                                                        .startDate(LocalDate.now().minusMonths(1))
+                                                        .endDate(LocalDate.now().plusMonths(6))
+                                                        .techStack(List.of("Java", "Spring Boot", "React",
+                                                                        "PostgreSQL"))
+                                                        .build();
+                                        project = projectRepository.save(project);
+                                }
 
                                 ProjectAssignment assignment = ProjectAssignment.builder()
                                                 .employeeId(employee.getId())
@@ -112,6 +105,7 @@ public class DataSeeder {
                                                 .startDate(LocalDate.now().minusMonths(1))
                                                 .build();
                                 assignmentRepository.save(assignment);
+                                System.out.println("Project assignment seeded for employee@skillbridge.com");
                         }
 
                         System.out.println("Data seeding audit complete.");

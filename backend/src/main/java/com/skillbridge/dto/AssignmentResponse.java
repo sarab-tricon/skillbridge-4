@@ -18,8 +18,10 @@ public class AssignmentResponse {
     private UUID assignmentId;
     private UUID employeeId;
     private UUID projectId;
+    private String projectName;
     private BillingType billingType;
     private AssignmentStatus assignmentStatus;
+    private String utilization; // Changed to String as per user request
     private LocalDate startDate;
     private LocalDate endDate;
 }

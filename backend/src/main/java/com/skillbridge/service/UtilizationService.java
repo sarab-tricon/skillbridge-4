@@ -7,7 +7,6 @@ import com.skillbridge.entity.Project;
 import com.skillbridge.entity.ProjectAssignment;
 import com.skillbridge.entity.User;
 import com.skillbridge.enums.AssignmentStatus;
-import com.skillbridge.enums.BillingType;
 import com.skillbridge.enums.Role;
 import com.skillbridge.repository.ProjectAssignmentRepository;
 import com.skillbridge.repository.ProjectRepository;
@@ -29,9 +28,14 @@ public class UtilizationService {
     private final ProjectRepository projectRepository;
 
     private User getCurrentUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof com.skillbridge.security.CustomUserDetails customUserDetails) {
+            return customUserDetails.getUser();
+        }
+        // Fallback to database lookup if principal is just a string (e.g. email)
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found: " + email));
     }
 
     public EmployeeUtilizationResponse getMyUtilization() {
@@ -45,20 +49,26 @@ public class UtilizationService {
 
         if (activeAssignment.isEmpty()) {
             return EmployeeUtilizationResponse.builder()
+                    .projectName("Bench")
+                    .assignmentStatus("ENDED")
+                    .utilization("BENCH")
                     .allocationStatus("BENCH")
                     .build();
         }
 
         ProjectAssignment assignment = activeAssignment.get();
         Project project = projectRepository.findById(assignment.getProjectId()).orElse(null);
-        String projectName = project != null ? project.getName() : null;
+        String projectName = project != null ? project.getName() : "Unknown Project";
 
-        String status = assignment.getBillingType() == BillingType.BILLABLE ? "BILLABLE" : "INVESTMENT";
+        String billingStr = assignment.getBillingType() != null ? assignment.getBillingType().name() : "NONE";
 
         return EmployeeUtilizationResponse.builder()
-                .allocationStatus(status)
-                .projectId(assignment.getProjectId())
                 .projectName(projectName)
+                .assignmentStatus(assignment.getAssignmentStatus().name())
+                .billingType(billingStr)
+                .utilization(billingStr) // String value as requested: "BILLABLE" or "INVESTMENT"
+                .projectId(assignment.getProjectId())
+                .allocationStatus(billingStr)
                 .build();
     }
 

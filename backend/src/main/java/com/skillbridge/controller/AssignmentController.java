@@ -43,15 +43,23 @@ public class AssignmentController {
 
     @PutMapping("/{id}/approve")
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<AssignmentResponse> approveAssignment(@PathVariable UUID id, @RequestBody java.util.Map<String, String> request) {
-        com.skillbridge.enums.BillingType billingType = com.skillbridge.enums.BillingType.valueOf(request.get("billingType"));
+    public ResponseEntity<AssignmentResponse> approveAssignment(@PathVariable UUID id,
+            @RequestBody java.util.Map<String, String> request) {
+        com.skillbridge.enums.BillingType billingType = com.skillbridge.enums.BillingType
+                .valueOf(request.get("billingType"));
         return ResponseEntity.ok(assignmentService.approveAssignment(id, billingType));
     }
 
     @PutMapping("/{id}/reject")
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<Void> rejectAssignment(@PathVariable UUID id) {
+    public ResponseEntity<Void> rejectAssignment(@PathVariable java.util.UUID id) {
         assignmentService.rejectAssignment(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/my")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('EMPLOYEE')")
+    public ResponseEntity<AssignmentResponse> getMyAssignment() {
+        return ResponseEntity.ok(assignmentService.getMyAssignment());
     }
 }
