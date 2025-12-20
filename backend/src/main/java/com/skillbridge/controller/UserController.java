@@ -44,4 +44,10 @@ public class UserController {
     public ResponseEntity<List<UserProfileResponse>> getManagers() {
         return ResponseEntity.ok(userService.getManagers());
     }
+
+    @GetMapping("/bench")
+    @PreAuthorize("hasRole('HR')")
+    public ResponseEntity<List<UserProfileResponse>> getBenchUsers() {
+        return ResponseEntity.ok(userService.getBenchUsers());
+    }
 }

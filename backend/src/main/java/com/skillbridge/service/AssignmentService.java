@@ -42,19 +42,25 @@ public class AssignmentService {
             throw new RuntimeException("Cannot assign employee to a non-active project");
         }
 
-        // 3. Check for existing active assignment
+        // 3. Prevent duplicate ACTIVE assignments for the same employee
         assignmentRepository.findByEmployeeIdAndAssignmentStatus(request.getEmployeeId(), AssignmentStatus.ACTIVE)
                 .ifPresent(a -> {
                     throw new IllegalStateException("Employee already has an active project assignment");
                 });
 
-        // 4. Create and save assignment
+        // 4. Validate dates
+        if (request.getEndDate() != null && request.getStartDate().isAfter(request.getEndDate())) {
+            throw new IllegalArgumentException("Start date cannot be after end date");
+        }
+
+        // 5. Create and save assignment
         ProjectAssignment assignment = ProjectAssignment.builder()
                 .employeeId(request.getEmployeeId())
                 .projectId(request.getProjectId())
                 .assignmentStatus(AssignmentStatus.ACTIVE)
                 .billingType(request.getBillingType())
-                .startDate(LocalDate.now())
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
                 .build();
 
         ProjectAssignment savedAssignment = assignmentRepository.save(assignment);

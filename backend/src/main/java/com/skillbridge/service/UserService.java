@@ -3,6 +3,7 @@ package com.skillbridge.service;
 import com.skillbridge.dto.CreateUserRequest;
 import com.skillbridge.dto.UserProfileResponse;
 import com.skillbridge.entity.User;
+import com.skillbridge.repository.ProjectAssignmentRepository;
 import com.skillbridge.repository.UserRepository;
 import com.skillbridge.security.CustomUserDetails;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final ProjectAssignmentRepository assignmentRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -64,6 +66,19 @@ public class UserService {
         // Allow ONLY Manager or HR? Requirement says "GET /users/team (Manager only)"
         // Assuming getting team members FOR the logged in manager.
         return userRepository.findByManagerId(manager.getId()).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<UserProfileResponse> getBenchUsers() {
+        // Fetch all employees
+        List<User> employees = userRepository.findByRole(com.skillbridge.enums.Role.EMPLOYEE);
+
+        // Filter those who don't have an ACTIVE assignment
+        return employees.stream()
+                .filter(employee -> assignmentRepository
+                        .findByEmployeeIdAndAssignmentStatus(employee.getId(), com.skillbridge.enums.AssignmentStatus.ACTIVE)
+                        .isEmpty())
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }

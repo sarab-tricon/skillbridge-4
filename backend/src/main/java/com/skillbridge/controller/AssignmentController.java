@@ -19,6 +19,7 @@ public class AssignmentController {
     private final AssignmentService assignmentService;
 
     @PostMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('HR')")
     public ResponseEntity<AssignmentResponse> assignEmployee(@Valid @RequestBody CreateAssignmentRequest request) {
         return new ResponseEntity<>(assignmentService.assignEmployeeToProject(request), HttpStatus.CREATED);
     }

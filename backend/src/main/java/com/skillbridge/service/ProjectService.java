@@ -34,6 +34,7 @@ public class ProjectService {
                 .techStack(request.getTechStack())
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
+                .employeesRequired(request.getEmployeesRequired())
                 .status(request.getStatus())
                 .build();
 
@@ -63,6 +64,7 @@ public class ProjectService {
                 .techStack(project.getTechStack())
                 .startDate(project.getStartDate())
                 .endDate(project.getEndDate())
+                .employeesRequired(project.getEmployeesRequired())
                 .status(project.getStatus())
                 .build();
     }

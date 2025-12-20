@@ -33,6 +33,9 @@ public class CreateProjectRequest {
     @NotNull(message = "End date is required")
     private LocalDate endDate;
 
+    @jakarta.validation.constraints.Min(value = 1, message = "At least 1 employee is required")
+    private Integer employeesRequired;
+
     @NotNull(message = "Project status is required")
     private ProjectStatus status;
 }

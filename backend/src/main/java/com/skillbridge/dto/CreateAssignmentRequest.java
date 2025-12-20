@@ -23,4 +23,9 @@ public class CreateAssignmentRequest {
 
     @NotNull(message = "Billing type is required")
     private BillingType billingType;
+
+    @NotNull(message = "Start date is required")
+    private java.time.LocalDate startDate;
+
+    private java.time.LocalDate endDate;
 }
