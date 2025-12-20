@@ -6,6 +6,12 @@ const LandingPage = () => {
     return (
         <div className="container d-flex flex-column justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
             <div className="text-center">
+                <img
+                    src="/skillbridgeLOGO.jpeg"
+                    alt="SkillBridge Logo"
+                    className="mb-4"
+                    style={{ height: '180px', width: 'auto', mixBlendMode: 'multiply', filter: 'brightness(1.1)' }}
+                />
                 <h1 className="display-1 fw-bold mb-3" style={{ color: '#333' }}>
                     SkillBridge
                 </h1>
