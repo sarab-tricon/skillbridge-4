@@ -5,54 +5,71 @@ import api from '../api/axios';
 const HRDashboard = () => {
     const { user, role } = useAuth();
 
-    // -- State Management --
-    const [utilizationData, setUtilizationData] = useState([]);
-    const [utilizationLoading, setUtilizationLoading] = useState(true);
-    const [utilizationError, setUtilizationError] = useState(null);
-
-    const [projectsData, setProjectsData] = useState([]);
-    const [projectsLoading, setProjectsLoading] = useState(true);
-    const [projectsError, setProjectsError] = useState(null);
+    // -- State Management for User Onboarding --
+    const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+        role: 'EMPLOYEE',
+        managerId: ''
+    });
+    const [managers, setManagers] = useState([]);
+    const [onboardingLoading, setOnboardingLoading] = useState(false);
+    const [onboardingSuccess, setOnboardingSuccess] = useState(null);
+    const [onboardingError, setOnboardingError] = useState(null);
 
     const [searchSkill, setSearchSkill] = useState('');
-    const [talentResults, setTalentResults] = useState(null); // null means no search performed yet
+    const [talentResults, setTalentResults] = useState(null);
     const [talentLoading, setTalentLoading] = useState(false);
     const [talentError, setTalentError] = useState(null);
 
     // -- Effects --
     useEffect(() => {
-        console.log("Current User:", user);
-        console.log("Current Role:", role);
-        fetchUtilization();
-        fetchProjects();
-    }, [user, role]);
+        if (role === 'HR') {
+            fetchManagers();
+        }
+    }, [role]);
 
     // -- API Calls --
-    const fetchUtilization = async () => {
-        setUtilizationLoading(true);
-        setUtilizationError(null);
+    const fetchManagers = async () => {
         try {
-            const response = await api.get('/utilization/org');
-            setUtilizationData(response.data);
+            const response = await api.get('/users/managers');
+            setManagers(response.data);
         } catch (err) {
-            console.error('Failed to fetch utilization:', err);
-            setUtilizationError('Unable to load utilization data. Please try again later.');
-        } finally {
-            setUtilizationLoading(false);
+            console.error('Failed to fetch managers:', err);
         }
     };
 
-    const fetchProjects = async () => {
-        setProjectsLoading(true);
-        setProjectsError(null);
+    const handleOnboardingSubmit = async (e) => {
+        e.preventDefault();
+        setOnboardingLoading(true);
+        setOnboardingSuccess(null);
+        setOnboardingError(null);
+
+        // Client-side validation for Employee role
+        if (formData.role === 'EMPLOYEE' && !formData.managerId) {
+            setOnboardingError('Please select a manager for the employee.');
+            setOnboardingLoading(false);
+            return;
+        }
+
         try {
-            const response = await api.get('/projects/active');
-            setProjectsData(response.data);
+            await api.post('/users', {
+                ...formData,
+                managerId: formData.role === 'EMPLOYEE' ? formData.managerId : null
+            });
+            setOnboardingSuccess(`User ${formData.email} created successfully!`);
+            setFormData({
+                email: '',
+                password: '',
+                role: 'EMPLOYEE',
+                managerId: ''
+            });
         } catch (err) {
-            console.error('Failed to fetch projects:', err);
-            setProjectsError(`Error: ${err.response?.status} - ${err.response?.data?.message || err.message}`);
+            console.error('Failed to create user:', err);
+            const errorMsg = err.response?.data?.message || err.message || 'Failed to create user.';
+            setOnboardingError(errorMsg);
         } finally {
-            setProjectsLoading(false);
+            setOnboardingLoading(false);
         }
     };
 
@@ -75,131 +92,189 @@ const HRDashboard = () => {
         }
     };
 
-    // -- Helpers --
-    const getUtilizationBadgeColor = (type) => {
-        switch (type?.toUpperCase()) {
-            case 'BILLABLE': return 'success'; // Green
-            case 'INVESTMENT': return 'warning'; // Orange/Yellow
-            case 'BENCH': return 'danger'; // Red
-            default: return 'secondary';
-        }
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
     };
 
-    const getProjectStatusBadgeColor = (status) => {
-        switch (status?.toUpperCase()) {
-            case 'ACTIVE': return 'success';
-            case 'COMPLETED': return 'info';
-            case 'ON_HOLD': return 'warning';
-            default: return 'secondary';
-        }
-    };
+    if (role !== 'HR') {
+        return (
+            <div className="container py-5 text-center">
+                <div className="alert alert-danger">
+                    <h3>Access Denied</h3>
+                    <p>Only HR administrators can access this module.</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="container py-5" style={{ fontFamily: 'Pompiere, cursive' }}>
-            <header className="mb-5 border-bottom pb-3" style={{ borderColor: 'var(--color-secondary)' }}>
-                <h1 className="display-4 fw-bold" style={{ color: 'var(--color-accent)' }}>HR Control Panel</h1>
+        <div className="container py-5" style={{ fontFamily: 'Pompiere, cursive', backgroundColor: '#FCF6D9', minHeight: '100vh' }}>
+            <header className="mb-5 border-bottom pb-3" style={{ borderColor: '#9CC6DB' }}>
+                <h1 className="display-4 fw-bold" style={{ color: '#CF4B00' }}>User Administration</h1>
                 <p className="lead text-muted">
-                    Welcome, {user?.sub || 'HR Administrator'}.
-                    <span className="ms-2 badge bg-info text-dark">{role} Workspace</span>
+                    Welcome, {user?.sub || 'HR Administrator'}. Manage organization onboarding and talent.
                 </p>
             </header>
 
             <div className="row g-5">
-
-                {/* Section 1: Organization Utilization */}
-                <div className="col-lg-6">
-                    <div className="card shadow-sm border-0 h-100" style={{ backgroundColor: '#fff', borderTop: '4px solid var(--color-primary)' }}>
-                        <div className="card-body">
-                            <h3 className="card-title fw-bold mb-4" style={{ color: 'var(--color-primary)' }}>
-                                <i className="bi bi-people-fill me-2"></i>Organization Utilization
+                {/* Section 1: Add New User */}
+                <div className="col-lg-7">
+                    <div className="card shadow-sm border-0" style={{ backgroundColor: '#fff', borderTop: '5px solid #9CC6DB' }}>
+                        <div className="card-body p-4">
+                            <h3 className="card-title fw-bold mb-4" style={{ color: '#CF4B00' }}>
+                                <i className="bi bi-person-plus-fill me-2"></i>Add New User
                             </h3>
 
-                            {utilizationLoading && (
-                                <div className="text-center py-5">
-                                    <div className="spinner-border text-primary" role="status"></div>
-                                    <p className="mt-2 text-muted">Loading utilization data...</p>
+                            {onboardingSuccess && (
+                                <div className="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i className="bi bi-check-circle-fill me-2"></i> {onboardingSuccess}
+                                    <button type="button" className="btn-close" onClick={() => setOnboardingSuccess(null)}></button>
                                 </div>
                             )}
 
-                            {utilizationError && (
-                                <div className="alert alert-danger" role="alert">{utilizationError}</div>
-                            )}
-
-                            {!utilizationLoading && !utilizationError && utilizationData.length === 0 && (
-                                <div className="alert alert-info">No utilization records found.</div>
-                            )}
-
-                            {!utilizationLoading && !utilizationError && utilizationData.length > 0 && (
-                                <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                                    <table className="table table-hover align-middle">
-                                        <thead className="table-light">
-                                            <tr>
-                                                <th>Employee</th>
-                                                <th>Role</th>
-                                                <th>Type</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {utilizationData.map((item, index) => (
-                                                <tr key={index}>
-                                                    <td className="fw-bold">{item.employeeName}</td>
-                                                    <td className="text-muted small">{item.role}</td>
-                                                    <td>
-                                                        <span className={`badge bg-${getUtilizationBadgeColor(item.utilizationType)}`}>
-                                                            {item.utilizationType}
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                            {onboardingError && (
+                                <div className="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i className="bi bi-exclamation-triangle-fill me-2"></i> {onboardingError}
+                                    <button type="button" className="btn-close" onClick={() => setOnboardingError(null)}></button>
                                 </div>
                             )}
+
+                            <form onSubmit={handleOnboardingSubmit}>
+                                <div className="mb-3">
+                                    <label className="form-label fw-bold">Email Address</label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        className="form-control"
+                                        placeholder="user@skillbridge.com"
+                                        required
+                                        value={formData.email}
+                                        onChange={handleInputChange}
+                                        style={{ border: '2px solid #9CC6DB' }}
+                                    />
+                                </div>
+
+                                <div className="mb-3">
+                                    <label className="form-label fw-bold">Initial Password</label>
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        className="form-control"
+                                        placeholder="••••••••"
+                                        required
+                                        value={formData.password}
+                                        onChange={handleInputChange}
+                                        style={{ border: '2px solid #9CC6DB' }}
+                                    />
+                                </div>
+
+                                <div className="row">
+                                    <div className="col-md-6 mb-3">
+                                        <label className="form-label fw-bold">Role</label>
+                                        <select
+                                            name="role"
+                                            className="form-select"
+                                            value={formData.role}
+                                            onChange={handleInputChange}
+                                            style={{ border: '2px solid #9CC6DB' }}
+                                        >
+                                            <option value="EMPLOYEE">EMPLOYEE</option>
+                                            <option value="MANAGER">MANAGER</option>
+                                            <option value="HR">HR</option>
+                                        </select>
+                                    </div>
+
+                                    {formData.role === 'EMPLOYEE' && (
+                                        <div className="col-md-6 mb-3">
+                                            <label className="form-label fw-bold">Assign Manager</label>
+                                            <select
+                                                name="managerId"
+                                                className="form-select"
+                                                required
+                                                value={formData.managerId}
+                                                onChange={handleInputChange}
+                                                style={{ border: '2px solid #9CC6DB' }}
+                                            >
+                                                <option value="">Select a Manager...</option>
+                                                {managers.map(mgr => (
+                                                    <option key={mgr.id} value={mgr.id}>
+                                                        {mgr.email}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="mt-4">
+                                    <button
+                                        type="submit"
+                                        className="btn btn-lg w-100 text-white fw-bold"
+                                        style={{ backgroundColor: '#CF4B00' }}
+                                        disabled={onboardingLoading}
+                                    >
+                                        {onboardingLoading ? (
+                                            <>
+                                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                Creating User...
+                                            </>
+                                        ) : (
+                                            'Onboard User'
+                                        )}
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
 
-                {/* Section 2: Talent Search */}
-                <div className="col-lg-6">
-                    <div className="card shadow-sm border-0 h-100" style={{ backgroundColor: '#fff', borderTop: '4px solid var(--color-secondary)' }}>
-                        <div className="card-body">
-                            <h3 className="card-title fw-bold mb-4" style={{ color: 'var(--color-accent)' }}>
+                {/* Section 2: Talent Discovery */}
+                <div className="col-lg-5">
+                    <div className="card shadow-sm border-0 h-100" style={{ backgroundColor: '#fff', borderTop: '5px solid #DDBA7D' }}>
+                        <div className="card-body p-4">
+                            <h3 className="card-title fw-bold mb-4" style={{ color: '#DDBA7D' }}>
                                 <i className="bi bi-search me-2"></i>Talent Discovery
                             </h3>
 
-                            <form onSubmit={handleTalentSearch} className="d-flex gap-2 mb-4">
-                                <input
-                                    type="text"
-                                    className="form-control form-control-lg"
-                                    placeholder="Search by skill (e.g., React, Java)..."
-                                    value={searchSkill}
-                                    onChange={(e) => setSearchSkill(e.target.value)}
-                                    style={{ border: '2px solid var(--color-secondary)' }}
-                                />
-                                <button
-                                    type="submit"
-                                    className="btn btn-lg text-white"
-                                    style={{ backgroundColor: 'var(--color-accent)', minWidth: '120px' }}
-                                    disabled={talentLoading || !searchSkill.trim()}
-                                >
-                                    {talentLoading ? 'Searching...' : 'Find'}
-                                </button>
+                            <form onSubmit={handleTalentSearch} className="mb-4">
+                                <div className="input-group">
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        placeholder="Search skill (e.g. Java)..."
+                                        value={searchSkill}
+                                        onChange={(e) => setSearchSkill(e.target.value)}
+                                        style={{ border: '2px solid #DDBA7D' }}
+                                    />
+                                    <button
+                                        type="submit"
+                                        className="btn text-white"
+                                        style={{ backgroundColor: '#DDBA7D' }}
+                                        disabled={talentLoading || !searchSkill.trim()}
+                                    >
+                                        Search
+                                    </button>
+                                </div>
                             </form>
 
-                            {talentError && (
-                                <div className="alert alert-danger" role="alert">{talentError}</div>
-                            )}
-
-                            {talentResults !== null && talentResults.length === 0 && !talentLoading && (
-                                <div className="alert alert-warning">
-                                    No employees found with skill: <strong>{searchSkill}</strong>
+                            {talentLoading && (
+                                <div className="text-center py-4">
+                                    <div className="spinner-border text-warning" role="status"></div>
                                 </div>
                             )}
 
-                            {talentResults && talentResults.length > 0 && (
-                                <div className="table-responsive bg-light rounded border p-2">
-                                    <table className="table table-sm mb-0">
-                                        <thead>
+                            {talentError && (
+                                <div className="alert alert-danger p-2 small">{talentError}</div>
+                            )}
+
+                            {talentResults && talentResults.length > 0 ? (
+                                <div className="table-responsive" style={{ maxHeight: '300px' }}>
+                                    <table className="table table-sm table-hover">
+                                        <thead className="table-light">
                                             <tr>
                                                 <th>Name</th>
                                                 <th>Skill</th>
@@ -211,90 +286,18 @@ const HRDashboard = () => {
                                                 <tr key={idx}>
                                                     <td>{res.employeeName}</td>
                                                     <td>{res.skillName}</td>
-                                                    <td>
-                                                        <span className="badge bg-secondary">{res.proficiencyLevel}</span>
-                                                    </td>
+                                                    <td>{res.proficiencyLevel}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
                                     </table>
                                 </div>
+                            ) : (
+                                talentResults !== null && !talentLoading && <p className="text-muted text-center">No results found.</p>
                             )}
 
                             {talentResults === null && !talentLoading && (
-                                <div className="text-center text-muted py-4">
-                                    <p>Enter a skill to find qualified employees across the organization.</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Section 3: Active Projects */}
-                <div className="col-12">
-                    <div className="card shadow-sm border-0" style={{ backgroundColor: '#fff', borderTop: '4px solid var(--color-primary)' }}>
-                        <div className="card-body">
-                            <div className="d-flex justify-content-between align-items-center mb-4">
-                                <h3 className="card-title fw-bold m-0" style={{ color: 'var(--color-primary)' }}>
-                                    <i className="bi bi-kanban me-2"></i>Active Project Portfolio
-                                </h3>
-                                <button className="btn btn-outline-primary btn-sm" onClick={fetchProjects}>
-                                    <i className="bi bi-arrow-clockwise me-1"></i> Refresh
-                                </button>
-                            </div>
-
-                            {projectsLoading && (
-                                <div className="d-flex justify-content-center py-4">
-                                    <div className="spinner-border text-info" role="status"></div>
-                                </div>
-                            )}
-
-                            {projectsError && (
-                                <div className="alert alert-danger">{projectsError}</div>
-                            )}
-
-                            {!projectsLoading && !projectsError && projectsData.length === 0 && (
-                                <div className="text-center p-5 bg-light rounded">
-                                    <h4>No Active Projects</h4>
-                                    <p className="text-muted">There are currently no projects in the system.</p>
-                                </div>
-                            )}
-
-                            {!projectsLoading && !projectsError && projectsData.length > 0 && (
-                                <div className="table-responsive">
-                                    <table className="table table-hover align-middle">
-                                        <thead className="table-light text-uppercase small text-muted">
-                                            <tr>
-                                                <th style={{ width: '25%' }}>Project Name</th>
-                                                <th style={{ width: '20%' }}>Client / Company</th>
-                                                <th style={{ width: '15%' }}>Status</th>
-                                                <th style={{ width: '25%' }}>Duration</th>
-                                                <th style={{ width: '15%' }}>Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {projectsData.map((project, idx) => (
-                                                <tr key={idx}>
-                                                    <td className="fw-bold fs-5">{project.name}</td>
-                                                    <td className="text-muted">{project.companyName}</td>
-                                                    <td>
-                                                        <span className={`badge rounded-pill bg-${getProjectStatusBadgeColor(project.status)}`}>
-                                                            {project.status?.replace('_', ' ')}
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <small className="d-block text-muted">
-                                                            {project.startDate} &mdash; {project.endDate}
-                                                        </small>
-                                                    </td>
-                                                    <td>
-                                                        <button className="btn btn-sm btn-light text-primary border">Details</button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                <p className="text-muted text-center py-4">Search for employees by their skills to view talent availability.</p>
                             )}
                         </div>
                     </div>

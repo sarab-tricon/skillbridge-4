@@ -23,19 +23,35 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public UUID createUser(CreateUserRequest request) {
+    public UserProfileResponse createUser(CreateUserRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already active");
         }
+
+        // Validation Rules:
+        // EMPLOYEE must have managerId
+        // MANAGER and HR must not require managerId (enforce null for consistency)
+        if (request.getRole() == com.skillbridge.enums.Role.EMPLOYEE && request.getManagerId() == null) {
+            throw new RuntimeException("Manager is required for Employee role");
+        }
+        
+        UUID managerId = request.getRole() == com.skillbridge.enums.Role.EMPLOYEE ? request.getManagerId() : null;
 
         User user = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
-                .managerId(request.getManagerId())
+                .managerId(managerId)
                 .build();
 
-        return userRepository.save(user).getId();
+        User savedUser = userRepository.save(user);
+        return mapToResponse(savedUser);
+    }
+
+    public List<UserProfileResponse> getManagers() {
+        return userRepository.findByRole(com.skillbridge.enums.Role.MANAGER).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
     public UserProfileResponse getCurrentUserProfile() {
