@@ -1,19 +1,41 @@
 :root {
+  /* Colors */
   --color-bg: #FCF6D9;
   --color-primary: #9CC6DB;
   --color-accent: #CF4B00;
   --color-secondary: #DDBA7D;
-  --bs-body-font-family: "Roboto Slab", serif;
-  --bs-body-color: #333;
+  --color-text: #333;
+
+  /* Typography Scaling */
+  --font-size-base: 1rem;
+  /* Adjustable base size */
+  --font-scale: 1;
+  /* Scaling factor */
+  --font-family-sans: "Roboto Slab", serif;
+
+  /* Computed Font Sizes */
+  --font-size-root: calc(var(--font-size-base) * var(--font-scale));
+  --font-size-h1: calc(var(--font-size-root) * 2.5);
+  --font-size-h2: calc(var(--font-size-root) * 2);
+  --font-size-h3: calc(var(--font-size-root) * 1.75);
+  --font-size-h4: calc(var(--font-size-root) * 1.5);
+  --font-size-body: var(--font-size-root);
+  --font-size-small: calc(var(--font-size-root) * 0.875);
+
+  /* Bootstrap Variable Overrides */
+  --bs-body-font-family: var(--font-family-sans);
+  --bs-body-color: var(--color-text);
   --bs-body-bg: var(--color-bg);
 }
 
 body {
-  font-family: "Roboto Slab", serif;
+  font-family: var(--font-family-sans);
   background-color: var(--color-bg);
-  font-size: 1.5rem;
-  /* Increased font size as requested */
-  color: #333;
+  font-size: var(--font-size-body);
+  color: var(--color-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Typography tweaks */
@@ -23,9 +45,26 @@ h3,
 h4,
 h5,
 h6 {
-  font-weight: 400;
-  /* Pompiere is naturally bold-ish */
-  letter-spacing: 0.5px;
+  font-family: var(--font-family-sans);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 1rem;
+}
+
+h1 {
+  font-size: var(--font-size-h1);
+}
+
+h2 {
+  font-size: var(--font-size-h2);
+}
+
+h3 {
+  font-size: var(--font-size-h3);
+}
+
+h4 {
+  font-size: var(--font-size-h4);
 }
 
 /* Button overrides for accent color */
@@ -33,9 +72,10 @@ h6 {
   background-color: var(--color-accent);
   color: white;
   border: none;
-  font-size: 1.4rem;
+  font-size: var(--font-size-body);
   padding: 0.5rem 1.5rem;
   transition: all 0.2s ease;
+  font-family: var(--font-family-sans);
 }
 
 .btn-accent:hover {
@@ -46,6 +86,7 @@ h6 {
 
 /* Navbar overrides */
 .navbar-brand {
-  font-size: 2rem;
-  color: #333 !important;
+  font-size: var(--font-size-h3);
+  font-weight: 700;
+  color: var(--color-text) !important;
 }
