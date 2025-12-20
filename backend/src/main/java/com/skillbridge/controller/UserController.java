@@ -34,8 +34,14 @@ public class UserController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('HR')") // Also enforced in SecurityConfig
-    public ResponseEntity<UUID> createUser(@RequestBody @Valid CreateUserRequest request) {
+    @PreAuthorize("hasRole('HR')")
+    public ResponseEntity<UserProfileResponse> createUser(@RequestBody @Valid CreateUserRequest request) {
         return ResponseEntity.ok(userService.createUser(request));
+    }
+
+    @GetMapping("/managers")
+    @PreAuthorize("hasRole('HR')")
+    public ResponseEntity<List<UserProfileResponse>> getManagers() {
+        return ResponseEntity.ok(userService.getManagers());
     }
 }
