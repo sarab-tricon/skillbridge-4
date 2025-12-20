@@ -13,26 +13,38 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping({ "/utilization", "/allocations" })
+@RequestMapping("/")
 @RequiredArgsConstructor
 public class UtilizationController {
 
     private final UtilizationService utilizationService;
+    private final com.skillbridge.service.AssignmentService assignmentService;
+    private final com.skillbridge.repository.UserRepository userRepository;
 
-    @GetMapping({ "/me", "/allocations/me" })
+    @GetMapping("/utilization/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<EmployeeUtilizationResponse> getMyUtilization() {
         return ResponseEntity.ok(utilizationService.getMyUtilization());
     }
 
-    @GetMapping("/team")
-    @PreAuthorize("hasRole('MANAGER')")
+    @GetMapping("/allocations/me")
+    @PreAuthorize("hasAnyAuthority('ROLE_EMPLOYEE','ROLE_MANAGER')")
+    public com.skillbridge.dto.AllocationResponse getMyAllocation() {
+        String email = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication()
+                .getName();
+        com.skillbridge.entity.User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return assignmentService.getMyAllocation(user.getId());
+    }
+
+    @GetMapping("/utilization/team")
+    @PreAuthorize("hasAuthority('ROLE_MANAGER')")
     public ResponseEntity<List<TeamUtilizationResponse>> getTeamUtilization() {
         return ResponseEntity.ok(utilizationService.getTeamUtilization());
     }
 
-    @GetMapping("/summary")
-    @PreAuthorize("hasRole('HR')")
+    @GetMapping("/utilization/summary")
+    @PreAuthorize("hasAuthority('ROLE_HR')")
     public ResponseEntity<UtilizationSummaryResponse> getSummary() {
         return ResponseEntity.ok(utilizationService.getSummary());
     }

@@ -43,7 +43,8 @@ public class AssignmentService {
         }
 
         // 3. Prevent duplicate ACTIVE assignments for the same employee
-        assignmentRepository.findByEmployeeIdAndAssignmentStatus(request.getEmployeeId(), AssignmentStatus.ACTIVE)
+        assignmentRepository.findTopByEmployeeIdOrderByStartDateDesc(request.getEmployeeId())
+                .filter(a -> a.getAssignmentStatus() == AssignmentStatus.ACTIVE)
                 .ifPresent(a -> {
                     throw new IllegalStateException("Employee already has an active project assignment");
                 });
@@ -94,14 +95,14 @@ public class AssignmentService {
         }
 
         // 2. Check for existing active or pending assignment
-        assignmentRepository.findByEmployeeIdAndAssignmentStatus(currentUser.getId(), AssignmentStatus.ACTIVE)
+        assignmentRepository.findTopByEmployeeIdOrderByStartDateDesc(currentUser.getId())
                 .ifPresent(a -> {
-                    throw new IllegalStateException("Already have an active assignment");
-                });
-
-        assignmentRepository.findByEmployeeIdAndAssignmentStatus(currentUser.getId(), AssignmentStatus.PENDING)
-                .ifPresent(a -> {
-                    throw new IllegalStateException("Already have a pending assignment request");
+                    if (a.getAssignmentStatus() == AssignmentStatus.ACTIVE) {
+                        throw new IllegalStateException("Already have an active assignment");
+                    }
+                    if (a.getAssignmentStatus() == AssignmentStatus.PENDING) {
+                        throw new IllegalStateException("Already have a pending assignment request");
+                    }
                 });
 
         // 3. Create and save pending assignment
@@ -155,44 +156,58 @@ public class AssignmentService {
     @Transactional(readOnly = true)
     public AssignmentResponse getMyAssignment() {
         User currentUser = getAuthenticatedUser();
-        // Return most relevant assignment (Active, else Pending, else Rejected)
-        java.util.List<ProjectAssignment> assignments = assignmentRepository.findByEmployeeId(currentUser.getId());
 
-        return assignments.stream()
-                .sorted((a1, a2) -> {
-                    // Quick priority: ACTIVE (0) > PENDING (1) > REJECTED (2) > ENDED (3)
-                    int p1 = getStatusPriority(a1.getAssignmentStatus());
-                    int p2 = getStatusPriority(a2.getAssignmentStatus());
-                    return Integer.compare(p1, p2);
-                })
-                .findFirst()
-                .map(this::mapToResponse)
-                .orElse(AssignmentResponse.builder()
-                        .projectName("Bench")
-                        .assignmentStatus(AssignmentStatus.ENDED)
-                        .utilization("BENCH")
-                        .build());
+        java.util.Optional<ProjectAssignment> opt = assignmentRepository
+                .findTopByEmployeeIdOrderByStartDateDesc(currentUser.getId());
+
+        if (opt.isEmpty()) {
+            return AssignmentResponse.builder()
+                    .projectName("Bench")
+                    .assignmentStatus(AssignmentStatus.ENDED)
+                    .utilization("BENCH")
+                    .build();
+        }
+
+        ProjectAssignment assignment = opt.get();
+        return mapToResponse(assignment);
     }
 
-    private int getStatusPriority(AssignmentStatus status) {
-        switch (status) {
-            case ACTIVE:
-                return 0;
-            case PENDING:
-                return 1;
-            case REJECTED:
-                return 2;
-            case ENDED:
-                return 3;
-            default:
-                return 4;
+    @Transactional(readOnly = true)
+    public com.skillbridge.dto.AllocationResponse getMyAllocation(UUID employeeId) {
+        java.util.Optional<ProjectAssignment> opt = assignmentRepository
+                .findTopByEmployeeIdOrderByStartDateDesc(employeeId);
+
+        if (opt.isEmpty()) {
+            return com.skillbridge.dto.AllocationResponse.bench();
         }
+
+        ProjectAssignment assignment = opt.get();
+
+        if (assignment.getAssignmentStatus() != AssignmentStatus.ACTIVE) {
+            return com.skillbridge.dto.AllocationResponse.bench();
+        }
+
+        // Map to AllocationResponse and enrich with project name
+        com.skillbridge.dto.AllocationResponse response = com.skillbridge.dto.AllocationResponse.from(assignment);
+        Project project = projectRepository.findById(assignment.getProjectId()).orElse(null);
+        if (project != null) {
+            response.setProjectName(project.getName());
+        }
+        return response;
     }
 
     private User getAuthenticatedUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof CustomUserDetails customUserDetails) {
             return customUserDetails.getUser();
+        }
+        if (principal instanceof org.springframework.security.core.userdetails.UserDetails userDetails) {
+            return userRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+        }
+        if (principal instanceof String email) {
+            return userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found: " + email));
         }
         throw new RuntimeException("User not authenticated");
     }

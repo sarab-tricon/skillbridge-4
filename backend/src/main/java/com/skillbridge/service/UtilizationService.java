@@ -45,7 +45,8 @@ public class UtilizationService {
 
     private EmployeeUtilizationResponse calculateUtilization(UUID userId) {
         Optional<ProjectAssignment> activeAssignment = projectAssignmentRepository
-                .findByEmployeeIdAndAssignmentStatus(userId, AssignmentStatus.ACTIVE);
+                .findTopByEmployeeIdOrderByStartDateDesc(userId)
+                .filter(a -> a.getAssignmentStatus() == AssignmentStatus.ACTIVE);
 
         if (activeAssignment.isEmpty()) {
             return EmployeeUtilizationResponse.builder()

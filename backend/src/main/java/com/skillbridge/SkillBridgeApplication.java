@@ -8,6 +8,7 @@ public class SkillBridgeApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(SkillBridgeApplication.class, args);
+        System.out.println("---------app's backend started---------");
     }
 
 }

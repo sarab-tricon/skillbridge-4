@@ -36,7 +36,7 @@ public class UserService {
         if (request.getRole() == com.skillbridge.enums.Role.EMPLOYEE && request.getManagerId() == null) {
             throw new RuntimeException("Manager is required for Employee role");
         }
-        
+
         UUID managerId = request.getRole() == com.skillbridge.enums.Role.EMPLOYEE ? request.getManagerId() : null;
 
         User user = User.builder()
@@ -77,7 +77,8 @@ public class UserService {
         // Filter those who don't have an ACTIVE assignment
         return employees.stream()
                 .filter(employee -> assignmentRepository
-                        .findByEmployeeIdAndAssignmentStatus(employee.getId(), com.skillbridge.enums.AssignmentStatus.ACTIVE)
+                        .findTopByEmployeeIdOrderByStartDateDesc(employee.getId())
+                        .filter(a -> a.getAssignmentStatus() == com.skillbridge.enums.AssignmentStatus.ACTIVE)
                         .isEmpty())
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -88,10 +89,13 @@ public class UserService {
         if (principal instanceof CustomUserDetails customUserDetails) {
             return customUserDetails.getUser();
         }
-        // Fallback or re-fetch if needed (though CustomUserDetails should be there)
         if (principal instanceof UserDetails userDetails) {
             return userRepository.findByEmail(userDetails.getUsername())
                     .orElseThrow(() -> new RuntimeException("User not found"));
+        }
+        if (principal instanceof String email) {
+            return userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found: " + email));
         }
         throw new RuntimeException("User not authenticated");
     }
