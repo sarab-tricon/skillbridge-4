@@ -21,5 +21,6 @@ public class ProjectResponse {
     private List<String> techStack;
     private LocalDate startDate;
     private LocalDate endDate;
+    private Integer employeesRequired;
     private ProjectStatus status;
 }

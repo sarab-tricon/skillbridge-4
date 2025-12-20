@@ -48,6 +48,9 @@ public class Project {
     @Column(nullable = false)
     private LocalDate endDate;
 
+    @Column(name = "employees_required")
+    private Integer employeesRequired;
+
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Project status is required")
     @Column(nullable = false)
