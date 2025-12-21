@@ -55,11 +55,13 @@ public class SecurityConfig {
                         .requestMatchers("/utilization/team").hasAuthority("ROLE_MANAGER")
                         .requestMatchers("/skills/pending").hasAuthority("ROLE_MANAGER")
                         .requestMatchers("/skills/*/verify").hasAuthority("ROLE_MANAGER")
+                        .requestMatchers("/assignments/pending").hasAnyAuthority("ROLE_MANAGER", "ROLE_HR")
 
                         // 4. HR-ONLY ACCESS (Broad matchers LAST)
                         .requestMatchers("/users/bench/**").hasAuthority("ROLE_HR")
                         .requestMatchers("/users/**").hasAuthority("ROLE_HR")
-                        .requestMatchers("/assignments/**").hasAuthority("ROLE_HR")
+                        .requestMatchers("/assignments/**").hasAuthority("ROLE_HR") // Allows other assignment endpoints
+                                                                                    // for HR only
                         .requestMatchers("/projects/**").hasAuthority("ROLE_HR")
                         .requestMatchers("/utilization/summary").hasAuthority("ROLE_HR")
                         .requestMatchers(HttpMethod.GET, "/skills/search").hasAnyAuthority("ROLE_MANAGER", "ROLE_HR")
