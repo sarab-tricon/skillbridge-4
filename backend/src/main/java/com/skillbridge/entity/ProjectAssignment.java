@@ -38,8 +38,7 @@ public class ProjectAssignment {
     private AssignmentStatus assignmentStatus;
 
     @Enumerated(EnumType.STRING)
-    @NotNull(message = "Billing type is required")
-    @Column(nullable = false)
+    @Column(nullable = true)
     private BillingType billingType;
 
     @NotNull(message = "Start date is required")
@@ -47,6 +46,15 @@ public class ProjectAssignment {
     private LocalDate startDate;
 
     private LocalDate endDate;
+
+    @Column(name = "requested_at")
+    private java.time.LocalDateTime requestedAt;
+
+    @Column(name = "reviewed_at")
+    private java.time.LocalDateTime reviewedAt;
+
+    @Column(name = "reviewed_by")
+    private UUID reviewedBy;
 
     @Version
     private Long version;

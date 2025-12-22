@@ -176,7 +176,7 @@ const EmployeeDashboard = () => {
         setRequestingAlloc(true);
         setRequestAllocError(null);
         try {
-            await api.post('/assignments/request', { projectId: selectedProject });
+            await api.post('/allocation-requests', { projectId: selectedProject });
             setSelectedProject('');
             fetchAllocation();
         } catch (err) {

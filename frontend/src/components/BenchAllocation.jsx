@@ -67,7 +67,7 @@ const BenchAllocation = () => {
                 projectId: selectedProject.id,
                 endDate: formData.endDate || null
             };
-            await api.post('/assignments', payload);
+            await api.post('/api/assignments', payload);
             setSuccess(`Employee allocated to ${selectedProject.name} successfully!`);
 
             // Refresh bench list
