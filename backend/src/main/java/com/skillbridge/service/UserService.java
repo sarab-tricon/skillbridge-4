@@ -41,6 +41,8 @@ public class UserService {
 
         User user = User.builder()
                 .email(request.getEmail())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
                 .managerId(managerId)
@@ -48,6 +50,12 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
         return mapToResponse(savedUser);
+    }
+
+    public List<UserProfileResponse> getAllEmployees() {
+        return userRepository.findByRole(com.skillbridge.enums.Role.EMPLOYEE).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
     public List<UserProfileResponse> getManagers() {
@@ -101,11 +109,26 @@ public class UserService {
     }
 
     private UserProfileResponse mapToResponse(User user) {
+        String managerName = null;
+        if (user.getManagerId() != null) {
+            managerName = userRepository.findById(user.getManagerId())
+                    .map(m -> {
+                        if (m.getFirstName() != null && m.getLastName() != null) {
+                            return m.getFirstName() + " " + m.getLastName();
+                        }
+                        return m.getEmail(); // Fallback to email
+                    })
+                    .orElse("Unknown");
+        }
+
         return UserProfileResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
                 .role(user.getRole())
                 .managerId(user.getManagerId())
+                .managerName(managerName)
                 .build();
     }
 }

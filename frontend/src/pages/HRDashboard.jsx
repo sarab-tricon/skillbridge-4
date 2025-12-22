@@ -7,10 +7,22 @@ import SkillCatalog from '../components/SkillCatalog';
 
 const HRDashboard = () => {
     const { user, role } = useAuth();
-    const [activeSection, setActiveSection] = useState('onboarding');
+    const [activeSection, setActiveSection] = useState('overview');
 
-    // -- State Management for User Onboarding --
+    // -- State Management --
+    const [stats, setStats] = useState({
+        totalEmployees: 0,
+        benchCount: 0,
+        projectsCount: 0, // Placeholder
+        activeRequests: 0 // Placeholder
+    });
+    const [employees, setEmployees] = useState([]);
+    const [benchUsers, setBenchUsers] = useState([]);
+
+    // Onboarding State
     const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
         email: '',
         password: '',
         role: 'EMPLOYEE',
@@ -21,7 +33,8 @@ const HRDashboard = () => {
     const [onboardingSuccess, setOnboardingSuccess] = useState(null);
     const [onboardingError, setOnboardingError] = useState(null);
 
-    const [searchSkills, setSearchSkills] = useState([]); // Changed from searchSkill string
+    // Talent/Skill State
+    const [searchSkills, setSearchSkills] = useState([]);
     const [catalogSkills, setCatalogSkills] = useState([]);
     const [talentResults, setTalentResults] = useState(null);
     const [talentLoading, setTalentLoading] = useState(false);
@@ -30,10 +43,47 @@ const HRDashboard = () => {
     // -- Effects --
     useEffect(() => {
         if (role === 'HR') {
-            fetchManagers();
-            fetchCatalog();
+            fetchInitialData();
         }
     }, [role]);
+
+    const fetchInitialData = async () => {
+        await Promise.all([
+            fetchManagers(),
+            fetchEmployees(),
+            fetchBenchUsers(),
+            fetchCatalog()
+        ]);
+    };
+
+    const fetchManagers = async () => {
+        try {
+            const response = await api.get('/users/managers');
+            setManagers(response.data);
+        } catch (err) {
+            console.error('Failed to fetch managers:', err);
+        }
+    };
+
+    const fetchEmployees = async () => {
+        try {
+            const response = await api.get('/users/employees');
+            setEmployees(response.data);
+            setStats(prev => ({ ...prev, totalEmployees: response.data.length }));
+        } catch (err) {
+            console.error('Failed to fetch employees:', err);
+        }
+    };
+
+    const fetchBenchUsers = async () => {
+        try {
+            const response = await api.get('/users/bench');
+            setBenchUsers(response.data);
+            setStats(prev => ({ ...prev, benchCount: response.data.length }));
+        } catch (err) {
+            console.error('Failed to fetch bench users:', err);
+        }
+    };
 
     const fetchCatalog = async () => {
         try {
@@ -41,16 +91,6 @@ const HRDashboard = () => {
             setCatalogSkills(response.data);
         } catch (err) {
             console.error('Failed to load skill catalog', err);
-        }
-    };
-
-    // -- API Calls --
-    const fetchManagers = async () => {
-        try {
-            const response = await api.get('/users/managers');
-            setManagers(response.data);
-        } catch (err) {
-            console.error('Failed to fetch managers:', err);
         }
     };
 
@@ -71,13 +111,16 @@ const HRDashboard = () => {
                 ...formData,
                 managerId: formData.role === 'EMPLOYEE' ? formData.managerId : null
             });
-            setOnboardingSuccess(`User ${formData.email} created successfully!`);
+            setOnboardingSuccess(`User ${formData.firstName} ${formData.lastName} created successfully!`);
             setFormData({
+                firstName: '',
+                lastName: '',
                 email: '',
                 password: '',
                 role: 'EMPLOYEE',
                 managerId: ''
             });
+            fetchEmployees(); // Refresh list
         } catch (err) {
             console.error('Failed to create user:', err);
             const errorMsg = err.response?.data?.message || err.message || 'Failed to create user.';
@@ -123,6 +166,124 @@ const HRDashboard = () => {
         );
     }
 
+    // -- Sub-Components --
+
+    const StatCard = ({ title, value, icon, color, onClick }) => (
+        <div className="col-md-3 mb-4">
+            <div
+                className="card shadow-sm border-0 h-100 STAT-CARD"
+                style={{ cursor: 'pointer', borderLeft: `5px solid ${color}` }}
+                onClick={onClick}
+            >
+                <div className="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 className="text-muted text-uppercase mb-2">{title}</h6>
+                        <h2 className="fw-bold mb-0" style={{ color: color }}>{value}</h2>
+                    </div>
+                    <div className="rounded-circle p-3" style={{ backgroundColor: `${color}20` }}>
+                        <i className={`bi ${icon} fs-4`} style={{ color: color }}></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderOverview = () => (
+        <div className="fade-in">
+            <h3 className="fw-bold mb-4" style={{ color: '#CF4B00' }}>Dashboard Overview</h3>
+            <div className="row g-4">
+                <StatCard
+                    title="Total Employees"
+                    value={stats.totalEmployees}
+                    icon="bi-people-fill"
+                    color="#0d6efd"
+                    onClick={() => setActiveSection('directory')}
+                />
+                <StatCard
+                    title="On Bench"
+                    value={stats.benchCount}
+                    icon="bi-hourglass-split"
+                    color="#ffc107"
+                    onClick={() => setActiveSection('bench')}
+                />
+                <StatCard
+                    title="Skill Catalog"
+                    value={catalogSkills.length}
+                    icon="bi-journal-code"
+                    color="#198754"
+                    onClick={() => setActiveSection('catalog')}
+                />
+                <StatCard
+                    title="Projects"
+                    value="Manage"
+                    icon="bi-folder-fill"
+                    color="#6f42c1"
+                    onClick={() => setActiveSection('projects')}
+                />
+                <StatCard
+                    title="Talent Search"
+                    value="Find"
+                    icon="bi-search"
+                    color="#0dcaf0"
+                    onClick={() => setActiveSection('talent')}
+                />
+                <StatCard
+                    title="Onboard New"
+                    value="+"
+                    icon="bi-person-plus-fill"
+                    color="#CF4B00"
+                    onClick={() => setActiveSection('onboarding')}
+                />
+            </div>
+        </div>
+    );
+
+    const renderEmployeeDirectory = () => (
+        <div className="card shadow-sm border-0" style={{ backgroundColor: '#fff', borderTop: '5px solid #0d6efd' }}>
+            <div className="card-body p-4">
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h3 className="card-title fw-bold m-0" style={{ color: '#0d6efd' }}>
+                        <i className="bi bi-people-fill me-2"></i>Employee Directory
+                    </h3>
+                    <button className="btn btn-outline-primary btn-sm" onClick={fetchEmployees}>
+                        <i className="bi bi-arrow-clockwise me-1"></i> Refresh
+                    </button>
+                </div>
+
+                <div className="table-responsive" style={{ maxHeight: '600px', overflowY: 'auto', border: '1px solid #dee2e6' }}>
+                    <table className="table table-hover align-middle mb-0">
+                        <thead className="table-light sticky-top">
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Manager Name</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {employees.length > 0 ? (
+                                employees.map(emp => (
+                                    <tr key={emp.id}>
+                                        <td className="fw-bold">{emp.firstName} {emp.lastName}</td>
+                                        <td>{emp.email}</td>
+                                        <td><span className="badge bg-secondary">{emp.role}</span></td>
+                                        <td><small className="text-muted">{emp.managerName || 'N/A'}</small></td>
+                                        <td><span className="badge bg-success">Active</span></td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="5" className="text-center py-4 text-muted">No employees found.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+
     const renderOnboarding = () => (
         <div className="card shadow-sm border-0" style={{ backgroundColor: '#fff', borderTop: '5px solid #9CC6DB' }}>
             <div className="card-body p-4">
@@ -145,6 +306,35 @@ const HRDashboard = () => {
                 )}
 
                 <form onSubmit={handleOnboardingSubmit}>
+                    <div className="row">
+                        <div className="col-md-6 mb-3">
+                            <label className="form-label fw-bold">First Name</label>
+                            <input
+                                type="text"
+                                name="firstName"
+                                className="form-control"
+                                placeholder="John"
+                                required
+                                value={formData.firstName}
+                                onChange={handleInputChange}
+                                style={{ border: '2px solid #9CC6DB' }}
+                            />
+                        </div>
+                        <div className="col-md-6 mb-3">
+                            <label className="form-label fw-bold">Last Name</label>
+                            <input
+                                type="text"
+                                name="lastName"
+                                className="form-control"
+                                placeholder="Doe"
+                                required
+                                value={formData.lastName}
+                                onChange={handleInputChange}
+                                style={{ border: '2px solid #9CC6DB' }}
+                            />
+                        </div>
+                    </div>
+
                     <div className="mb-3">
                         <label className="form-label fw-bold">Email Address</label>
                         <input
@@ -203,7 +393,7 @@ const HRDashboard = () => {
                                     <option value="">Select a Manager...</option>
                                     {managers.map(mgr => (
                                         <option key={mgr.id} value={mgr.id}>
-                                            {mgr.email}
+                                            {mgr.firstName} {mgr.lastName}
                                         </option>
                                     ))}
                                 </select>
@@ -302,14 +492,14 @@ const HRDashboard = () => {
                                         <td>{res.skillName}</td>
                                         <td>
                                             <span className={`badge ${res.proficiencyLevel === 'ADVANCED' ? 'bg-success' :
-                                                    res.proficiencyLevel === 'INTERMEDIATE' ? 'bg-info text-dark' : 'bg-secondary'
+                                                res.proficiencyLevel === 'INTERMEDIATE' ? 'bg-info text-dark' : 'bg-secondary'
                                                 }`}>
                                                 {res.proficiencyLevel}
                                             </span>
                                         </td>
                                         <td>
                                             <span className={`badge ${res.status === 'APPROVED' ? 'bg-success' :
-                                                    res.status === 'PENDING' ? 'bg-warning text-dark' : 'bg-danger'
+                                                res.status === 'PENDING' ? 'bg-warning text-dark' : 'bg-danger'
                                                 }`}>
                                                 {res.status}
                                             </span>
@@ -330,10 +520,24 @@ const HRDashboard = () => {
         <div className="container-fluid" style={{ fontFamily: 'Pompiere, cursive', backgroundColor: '#FCF6D9', minHeight: '100vh', padding: 0 }}>
             <div className="row g-0">
                 {/* Sidebar */}
-                <div className="col-md-3 col-lg-2 d-md-block shadow-sm" style={{ backgroundColor: '#fff', minHeight: '100vh' }}>
+                <div className="col-md-3 col-lg-2 d-md-block shadow-sm" style={{ backgroundColor: '#fff', minHeight: '100vh', position: 'sticky', top: 0, height: '100vh', overflowY: 'auto' }}>
                     <div className="p-4">
                         <h4 className="fw-bold mb-4" style={{ color: '#CF4B00' }}>HR Portal</h4>
                         <div className="list-group list-group-flush">
+                            <button
+                                onClick={() => setActiveSection('overview')}
+                                className={`list-group-item list-group-item-action border-0 py-3 ${activeSection === 'overview' ? 'active' : ''}`}
+                                style={activeSection === 'overview' ? { backgroundColor: '#9CC6DB', color: '#fff' } : {}}
+                            >
+                                <i className="bi bi-speedometer2 me-2"></i> Overview
+                            </button>
+                            <button
+                                onClick={() => setActiveSection('directory')}
+                                className={`list-group-item list-group-item-action border-0 py-3 ${activeSection === 'directory' ? 'active' : ''}`}
+                                style={activeSection === 'directory' ? { backgroundColor: '#9CC6DB', color: '#fff' } : {}}
+                            >
+                                <i className="bi bi-people-fill me-2"></i> Employees
+                            </button>
                             <button
                                 onClick={() => setActiveSection('onboarding')}
                                 className={`list-group-item list-group-item-action border-0 py-3 ${activeSection === 'onboarding' ? 'active' : ''}`}
@@ -377,9 +581,11 @@ const HRDashboard = () => {
                 </div>
 
                 {/* Main Content */}
-                <div className="col-md-9 col-lg-10 p-5">
+                <div className="col-md-9 col-lg-10 p-5" style={{ maxHeight: '100vh', overflowY: 'auto' }}>
                     <header className="mb-5">
                         <h1 className="display-5 fw-bold" style={{ color: '#CF4B00' }}>
+                            {activeSection === 'overview' && 'Dashboard Overview'}
+                            {activeSection === 'directory' && 'Employee Directory'}
                             {activeSection === 'onboarding' && 'User Onboarding'}
                             {activeSection === 'projects' && 'Project Management'}
                             {activeSection === 'bench' && 'Bench Management & Allocation'}
@@ -390,6 +596,8 @@ const HRDashboard = () => {
                     </header>
 
                     <div className="fade-in">
+                        {activeSection === 'overview' && renderOverview()}
+                        {activeSection === 'directory' && renderEmployeeDirectory()}
                         {activeSection === 'onboarding' && renderOnboarding()}
                         {activeSection === 'projects' && <ProjectManagement />}
                         {activeSection === 'bench' && <BenchAllocation />}
