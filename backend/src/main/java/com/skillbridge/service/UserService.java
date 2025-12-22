@@ -2,8 +2,11 @@ package com.skillbridge.service;
 
 import com.skillbridge.dto.CreateUserRequest;
 import com.skillbridge.dto.UserProfileResponse;
+import com.skillbridge.dto.SkillResponse;
 import com.skillbridge.entity.User;
+import com.skillbridge.repository.EmployeeSkillRepository;
 import com.skillbridge.repository.ProjectAssignmentRepository;
+import com.skillbridge.repository.ProjectRepository;
 import com.skillbridge.repository.UserRepository;
 import com.skillbridge.security.CustomUserDetails;
 import java.util.List;
@@ -22,6 +25,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ProjectAssignmentRepository assignmentRepository;
+    private final ProjectRepository projectRepository;
+    private final EmployeeSkillRepository employeeSkillRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -121,7 +126,19 @@ public class UserService {
                     .orElse("Unknown");
         }
 
-        return UserProfileResponse.builder()
+        List<SkillResponse> skills = employeeSkillRepository.findByEmployeeId(user.getId()).stream()
+                .map(skill -> SkillResponse.builder()
+                        .id(skill.getId())
+                        .employeeId(user.getId())
+                        .employeeName(user.getFirstName() + " " + user.getLastName())
+                        .employeeEmail(user.getEmail())
+                        .skillName(skill.getSkillName())
+                        .proficiencyLevel(skill.getProficiencyLevel())
+                        .status(skill.getStatus())
+                        .build())
+                .collect(Collectors.toList());
+
+        UserProfileResponse.UserProfileResponseBuilder builder = UserProfileResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
@@ -129,6 +146,32 @@ public class UserService {
                 .role(user.getRole())
                 .managerId(user.getManagerId())
                 .managerName(managerName)
-                .build();
+                .skills(skills);
+
+        assignmentRepository.findTopByEmployeeIdOrderByStartDateDesc(user.getId())
+                .ifPresent(assignment -> {
+                    builder.assignmentStatus(assignment.getAssignmentStatus().name());
+                    builder.startDate(assignment.getStartDate());
+                    builder.endDate(assignment.getEndDate());
+                    builder.billingStatus(
+                            assignment.getBillingType() != null ? assignment.getBillingType().name() : null);
+
+                    if (assignment.getAssignmentStatus() == com.skillbridge.enums.AssignmentStatus.ACTIVE) {
+                        projectRepository.findById(assignment.getProjectId())
+                                .ifPresent(project -> {
+                                    builder.projectName(project.getName());
+                                    builder.companyName(project.getCompanyName());
+                                });
+                    }
+                });
+
+        if (builder.build().getAssignmentStatus() == null) {
+            builder.assignmentStatus("NONE");
+            builder.projectName("Bench");
+        } else if (builder.build().getProjectName() == null) {
+            builder.projectName("Bench");
+        }
+
+        return builder.build();
     }
 }

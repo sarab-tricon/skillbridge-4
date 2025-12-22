@@ -10,3 +10,8 @@ target/
 # OS
 .DS_Store
 Thumbs.db
+hr_workflow_ppt_content.md
+security_brief.md
+technical_report.md
+commit_documentation.md
+*.md
