@@ -11,7 +11,6 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -36,37 +35,48 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         // 1. PUBLIC
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/auth/**", "/h2-console/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
 
-                        // 2. EMPLOYEE + MANAGER ACCESS (Specific matchers FIRST)
-                        .requestMatchers("/allocations/me").hasAnyAuthority("ROLE_EMPLOYEE", "ROLE_MANAGER")
-                        .requestMatchers("/assignments/my").hasAuthority("ROLE_EMPLOYEE")
-                        .requestMatchers("/utilization/me").authenticated()
-                        .requestMatchers("/projects/active").hasAnyAuthority("ROLE_HR", "ROLE_MANAGER", "ROLE_EMPLOYEE")
-                        .requestMatchers("/skills/my").hasAuthority("ROLE_EMPLOYEE")
-                        .requestMatchers(HttpMethod.POST, "/skills").hasAuthority("ROLE_EMPLOYEE")
+                        // 2. COMMON / AUTHENTICATED
+                        .requestMatchers("/api/users/me").authenticated()
+                        .requestMatchers("/api/utilization/me", "/api/allocations/me").authenticated()
+                        .requestMatchers("/api/catalog/skills").authenticated()
 
-                        // 3. MANAGER ACCESS
-                        .requestMatchers("/users/team").hasAuthority("ROLE_MANAGER")
-                        .requestMatchers("/utilization/team").hasAuthority("ROLE_MANAGER")
-                        .requestMatchers("/skills/pending").hasAuthority("ROLE_MANAGER")
-                        .requestMatchers("/skills/*/verify").hasAuthority("ROLE_MANAGER")
-                        .requestMatchers("/assignments/pending").hasAnyAuthority("ROLE_MANAGER", "ROLE_HR")
+                        // 3. EMPLOYEE
+                        .requestMatchers("/api/assignments/my").hasAuthority("ROLE_EMPLOYEE")
+                        .requestMatchers(HttpMethod.POST, "/api/allocation-requests").hasAuthority("ROLE_EMPLOYEE")
+                        .requestMatchers("/api/skills/my").hasAuthority("ROLE_EMPLOYEE")
+                        .requestMatchers(HttpMethod.POST, "/api/skills").hasAuthority("ROLE_EMPLOYEE")
+                        .requestMatchers(HttpMethod.PUT, "/api/skills/*").hasAuthority("ROLE_EMPLOYEE")
+                        .requestMatchers(HttpMethod.DELETE, "/api/skills/*").hasAuthority("ROLE_EMPLOYEE")
 
-                        // 4. HR-ONLY ACCESS (Broad matchers LAST)
-                        .requestMatchers("/users/bench/**").hasAuthority("ROLE_HR")
-                        .requestMatchers("/users/**").hasAuthority("ROLE_HR")
-                        .requestMatchers("/assignments/**").hasAuthority("ROLE_HR") // Allows other assignment endpoints
-                                                                                    // for HR only
-                        .requestMatchers("/projects/**").hasAuthority("ROLE_HR")
-                        .requestMatchers("/utilization/summary").hasAuthority("ROLE_HR")
-                        .requestMatchers(HttpMethod.GET, "/skills/search").hasAnyAuthority("ROLE_MANAGER", "ROLE_HR")
+                        // 4. MANAGER (Shared with HR often)
+                        .requestMatchers("/api/users/team").hasAnyAuthority("ROLE_MANAGER", "ROLE_HR")
+                        .requestMatchers("/api/projects/active")
+                        .hasAnyAuthority("ROLE_MANAGER", "ROLE_HR", "ROLE_EMPLOYEE")
+                        .requestMatchers("/api/utilization/team").hasAuthority("ROLE_MANAGER")
+                        .requestMatchers("/api/skills/pending").hasAuthority("ROLE_MANAGER")
+                        .requestMatchers("/api/skills/*/verify").hasAuthority("ROLE_MANAGER")
+                        .requestMatchers("/api/skills/search").hasAnyAuthority("ROLE_MANAGER", "ROLE_HR")
 
-                        // 5. GLOBAL FALLBACK
+                        // Allocation Requests Review
+                        .requestMatchers("/api/allocation-requests/pending").hasAnyAuthority("ROLE_MANAGER", "ROLE_HR")
+                        .requestMatchers("/api/allocation-requests/*/approve")
+                        .hasAnyAuthority("ROLE_MANAGER", "ROLE_HR")
+                        .requestMatchers("/api/allocation-requests/*/reject").hasAnyAuthority("ROLE_MANAGER", "ROLE_HR")
+
+                        // 5. HR / ADMIN
+                        .requestMatchers(HttpMethod.POST, "/api/assignments").hasAuthority("ROLE_HR")
+                        .requestMatchers(HttpMethod.PUT, "/api/assignments/*/end")
+                        .hasAnyAuthority("ROLE_HR", "ROLE_MANAGER")
+                        .requestMatchers("/api/users/**").hasAuthority("ROLE_HR")
+                        .requestMatchers("/api/projects/**").hasAuthority("ROLE_HR")
+                        .requestMatchers("/api/utilization/summary").hasAuthority("ROLE_HR")
+
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -97,7 +107,6 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Allow multiple localhost ports to handle dev scenarios where port increments
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "http://localhost:5174",

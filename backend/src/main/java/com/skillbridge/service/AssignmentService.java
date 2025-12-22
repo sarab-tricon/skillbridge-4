@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.skillbridge.repository.AllocationRequestRepository;
+import com.skillbridge.entity.AllocationRequest;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -26,6 +28,7 @@ public class AssignmentService {
     private final ProjectAssignmentRepository assignmentRepository;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final AllocationRequestRepository allocationRequestRepository;
 
     @Transactional
     public AssignmentResponse assignEmployeeToProject(CreateAssignmentRequest request) {
@@ -112,6 +115,7 @@ public class AssignmentService {
                 .assignmentStatus(AssignmentStatus.PENDING)
                 .billingType(null) // Not assigned yet
                 .startDate(LocalDate.now())
+                .requestedAt(java.time.LocalDateTime.now())
                 .build();
 
         return mapToResponse(assignmentRepository.save(assignment));
@@ -126,8 +130,11 @@ public class AssignmentService {
             throw new IllegalStateException("Can only approve pending requests");
         }
 
+        User currentUser = getAuthenticatedUser();
         assignment.setAssignmentStatus(AssignmentStatus.ACTIVE);
         assignment.setBillingType(billingType);
+        assignment.setReviewedAt(java.time.LocalDateTime.now());
+        assignment.setReviewedBy(currentUser.getId());
         return mapToResponse(assignmentRepository.save(assignment));
     }
 
@@ -140,7 +147,10 @@ public class AssignmentService {
             throw new IllegalStateException("Can only reject pending requests");
         }
 
+        User currentUser = getAuthenticatedUser();
         assignment.setAssignmentStatus(AssignmentStatus.REJECTED);
+        assignment.setReviewedAt(java.time.LocalDateTime.now());
+        assignment.setReviewedBy(currentUser.getId());
         assignmentRepository.save(assignment);
     }
 
@@ -157,19 +167,44 @@ public class AssignmentService {
     public AssignmentResponse getMyAssignment() {
         User currentUser = getAuthenticatedUser();
 
+        // 1. Check for active project assignment
         java.util.Optional<ProjectAssignment> opt = assignmentRepository
                 .findTopByEmployeeIdOrderByStartDateDesc(currentUser.getId());
 
-        if (opt.isEmpty()) {
+        if (opt.isPresent() && opt.get().getAssignmentStatus() == AssignmentStatus.ACTIVE) {
+            return mapToResponse(opt.get());
+        }
+
+        // 2. Check for pending allocation request in NEW table
+        java.util.List<AllocationRequest> pendingReqs = allocationRequestRepository
+                .findByEmployeeId(currentUser.getId()).stream()
+                .filter(r -> "PENDING".equals(r.getStatus()))
+                .toList();
+
+        if (!pendingReqs.isEmpty()) {
+            AllocationRequest req = pendingReqs.get(0);
+            Project project = projectRepository.findById(req.getProjectId()).orElse(null);
             return AssignmentResponse.builder()
-                    .projectName("Bench")
-                    .assignmentStatus(AssignmentStatus.ENDED)
-                    .utilization("BENCH")
+                    .assignmentId(req.getId())
+                    .employeeId(req.getEmployeeId())
+                    .projectId(req.getProjectId())
+                    .projectName(project != null ? project.getName() : "Requested Project")
+                    .assignmentStatus(AssignmentStatus.PENDING)
+                    .requestedAt(req.getCreatedAt())
+                    .utilization("PENDING")
                     .build();
         }
 
-        ProjectAssignment assignment = opt.get();
-        return mapToResponse(assignment);
+        // 3. Fallback to base assignment status or Bench
+        if (opt.isPresent()) {
+            return mapToResponse(opt.get());
+        }
+
+        return AssignmentResponse.builder()
+                .projectName("Bench")
+                .assignmentStatus(AssignmentStatus.ENDED)
+                .utilization("BENCH")
+                .build();
     }
 
     @Transactional(readOnly = true)
@@ -228,6 +263,9 @@ public class AssignmentService {
                 .utilization(billingStr) // String as requested
                 .startDate(assignment.getStartDate())
                 .endDate(assignment.getEndDate())
+                .requestedAt(assignment.getRequestedAt())
+                .employeeName(userRepository.findById(assignment.getEmployeeId())
+                        .map(u -> u.getFirstName() + " " + u.getLastName()).orElse("Unknown"))
                 .build();
     }
 }

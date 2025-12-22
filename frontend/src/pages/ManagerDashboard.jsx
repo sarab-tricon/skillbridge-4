@@ -24,7 +24,7 @@ const ManagerDashboard = () => {
             const [teamRes, utilRes, pendingAllocRes] = await Promise.all([
                 api.get('/users/team'),
                 api.get('/utilization/team'),
-                api.get('/assignments/pending')
+                api.get('/allocation-requests/pending')
             ]);
 
             const merged = teamRes.data.map(member => {
@@ -39,7 +39,11 @@ const ManagerDashboard = () => {
             });
 
             setMergedTeam(merged);
-            setPendingAllocations(pendingAllocRes.data);
+            // Map assignmentId (from Backend DTO) to id for UI consistency and key binding
+            setPendingAllocations(pendingAllocRes.data.map(req => ({
+                ...req,
+                id: req.id || req.assignmentId
+            })));
             setError(prev => ({ ...prev, data: null }));
         } catch (err) {
             console.error('Error fetching dashboard data:', err);
@@ -80,13 +84,13 @@ const ManagerDashboard = () => {
         }
     };
 
-    const handleAllocationAction = async (id, status, billingType = 'BILLABLE') => {
+    const handleAllocationAction = async (requestId, status, billingType = 'BILLABLE') => {
         setActionLoading(true);
         try {
             if (status === 'APPROVED') {
-                await api.put(`/assignments/${id}/approve`, { billingType });
+                await api.put(`/allocation-requests/${requestId}/approve`, { billingType });
             } else {
-                await api.put(`/assignments/${id}/reject`);
+                await api.put(`/allocation-requests/${requestId}/reject`);
             }
             fetchData();
         } catch (err) {

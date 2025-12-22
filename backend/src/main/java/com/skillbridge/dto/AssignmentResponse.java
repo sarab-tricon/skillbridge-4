@@ -24,4 +24,6 @@ public class AssignmentResponse {
     private String utilization; // Changed to String as per user request
     private LocalDate startDate;
     private LocalDate endDate;
+    private java.time.LocalDateTime requestedAt;
+    private String employeeName;
 }

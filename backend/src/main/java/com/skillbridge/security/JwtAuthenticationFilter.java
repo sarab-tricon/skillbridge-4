@@ -51,7 +51,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 // Validate generic token validity (signature, expiration)
                 if (jwtService.isTokenValid(jwt, userDetails)) {
-
                     // STRICT JTI ENFORCEMENT
                     String tokenJti = jwtService.extractJti(jwt);
                     if (userDetails instanceof CustomUserDetails customUserDetails) {
@@ -80,7 +79,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         }
                     }
 
-                    java.util.List<org.springframework.security.core.GrantedAuthority> authorities = authorityStrings
+                    // Ensure authorities start with ROLE_
+                    java.util.List<String> finalAuthorities = authorityStrings.stream()
+                            .map(auth -> auth.startsWith("ROLE_") ? auth : "ROLE_" + auth)
+                            .toList();
+
+                    System.out.println("DEBUG: JWT Parsed. User: " + userEmail + ", Raw Authorities: "
+                            + authorityStrings + ", Final Authorities: " + finalAuthorities);
+
+                    java.util.List<org.springframework.security.core.GrantedAuthority> authorities = finalAuthorities
                             .stream()
                             .map(org.springframework.security.core.authority.SimpleGrantedAuthority::new)
                             .map(org.springframework.security.core.GrantedAuthority.class::cast)
@@ -98,14 +105,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     // 4. Set security context
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                    // 5. Mandatory Log - Verification that ROLE_HR/ROLE_EMPLOYEE exists
-                    log.info("AUTH AUTHORITIES: {}",
-                            SecurityContextHolder.getContext()
-                                    .getAuthentication()
-                                    .getAuthorities());
+                    System.out.println("DEBUG: SecurityContext Set. Authentication: " + authentication);
+
                 }
             }
         } catch (Exception e) {
+            System.err.println("DEBUG: JWT Auth Error: " + e.getMessage());
+            log.error("JWT AUTH ERROR: {}", e.getMessage(), e);
             // In case of JWT parsing errors or other issues, we just continue.
             // The SecurityContext will remain empty, failing later stages if they need
             // auth.
