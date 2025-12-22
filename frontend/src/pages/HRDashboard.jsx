@@ -197,7 +197,7 @@ const HRDashboard = () => {
                     value={stats.totalEmployees}
                     icon="bi-people-fill"
                     color="#0d6efd"
-                    onClick={() => setActiveSection('directory')}
+                    onClick={() => setActiveSection('people')}
                 />
                 <StatCard
                     title="On Bench"
@@ -232,8 +232,21 @@ const HRDashboard = () => {
                     value="+"
                     icon="bi-person-plus-fill"
                     color="#CF4B00"
-                    onClick={() => setActiveSection('onboarding')}
+                    onClick={() => setActiveSection('people')}
                 />
+            </div>
+        </div>
+    );
+
+    const renderPeopleManagement = () => (
+        <div className="fade-in">
+            <div className="row g-4">
+                <div className="col-lg-4">
+                    {renderOnboarding()}
+                </div>
+                <div className="col-lg-8">
+                    {renderEmployeeDirectory()}
+                </div>
             </div>
         </div>
     );
@@ -250,7 +263,7 @@ const HRDashboard = () => {
                     </button>
                 </div>
 
-                <div className="table-responsive" style={{ maxHeight: '600px', overflowY: 'auto', border: '1px solid #dee2e6' }}>
+                <div className="table-responsive" style={{ maxHeight: 'calc(100vh - 350px)', overflowY: 'auto', overflowX: 'hidden', border: '1px solid #dee2e6' }}>
                     <table className="table table-hover align-middle mb-0">
                         <thead className="table-light sticky-top">
                             <tr>
@@ -306,72 +319,72 @@ const HRDashboard = () => {
                 )}
 
                 <form onSubmit={handleOnboardingSubmit}>
-                    <div className="row">
-                        <div className="col-md-6 mb-3">
-                            <label className="form-label fw-bold">First Name</label>
+                    <div className="row g-2">
+                        <div className="col-md-6 mb-2">
+                            <label className="form-label fw-bold small">First Name</label>
                             <input
                                 type="text"
                                 name="firstName"
-                                className="form-control"
+                                className="form-control form-control-sm"
                                 placeholder="John"
                                 required
                                 value={formData.firstName}
                                 onChange={handleInputChange}
-                                style={{ border: '2px solid #9CC6DB' }}
+                                style={{ border: '1px solid #9CC6DB' }}
                             />
                         </div>
-                        <div className="col-md-6 mb-3">
-                            <label className="form-label fw-bold">Last Name</label>
+                        <div className="col-md-6 mb-2">
+                            <label className="form-label fw-bold small">Last Name</label>
                             <input
                                 type="text"
                                 name="lastName"
-                                className="form-control"
+                                className="form-control form-control-sm"
                                 placeholder="Doe"
                                 required
                                 value={formData.lastName}
                                 onChange={handleInputChange}
-                                style={{ border: '2px solid #9CC6DB' }}
+                                style={{ border: '1px solid #9CC6DB' }}
                             />
                         </div>
                     </div>
 
-                    <div className="mb-3">
-                        <label className="form-label fw-bold">Email Address</label>
+                    <div className="mb-2">
+                        <label className="form-label fw-bold small">Email Address</label>
                         <input
                             type="email"
                             name="email"
-                            className="form-control"
+                            className="form-control form-control-sm"
                             placeholder="user@skillbridge.com"
                             required
                             value={formData.email}
                             onChange={handleInputChange}
-                            style={{ border: '2px solid #9CC6DB' }}
+                            style={{ border: '1px solid #9CC6DB' }}
                         />
                     </div>
 
-                    <div className="mb-3">
-                        <label className="form-label fw-bold">Initial Password</label>
+                    <div className="mb-2">
+                        <label className="form-label fw-bold small">Initial Password</label>
                         <input
                             type="password"
                             name="password"
-                            className="form-control"
+                            className="form-control form-control-sm"
                             placeholder="••••••••"
                             required
                             value={formData.password}
                             onChange={handleInputChange}
-                            style={{ border: '2px solid #9CC6DB' }}
+                            style={{ border: '1px solid #9CC6DB' }}
                         />
                     </div>
 
-                    <div className="row">
-                        <div className="col-md-6 mb-3">
-                            <label className="form-label fw-bold">Role</label>
+                    <div className="row g-2">
+                        <div className={formData.role === 'EMPLOYEE' ? "col-md-6 mb-2" : "col-12 mb-2"}>
+                            <label className="form-label fw-bold small">Role</label>
                             <select
                                 name="role"
-                                className="form-select"
+                                className="form-select form-select-sm"
                                 value={formData.role}
                                 onChange={handleInputChange}
-                                style={{ border: '2px solid #9CC6DB' }}
+                                style={{ border: '1px solid #9CC6DB' }}
                             >
                                 <option value="EMPLOYEE">EMPLOYEE</option>
                                 <option value="MANAGER">MANAGER</option>
@@ -380,17 +393,17 @@ const HRDashboard = () => {
                         </div>
 
                         {formData.role === 'EMPLOYEE' && (
-                            <div className="col-md-6 mb-3">
-                                <label className="form-label fw-bold">Assign Manager</label>
+                            <div className="col-md-6 mb-2">
+                                <label className="form-label fw-bold small">Manager</label>
                                 <select
                                     name="managerId"
-                                    className="form-select"
+                                    className="form-select form-select-sm"
                                     required
                                     value={formData.managerId}
                                     onChange={handleInputChange}
-                                    style={{ border: '2px solid #9CC6DB' }}
+                                    style={{ border: '1px solid #9CC6DB' }}
                                 >
-                                    <option value="">Select a Manager...</option>
+                                    <option value="">Choose...</option>
                                     {managers.map(mgr => (
                                         <option key={mgr.id} value={mgr.id}>
                                             {mgr.firstName} {mgr.lastName}
@@ -401,14 +414,14 @@ const HRDashboard = () => {
                         )}
                     </div>
 
-                    <div className="mt-4">
+                    <div className="mt-3">
                         <button
                             type="submit"
-                            className="btn btn-lg w-100 text-white fw-bold"
+                            className="btn btn-sm w-100 text-white fw-bold"
                             style={{ backgroundColor: '#CF4B00' }}
                             disabled={onboardingLoading}
                         >
-                            {onboardingLoading ? 'Onboarding...' : 'Onboard User'}
+                            {onboardingLoading ? 'Saving...' : 'Onboard User'}
                         </button>
                     </div>
                 </form>
@@ -532,18 +545,11 @@ const HRDashboard = () => {
                                 <i className="bi bi-speedometer2 me-2"></i> Overview
                             </button>
                             <button
-                                onClick={() => setActiveSection('directory')}
-                                className={`list-group-item list-group-item-action border-0 py-3 ${activeSection === 'directory' ? 'active' : ''}`}
-                                style={activeSection === 'directory' ? { backgroundColor: '#9CC6DB', color: '#fff' } : {}}
+                                onClick={() => setActiveSection('people')}
+                                className={`list-group-item list-group-item-action border-0 py-3 ${activeSection === 'people' ? 'active' : ''}`}
+                                style={activeSection === 'people' ? { backgroundColor: '#9CC6DB', color: '#fff' } : {}}
                             >
-                                <i className="bi bi-people-fill me-2"></i> Employees
-                            </button>
-                            <button
-                                onClick={() => setActiveSection('onboarding')}
-                                className={`list-group-item list-group-item-action border-0 py-3 ${activeSection === 'onboarding' ? 'active' : ''}`}
-                                style={activeSection === 'onboarding' ? { backgroundColor: '#9CC6DB', color: '#fff' } : {}}
-                            >
-                                <i className="bi bi-person-plus me-2"></i> User Onboarding
+                                <i className="bi bi-people-fill me-2"></i> People Management
                             </button>
                             <button
                                 onClick={() => setActiveSection('projects')}
@@ -581,24 +587,29 @@ const HRDashboard = () => {
                 </div>
 
                 {/* Main Content */}
-                <div className="col-md-9 col-lg-10 p-5" style={{ maxHeight: '100vh', overflowY: 'auto' }}>
-                    <header className="mb-5">
-                        <h1 className="display-5 fw-bold" style={{ color: '#CF4B00' }}>
-                            {activeSection === 'overview' && 'Dashboard Overview'}
-                            {activeSection === 'directory' && 'Employee Directory'}
-                            {activeSection === 'onboarding' && 'User Onboarding'}
-                            {activeSection === 'projects' && 'Project Management'}
-                            {activeSection === 'bench' && 'Bench Management & Allocation'}
-                            {activeSection === 'catalog' && 'Skill Catalog'}
-                            {activeSection === 'talent' && 'Talent Discovery'}
-                        </h1>
-                        <p className="lead text-muted">Manage your organization's workforce and projects from one place.</p>
+                <div className="col-md-9 col-lg-10" style={{ padding: 0 }}>
+                    <header className="px-5 py-4 mb-4 shadow-sm" style={{ backgroundColor: '#FCF6D9' }}>
+                        <div className="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h1 className="display-6 fw-bold m-0" style={{ color: '#CF4B00' }}>
+                                    {activeSection === 'overview' && 'Dashboard Overview'}
+                                    {activeSection === 'people' && 'People Management'}
+                                    {activeSection === 'projects' && 'Project Management'}
+                                    {activeSection === 'bench' && 'Bench Management & Allocation'}
+                                    {activeSection === 'catalog' && 'Skill Catalog'}
+                                    {activeSection === 'talent' && 'Talent Discovery'}
+                                </h1>
+                                <p className="lead text-muted m-0 small">Manage your organization's workforce and projects from one place.</p>
+                            </div>
+                            <div className="text-end">
+                                <small className="text-muted">Welcome, <strong>{user?.sub.split('@')[0]}</strong></small>
+                            </div>
+                        </div>
                     </header>
 
-                    <div className="fade-in">
+                    <div className="px-5 pb-5 fade-in">
                         {activeSection === 'overview' && renderOverview()}
-                        {activeSection === 'directory' && renderEmployeeDirectory()}
-                        {activeSection === 'onboarding' && renderOnboarding()}
+                        {activeSection === 'people' && renderPeopleManagement()}
                         {activeSection === 'projects' && <ProjectManagement />}
                         {activeSection === 'bench' && <BenchAllocation />}
                         {activeSection === 'catalog' && <SkillCatalog />}
