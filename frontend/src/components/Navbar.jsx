@@ -17,7 +17,7 @@ const Navbar = () => {
                 borderBottom: '1px solid var(--color-secondary)',
                 position: 'sticky',
                 top: 0,
-                zIndex: 1000,
+                zIndex: 2000,
                 backgroundColor: '#ffffff',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
             }}
