@@ -39,6 +39,12 @@ public class UserController {
         return ResponseEntity.ok(userService.createUser(request));
     }
 
+    @GetMapping("/employees")
+    @PreAuthorize("hasAuthority('ROLE_HR')")
+    public ResponseEntity<List<UserProfileResponse>> getEmployees() {
+        return ResponseEntity.ok(userService.getAllEmployees());
+    }
+
     @GetMapping("/managers")
     @PreAuthorize("hasAuthority('ROLE_HR')")
     public ResponseEntity<List<UserProfileResponse>> getManagers() {

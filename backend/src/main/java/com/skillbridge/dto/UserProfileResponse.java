@@ -14,6 +14,9 @@ import lombok.NoArgsConstructor;
 public class UserProfileResponse {
     private UUID id;
     private String email;
+    private String firstName;
+    private String lastName;
     private Role role;
     private UUID managerId;
+    private String managerName;
 }
