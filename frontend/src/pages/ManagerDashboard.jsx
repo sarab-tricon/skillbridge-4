@@ -335,111 +335,53 @@ const ManagerDashboard = () => {
                 )}
 
                 {activeSection === 'allocations' && (
-                    <div className="row g-4 mb-5">
-                        <div className="col-lg-8">
-                            <div className="card shadow border-0 rounded-4 overflow-hidden h-100">
-                                <div className="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
-                                    <h3 className="fw-bold mb-0">Active Project Assignments</h3>
-                                    <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={() => setActiveSection(null)}>Close</button>
-                                </div>
-                                <div className="card-body p-0">
-                                    {loading.data ? renderLoading() :
-                                        error.data ? renderError(error.data) :
-                                            mergedTeam.filter(m => m.projectName).length === 0 ? renderEmpty('No active project assignments.') : (
-                                                <div className="table-responsive">
-                                                    <table className="table table-hover align-middle mb-0">
-                                                        <thead className="table-light">
-                                                            <tr>
-                                                                <th className="px-4 py-3">Employee</th>
-                                                                <th className="py-3">Project</th>
-                                                                <th className="py-3">Billing</th>
-                                                                <th className="px-4 py-3 text-end">Actions</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {mergedTeam.filter(m => m.projectName).map((member, idx) => (
-                                                                <tr key={idx}>
-                                                                    <td className="px-4 py-3">
-                                                                        <div className="fw-bold">{member.name || 'Employee'}</div>
-                                                                        <div className="small text-muted">{member.email}</div>
-                                                                    </td>
-                                                                    <td className="fw-bold">{member.projectName}</td>
-                                                                    <td>
-                                                                        <span className={`badge rounded-pill ${member.allocationStatus === 'BILLABLE' ? 'bg-success' : 'bg-primary'}`}>
-                                                                            {member.allocationStatus}
-                                                                        </span>
-                                                                    </td>
-                                                                    <td className="px-4 text-end">
-                                                                        <button
-                                                                            className="btn btn-outline-danger btn-sm rounded-pill px-3"
-                                                                            onClick={() => handleEndAllocation(member.assignmentId)}
-                                                                            disabled={actionLoading || !member.assignmentId}
-                                                                        >
-                                                                            End Assignment
-                                                                        </button>
-                                                                    </td>
-                                                                </tr>
-                                                            ))}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            )}
-                                </div>
-                            </div>
+                    <div className="card shadow border-0 rounded-4 overflow-hidden mb-5">
+                        <div className="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
+                            <h3 className="fw-bold mb-0">Active Project Assignments</h3>
+                            <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={() => setActiveSection(null)}>Close</button>
                         </div>
-                        <div className="col-lg-4">
-                            <div className="card shadow-sm border-0 rounded-4 p-4 h-100" style={{ borderTop: '6px solid #9CC6DB' }}>
-                                <h4 className="fw-bold mb-4">Quick Assignment</h4>
-                                <form onSubmit={async (e) => {
-                                    e.preventDefault();
-                                    const formData = new FormData(e.target);
-                                    const payload = {
-                                        employeeId: formData.get('employeeId'),
-                                        projectId: formData.get('projectId'),
-                                        billingType: formData.get('billingType')
-                                    };
-                                    setActionLoading(true);
-                                    try {
-                                        await api.post('/assignments', payload);
-                                        e.target.reset();
-                                        fetchData();
-                                    } catch (err) {
-                                        console.error('Failed to assign employee', err);
-                                        alert(err.response?.data?.message || 'Failed to assign employee.');
-                                    } finally {
-                                        setActionLoading(false);
-                                    }
-                                }}>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Select Employee (Bench)</label>
-                                        <select name="employeeId" className="form-select border-2 shadow-none" required>
-                                            <option value="">-- Choose Employee --</option>
-                                            {mergedTeam.filter(m => m.allocationStatus === 'BENCH').map(m => (
-                                                <option key={m.id} value={m.id}>{m.email}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Select Project</label>
-                                        <select name="projectId" className="form-select border-2 shadow-none" required>
-                                            <option value="">-- Choose Project --</option>
-                                            {mergedTeam.map(m => m.projectName).filter((v, i, a) => v && a.indexOf(v) === i).map((name, i) => (
-                                                <option key={i} value={mergedTeam.find(m => m.projectName === name).projectId}>{name}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="mb-4">
-                                        <label className="form-label small fw-bold">Billing Type</label>
-                                        <select name="billingType" className="form-select border-2 shadow-none" required>
-                                            <option value="BILLABLE">Billable</option>
-                                            <option value="INVESTMENT">Investment</option>
-                                        </select>
-                                    </div>
-                                    <button type="submit" className="btn btn-dark w-100 py-2 rounded-pill fw-bold" disabled={actionLoading}>
-                                        {actionLoading ? 'Assigning...' : 'Assign to Project'}
-                                    </button>
-                                </form>
-                            </div>
+                        <div className="card-body p-0">
+                            {loading.data ? renderLoading() :
+                                error.data ? renderError(error.data) :
+                                    mergedTeam.filter(m => m.projectName).length === 0 ? renderEmpty('No active project assignments.') : (
+                                        <div className="table-responsive">
+                                            <table className="table table-hover align-middle mb-0">
+                                                <thead className="table-light">
+                                                    <tr>
+                                                        <th className="px-4 py-3">Employee</th>
+                                                        <th className="py-3">Project</th>
+                                                        <th className="py-3">Billing</th>
+                                                        <th className="px-4 py-3 text-end">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {mergedTeam.filter(m => m.projectName).map((member, idx) => (
+                                                        <tr key={idx}>
+                                                            <td className="px-4 py-3">
+                                                                <div className="fw-bold">{member.name || 'Employee'}</div>
+                                                                <div className="small text-muted">{member.email}</div>
+                                                            </td>
+                                                            <td className="fw-bold">{member.projectName}</td>
+                                                            <td>
+                                                                <span className={`badge rounded-pill ${member.allocationStatus === 'BILLABLE' ? 'bg-success' : 'bg-primary'}`}>
+                                                                    {member.allocationStatus}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-4 text-end">
+                                                                <button
+                                                                    className="btn btn-outline-danger btn-sm rounded-pill px-3"
+                                                                    onClick={() => handleEndAllocation(member.assignmentId)}
+                                                                    disabled={actionLoading || !member.assignmentId}
+                                                                >
+                                                                    End Assignment
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
                         </div>
                     </div>
                 )}

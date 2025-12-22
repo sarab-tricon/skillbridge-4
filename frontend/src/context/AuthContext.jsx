@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(localStorage.getItem('token'));
     const [role, setRole] = useState(null);
+    const [loading, setLoading] = useState(true); // Add loading state
 
     useEffect(() => {
         if (token) {
@@ -22,6 +23,7 @@ export const AuthProvider = ({ children }) => {
                 logout();
             }
         }
+        setLoading(false); // Done loading
     }, [token]);
 
     const login = async (email, password) => {
@@ -50,6 +52,22 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         setRole(null);
     };
+
+    // Show loading spinner while checking authentication
+    if (loading) {
+        return (
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100vh'
+            }}>
+                <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <AuthContext.Provider value={{ user, token, role, login, logout, isAuthenticated: !!token }}>
