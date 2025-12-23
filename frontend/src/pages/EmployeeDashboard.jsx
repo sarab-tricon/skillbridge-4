@@ -12,6 +12,7 @@ const EmployeeDashboard = () => {
     const [skills, setSkills] = useState([]);
     const [allocation, setAllocation] = useState(null);
     const [utilization, setUtilization] = useState(null);
+    const [profile, setProfile] = useState(null);
 
     // New Skill Form State
     const [newSkill, setNewSkill] = useState({ skillName: '', proficiencyLevel: 'BEGINNER' });
@@ -40,7 +41,17 @@ const EmployeeDashboard = () => {
         fetchUtilization();
         fetchAvailableProjects();
         fetchCatalog();
+        fetchProfile();
     }, []);
+
+    const fetchProfile = async () => {
+        try {
+            const response = await api.get('/users/me');
+            setProfile(response.data);
+        } catch (err) {
+            console.error('Failed to load profile', err);
+        }
+    };
 
     const [catalogSkills, setCatalogSkills] = useState([]);
     const fetchCatalog = async () => {
@@ -455,10 +466,7 @@ const EmployeeDashboard = () => {
                                         <p className="text-muted small text-uppercase fw-bold mb-1">Status</p>
                                         <p className="h4 mb-0">{allocation.assignmentStatus === 'ACTIVE' ? 'Allocated' : 'Awaiting Approval'}</p>
                                     </div>
-                                    <div className="col-12">
-                                        <p className="text-muted small text-uppercase fw-bold mb-1">Internal Assignment ID</p>
-                                        <p className="font-monospace text-muted small">{allocation.assignmentId}</p>
-                                    </div>
+
                                 </div>
                             </div>
                         </div>
