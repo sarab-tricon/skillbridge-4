@@ -350,12 +350,12 @@ const EmployeeDashboard = () => {
                                                             {groupedSkills[level].map((skill) => (
                                                                 <tr key={skill.id} className={editingSkill?.id === skill.id ? 'table-info' : ''}>
                                                                     <td className="px-4 py-3">
-                                                                        <div className="fw-bold fs-5 text-dark">{skill.skillName}</div>
+                                                                        <div className="fw-bold text-dark">{skill.skillName}</div>
                                                                     </td>
                                                                     <td className="px-4 py-3 text-center">
                                                                         <span className={`badge px-3 py-2 rounded-pill ${skill.status === 'APPROVED' ? 'bg-success' :
                                                                             skill.status === 'PENDING' ? 'bg-secondary' : 'bg-danger'
-                                                                            }`} style={{ fontSize: '0.75rem', minWidth: '90px', letterSpacing: '0.5px' }}>
+                                                                            }`} style={{ minWidth: '90px', letterSpacing: '0.5px' }}>
                                                                             {skill.status}
                                                                         </span>
                                                                     </td>
@@ -513,64 +513,69 @@ const EmployeeDashboard = () => {
         <div className="container-fluid p-0 overflow-hidden" style={{ minHeight: 'calc(100vh - 70px)' }}>
             <div className="row g-0">
                 {/* SIDEBAR */}
-                <div className="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-white shadow-sm" style={{ borderRight: '1px solid #eee' }}>
-                    <div className="d-flex flex-column align-items-center align-items-sm-start px-3 pt-4 text-white min-vh-100 sticky-top" style={{ top: '70px' }}>
-                        <div className="mb-4 d-none d-sm-block">
-                            <h6 className="text-muted text-uppercase small fw-bold mb-3">Menu</h6>
+                <div className="col-auto col-md-3 col-xl-2 sidebar">
+                    <div className="d-flex flex-column px-3 pt-4">
+                        <div className="sidebar-header">
+                            <h4 className="sidebar-title">Menu</h4>
                         </div>
-                        <ul className="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start w-100" id="menu">
+                        <ul className="nav flex-column w-100 gap-2" id="menu">
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('overview')}
-                                    className={`nav-link align-middle px-3 py-2 w-100 text-start d-flex align-items-center gap-2 ${activeSection === 'overview' ? 'active bg-primary' : 'text-dark'}`}
+                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'overview' ? 'active' : ''}`}
                                 >
-                                    <i className="bi bi-speedometer2"></i>
-                                    <span className="ms-1 d-none d-sm-inline">Dashboard</span>
+                                    <i className="bi bi-speedometer2 icon-std"></i>
+                                    <span className="d-none d-sm-inline">Dashboard</span>
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('skills')}
-                                    className={`nav-link align-middle px-3 py-2 w-100 text-start d-flex align-items-center gap-2 ${activeSection === 'skills' ? 'active bg-primary' : 'text-dark'}`}
+                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'skills' ? 'active' : ''}`}
                                 >
-                                    <i className="bi bi-star"></i>
-                                    <span className="ms-1 d-none d-sm-inline">My Skills</span>
+                                    <i className="bi bi-star icon-std"></i>
+                                    <span className="d-none d-sm-inline">My Skills</span>
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('allocation')}
-                                    className={`nav-link align-middle px-3 py-2 w-100 text-start d-flex align-items-center gap-2 ${activeSection === 'allocation' ? 'active bg-primary' : 'text-dark'}`}
+                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'allocation' ? 'active' : ''}`}
                                 >
-                                    <i className="bi bi-briefcase"></i>
-                                    <span className="ms-1 d-none d-sm-inline">Allocation</span>
+                                    <i className="bi bi-briefcase icon-std"></i>
+                                    <span className="d-none d-sm-inline">Allocation</span>
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('utilization')}
-                                    className={`nav-link align-middle px-3 py-2 w-100 text-start d-flex align-items-center gap-2 ${activeSection === 'utilization' ? 'active bg-primary' : 'text-dark'}`}
+                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'utilization' ? 'active' : ''}`}
                                 >
-                                    <i className="bi bi-graph-up"></i>
-                                    <span className="ms-1 d-none d-sm-inline">Utilization</span>
+                                    <i className="bi bi-graph-up icon-std"></i>
+                                    <span className="d-none d-sm-inline">Utilization</span>
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('profile')}
-                                    className={`nav-link align-middle px-3 py-2 w-100 text-start d-flex align-items-center gap-2 ${activeSection === 'profile' ? 'active bg-primary' : 'text-dark'}`}
+                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'profile' ? 'active' : ''}`}
                                 >
-                                    <i className="bi bi-person-circle"></i>
-                                    <span className="ms-1 d-none d-sm-inline">My Profile</span>
+                                    <i className="bi bi-person-circle icon-std"></i>
+                                    <span className="d-none d-sm-inline">My Profile</span>
                                 </button>
                             </li>
                         </ul>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9cb2a1f10e65666ce2f54f9bb3fb5eb5ae392049
                     </div>
                 </div>
 
                 {/* MAIN CONTENT AREA */}
                 <div className="col p-4 p-md-5" style={{ backgroundColor: '#f8f9fa' }}>
                     <div className="max-width-xl mx-auto">
+<<<<<<< HEAD
                         {activeSection !== 'profile' && (
                             <header className="mb-4">
                                 <h4 className="text-muted mb-1">Welcome back, {user?.sub?.split('@')[0]}</h4>
@@ -582,6 +587,18 @@ const EmployeeDashboard = () => {
                                 </h1>
                             </header>
                         )}
+=======
+                        <header className="page-header">
+                            <h4 className="text-muted mb-2">Welcome back, {user?.sub?.split('@')[0]}</h4>
+                            <h1 className="page-title text-dark">
+                                {activeSection === 'overview' && 'Dashboard Overview'}
+                                {activeSection === 'skills' && 'Skill Management'}
+                                {activeSection === 'allocation' && 'My Projects'}
+                                {activeSection === 'utilization' && 'Personal Utilization'}
+                                {activeSection === 'profile' && 'My Profile'}
+                            </h1>
+                        </header>
+>>>>>>> 9cb2a1f10e65666ce2f54f9bb3fb5eb5ae392049
 
                         <div className="animate-fade-in">
                             {activeSection === 'overview' && renderOverview()}
@@ -624,7 +641,7 @@ const EmployeeDashboard = () => {
                     font-size: 1.25rem;
                 }
             `}</style>
-        </div>
+        </div >
     );
 };
 

@@ -37,7 +37,10 @@ const Navbar = () => {
                     className="navbar-brand d-flex align-items-center fw-bold mb-0"
                     to="/"
                     style={{
+<<<<<<< HEAD
                         fontSize: '1.5rem',
+=======
+>>>>>>> 9cb2a1f10e65666ce2f54f9bb3fb5eb5ae392049
                         color: 'var(--color-accent)',
                         margin: 0
                     }}
@@ -52,6 +55,7 @@ const Navbar = () => {
                     SkillBridge
                 </Link>
                 {isAuthenticated && !['/', '/login'].includes(location.pathname) && (
+<<<<<<< HEAD
                     <div className="d-flex align-items-center gap-3">
                         <div className="d-flex align-items-center text-muted small">
                             <i className="bi bi-person-circle me-1"></i>
@@ -64,6 +68,29 @@ const Navbar = () => {
                             style={{ width: '32px', height: '32px' }}
                         >
                             <i className="bi bi-box-arrow-right" style={{ fontSize: '1rem' }}></i>
+=======
+                    <div className="d-flex align-items-center gap-4">
+                        {/* User Info */}
+                        <div className="d-none d-md-flex align-items-center gap-2">
+                            <span className="text-secondary small fw-medium">
+                                {localStorage.getItem('userEmail') || 'User'}
+                            </span>
+                            <div className="bg-light rounded-circle d-flex align-items-center justify-content-center border"
+                                style={{ width: '32px', height: '32px' }}>
+                                <i className="bi bi-person-fill text-muted"></i>
+                            </div>
+                        </div>
+
+                        {/* Logout Icon Button */}
+                        <button
+                            className="btn btn-link text-muted p-0 border-0"
+                            onClick={handleLogout}
+                            aria-label="Logout"
+                            title="Logout"
+                            style={{ fontSize: '1.25rem' }}
+                        >
+                            <i className="bi bi-box-arrow-right hover-danger"></i>
+>>>>>>> 9cb2a1f10e65666ce2f54f9bb3fb5eb5ae392049
                         </button>
                     </div>
                 )}
