@@ -57,6 +57,12 @@ public class UserService {
         return mapToResponse(savedUser);
     }
 
+    public List<UserProfileResponse> getAllHRs() {
+        return userRepository.findByRole(com.skillbridge.enums.Role.HR).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
     public List<UserProfileResponse> getAllEmployees() {
         return userRepository.findByRole(com.skillbridge.enums.Role.EMPLOYEE).stream()
                 .map(this::mapToResponse)
