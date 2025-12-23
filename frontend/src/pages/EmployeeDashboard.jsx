@@ -11,6 +11,7 @@ const EmployeeDashboard = () => {
     const [skills, setSkills] = useState([]);
     const [allocation, setAllocation] = useState(null);
     const [utilization, setUtilization] = useState(null);
+    const [profile, setProfile] = useState(null);
 
     // New Skill Form State
     const [newSkill, setNewSkill] = useState({ skillName: '', proficiencyLevel: 'BEGINNER' });
@@ -39,7 +40,17 @@ const EmployeeDashboard = () => {
         fetchUtilization();
         fetchAvailableProjects();
         fetchCatalog();
+        fetchProfile();
     }, []);
+
+    const fetchProfile = async () => {
+        try {
+            const response = await api.get('/users/me');
+            setProfile(response.data);
+        } catch (err) {
+            console.error('Failed to load profile', err);
+        }
+    };
 
     const [catalogSkills, setCatalogSkills] = useState([]);
     const fetchCatalog = async () => {
@@ -452,10 +463,7 @@ const EmployeeDashboard = () => {
                                         <p className="text-muted small text-uppercase fw-bold mb-1">Status</p>
                                         <p className="h4 mb-0">{allocation.assignmentStatus === 'ACTIVE' ? 'Allocated' : 'Awaiting Approval'}</p>
                                     </div>
-                                    <div className="col-12">
-                                        <p className="text-muted small text-uppercase fw-bold mb-1">Internal Assignment ID</p>
-                                        <p className="font-monospace text-muted small">{allocation.assignmentId}</p>
-                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -556,7 +564,14 @@ const EmployeeDashboard = () => {
                 <div className="col p-4 p-md-5" style={{ backgroundColor: '#f8f9fa' }}>
                     <div className="max-width-xl mx-auto">
                         <header className="mb-4">
-                            <h4 className="text-muted mb-1">Welcome back, {user?.sub?.split('@')[0]}</h4>
+                            <h4 className="text-muted mb-1">
+                                Welcome back, {user?.sub?.split('@')[0]}
+                                {profile?.managerName && (
+                                    <span className="ms-2 small text-muted">
+                                        [reports to: <span className="fw-semibold text-dark">{profile.managerName}</span>]
+                                    </span>
+                                )}
+                            </h4>
                             <h1 className="display-5 fw-bold text-dark">
                                 {activeSection === 'overview' && 'Dashboard Overview'}
                                 {activeSection === 'skills' && 'Skill Management'}
