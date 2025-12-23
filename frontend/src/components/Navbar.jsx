@@ -37,7 +37,6 @@ const Navbar = () => {
                     className="navbar-brand d-flex align-items-center fw-bold mb-0 h1"
                     to="/"
                     style={{
-                        fontSize: '2.5rem',
                         color: 'var(--color-accent)',
                         margin: 0
                     }}
@@ -52,13 +51,29 @@ const Navbar = () => {
                     SkillBridge
                 </Link>
                 {isAuthenticated && !['/', '/login'].includes(location.pathname) && (
-                    <button
-                        className="btn btn-accent shadow-sm"
-                        onClick={handleLogout}
-                        style={{ flexShrink: 0 }}
-                    >
-                        Logout
-                    </button>
+                    <div className="d-flex align-items-center gap-4">
+                        {/* User Info */}
+                        <div className="d-none d-md-flex align-items-center gap-2">
+                            <span className="text-secondary small fw-medium">
+                                {localStorage.getItem('userEmail') || 'User'}
+                            </span>
+                            <div className="bg-light rounded-circle d-flex align-items-center justify-content-center border"
+                                style={{ width: '32px', height: '32px' }}>
+                                <i className="bi bi-person-fill text-muted"></i>
+                            </div>
+                        </div>
+
+                        {/* Logout Icon Button */}
+                        <button
+                            className="btn btn-link text-muted p-0 border-0"
+                            onClick={handleLogout}
+                            aria-label="Logout"
+                            title="Logout"
+                            style={{ fontSize: '1.25rem' }}
+                        >
+                            <i className="bi bi-box-arrow-right hover-danger"></i>
+                        </button>
+                    </div>
                 )}
             </div>
         </nav>

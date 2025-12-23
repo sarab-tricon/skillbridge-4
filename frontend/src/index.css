@@ -7,20 +7,17 @@
   --color-text: #333;
 
   /* Typography Scaling */
-  --font-size-base: 1rem;
-  /* Adjustable base size */
-  --font-scale: 1;
-  /* Scaling factor */
-  --font-family-sans: "Roboto Slab", serif;
+  --font-family-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
   /* Computed Font Sizes */
-  --font-size-root: calc(var(--font-size-base) * var(--font-scale));
-  --font-size-h1: calc(var(--font-size-root) * 2.5);
-  --font-size-h2: calc(var(--font-size-root) * 2);
-  --font-size-h3: calc(var(--font-size-root) * 1.75);
-  --font-size-h4: calc(var(--font-size-root) * 1.5);
-  --font-size-body: var(--font-size-root);
-  --font-size-small: calc(var(--font-size-root) * 0.875);
+  --font-size-body: 14px;
+  --font-size-h1: 28px;
+  --font-size-h2: 24px;
+  --font-size-h3: 20px;
+  --font-size-h4: 18px;
+  --font-size-h5: 16px;
+  --font-size-h6: 14px;
+  --font-size-small: 13px;
 
   /* Bootstrap Variable Overrides */
   --bs-body-font-family: var(--font-family-sans);
@@ -33,7 +30,7 @@ body {
   background-color: var(--color-bg);
   font-size: var(--font-size-body);
   color: var(--color-text);
-  line-height: 1.6;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -49,10 +46,13 @@ h6 {
   font-weight: 600;
   color: var(--color-text);
   margin-bottom: 1rem;
+  line-height: 1.3;
 }
 
 h1 {
   font-size: var(--font-size-h1);
+  font-weight: 700;
+  line-height: 1.25;
 }
 
 h2 {
@@ -67,12 +67,47 @@ h4 {
   font-size: var(--font-size-h4);
 }
 
+h5 {
+  font-size: var(--font-size-h5);
+}
+
+h6 {
+  font-size: var(--font-size-h6);
+}
+
+/* Inputs, Tables, Forms */
+input,
+select,
+textarea,
+.form-control,
+table {
+  font-size: 14px !important;
+}
+
+table th {
+  font-weight: 600;
+}
+
+table td {
+  font-weight: 400;
+}
+
+/* Badges / Tags / Helper Text */
+.badge,
+.small,
+small,
+.text-muted.x-small {
+  font-size: var(--font-size-small) !important;
+  font-weight: 500;
+}
+
 /* Button overrides for accent color */
 .btn-accent {
   background-color: var(--color-accent);
   color: white;
   border: none;
-  font-size: var(--font-size-body);
+  font-size: 14px;
+  font-weight: 500;
   padding: 0.5rem 1.5rem;
   transition: all 0.2s ease;
   font-family: var(--font-family-sans);
@@ -89,4 +124,86 @@ h4 {
   font-size: var(--font-size-h3);
   font-weight: 700;
   color: var(--color-text) !important;
+}
+
+/* --- Layout Standardization --- */
+
+/* Sidebar */
+.sidebar {
+  background-color: #fff;
+  border-right: 1px solid #eee;
+  min-height: 100vh;
+  position: sticky;
+  top: 70px;
+  /* Aligns below navbar */
+  height: calc(100vh - 70px);
+  overflow-y: auto;
+  padding: 1.5rem 1rem;
+  /* Compact consistent padding */
+}
+
+.sidebar-header {
+  margin-bottom: 2rem;
+  padding-left: 0.5rem;
+}
+
+.sidebar-title {
+  font-size: var(--font-size-h4);
+  font-weight: 700;
+  color: var(--color-accent);
+  margin: 0;
+}
+
+.nav-link.sidebar-link {
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  color: var(--color-text);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.nav-link.sidebar-link:hover {
+  background-color: #f0f7ff;
+  color: var(--color-accent);
+}
+
+.nav-link.sidebar-link.active {
+  background-color: var(--color-primary);
+  color: #fff !important;
+}
+
+/* Icons */
+.icon-std {
+  font-size: 1.1rem;
+  /* Consistent icon size */
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Headings Hierarchy */
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  font-size: var(--font-size-h1);
+  font-weight: 700;
+  color: var(--color-accent);
+  margin-bottom: 0.5rem;
+}
+
+.section-title {
+  font-size: var(--font-size-h2);
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.card-title-std {
+  font-size: var(--font-size-h3);
+  font-weight: 600;
+  margin-bottom: 1rem;
 }

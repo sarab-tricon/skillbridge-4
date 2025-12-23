@@ -18,7 +18,7 @@ const LandingPage = () => {
                 <h2 className="display-5 mb-4 text-muted">
                     Trust is rare and expensive
                 </h2>
-                <p className="lead mb-5" style={{ fontSize: '1.8rem' }}>
+                <p className="lead mb-5">
                     Discover skills, manage allocations, and track utilization in one place.
                 </p>
                 <button
