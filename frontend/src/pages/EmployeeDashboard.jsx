@@ -360,12 +360,14 @@ const EmployeeDashboard = () => {
                                                                             >
                                                                                 Edit
                                                                             </button>
-                                                                            <button
-                                                                                className="btn btn-sm btn-danger rounded-pill px-3 shadow-sm"
-                                                                                onClick={() => handleDeleteSkill(skill.id)}
-                                                                            >
-                                                                                Delete
-                                                                            </button>
+                                                                            {skill.status === 'PENDING' && (
+                                                                                <button
+                                                                                    className="btn btn-sm btn-danger rounded-pill px-3 shadow-sm"
+                                                                                    onClick={() => handleDeleteSkill(skill.id)}
+                                                                                >
+                                                                                    Delete
+                                                                                </button>
+                                                                            )}
                                                                         </div>
                                                                     </td>
                                                                 </tr>
