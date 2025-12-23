@@ -565,33 +565,30 @@ const EmployeeDashboard = () => {
                                 </button>
                             </li>
                         </ul>
-                        <div className="sidebar-footer mt-auto pb-5 d-none d-sm-block border-top w-100 pt-3">
-                            <p className="small text-muted mb-1">Logged in as</p>
-                            <p className="small fw-bold text-dark text-truncate mb-0">{user?.sub}</p>
-                        </div>
                     </div>
                 </div>
 
                 {/* MAIN CONTENT AREA */}
                 <div className="col p-4 p-md-5" style={{ backgroundColor: '#f8f9fa' }}>
                     <div className="max-width-xl mx-auto">
-                        <header className="mb-4">
-                            <h4 className="text-muted mb-1">Welcome back, {user?.sub?.split('@')[0]}</h4>
-                            <h1 className="display-5 fw-bold text-dark">
-                                {activeSection === 'overview' && 'Dashboard Overview'}
-                                {activeSection === 'skills' && 'Skill Management'}
-                                {activeSection === 'allocation' && 'My Projects'}
-                                {activeSection === 'utilization' && 'Personal Utilization'}
-                                {activeSection === 'profile' && 'My Profile'}
-                            </h1>
-                        </header>
+                        {activeSection !== 'profile' && (
+                            <header className="mb-4">
+                                <h4 className="text-muted mb-1">Welcome back, {user?.sub?.split('@')[0]}</h4>
+                                <h1 className="display-5 fw-bold text-dark">
+                                    {activeSection === 'overview' && 'Dashboard Overview'}
+                                    {activeSection === 'skills' && 'Skill Management'}
+                                    {activeSection === 'allocation' && 'My Projects'}
+                                    {activeSection === 'utilization' && 'Personal Utilization'}
+                                </h1>
+                            </header>
+                        )}
 
                         <div className="animate-fade-in">
                             {activeSection === 'overview' && renderOverview()}
                             {activeSection === 'skills' && renderSkills()}
                             {activeSection === 'allocation' && renderAllocation()}
                             {activeSection === 'utilization' && renderUtilization()}
-                            {activeSection === 'profile' && <ProfileSection />}
+                            {activeSection === 'profile' && <ProfileSection onNavigateToSkills={() => setActiveSection('skills')} />}
                         </div>
                     </div>
                 </div>

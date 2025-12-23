@@ -2,7 +2,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
-    const { isAuthenticated, logout } = useAuth();
+    const { isAuthenticated, logout, user } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -13,7 +13,7 @@ const Navbar = () => {
 
     return (
         <nav
-            className="navbar navbar-light py-3"
+            className="navbar navbar-light py-2"
             style={{
                 borderBottom: '1px solid var(--color-secondary)',
                 position: 'sticky',
@@ -24,7 +24,7 @@ const Navbar = () => {
             }}
         >
             <div
-                className="container-fluid px-4"
+                className="container-fluid px-3"
                 style={{
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -34,10 +34,10 @@ const Navbar = () => {
                 }}
             >
                 <Link
-                    className="navbar-brand d-flex align-items-center fw-bold mb-0 h1"
+                    className="navbar-brand d-flex align-items-center fw-bold mb-0"
                     to="/"
                     style={{
-                        fontSize: '2.5rem',
+                        fontSize: '1.5rem',
                         color: 'var(--color-accent)',
                         margin: 0
                     }}
@@ -45,20 +45,27 @@ const Navbar = () => {
                     <img
                         src="/skillbridgeLOGO.jpeg"
                         alt="Logo"
-                        height="50"
-                        className="me-3"
+                        height="35"
+                        className="me-2"
                         style={{ mixBlendMode: 'multiply', filter: 'brightness(1.1)' }}
                     />
                     SkillBridge
                 </Link>
                 {isAuthenticated && !['/', '/login'].includes(location.pathname) && (
-                    <button
-                        className="btn btn-accent shadow-sm"
-                        onClick={handleLogout}
-                        style={{ flexShrink: 0 }}
-                    >
-                        Logout
-                    </button>
+                    <div className="d-flex align-items-center gap-3">
+                        <div className="d-flex align-items-center text-muted small">
+                            <i className="bi bi-person-circle me-1"></i>
+                            <span className="fw-medium">{user?.sub || 'User'}</span>
+                        </div>
+                        <button
+                            className="btn btn-outline-danger rounded-circle p-0 d-flex align-items-center justify-content-center"
+                            onClick={handleLogout}
+                            title="Logout"
+                            style={{ width: '32px', height: '32px' }}
+                        >
+                            <i className="bi bi-box-arrow-right" style={{ fontSize: '1rem' }}></i>
+                        </button>
+                    </div>
                 )}
             </div>
         </nav>
