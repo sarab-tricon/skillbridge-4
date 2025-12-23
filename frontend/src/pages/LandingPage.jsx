@@ -16,7 +16,7 @@ const LandingPage = () => {
                     SkillBridge
                 </h1>
                 <h2 className="display-5 mb-4 text-muted">
-                    Smart skill visibility and workforce intelligence.
+                    Trust is rare and expensive
                 </h2>
                 <p className="lead mb-5" style={{ fontSize: '1.8rem' }}>
                     Discover skills, manage allocations, and track utilization in one place.

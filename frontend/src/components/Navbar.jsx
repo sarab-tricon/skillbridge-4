@@ -1,9 +1,10 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
     const { isAuthenticated, logout } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleLogout = () => {
         logout();
@@ -50,7 +51,7 @@ const Navbar = () => {
                     />
                     SkillBridge
                 </Link>
-                {isAuthenticated && (
+                {isAuthenticated && !['/', '/login'].includes(location.pathname) && (
                     <button
                         className="btn btn-accent shadow-sm"
                         onClick={handleLogout}
