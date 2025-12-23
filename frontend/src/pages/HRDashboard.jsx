@@ -501,9 +501,9 @@ const HRDashboard = () => {
                         <i className="bi bi-search me-2"></i>Talent Discovery
                     </h4>
                     <div className="d-flex gap-2">
-                        <span className="badge bg-success small" style={{ fontSize: '0.7rem' }}>Advanced</span>
-                        <span className="badge bg-primary small" style={{ fontSize: '0.7rem' }}>Intermediate</span>
-                        <span className="badge bg-warning text-dark small" style={{ fontSize: '0.7rem' }}>Beginner</span>
+                        <span className="badge bg-success small">Advanced</span>
+                        <span className="badge bg-primary small">Intermediate</span>
+                        <span className="badge bg-warning text-dark small">Beginner</span>
                     </div>
                 </div>
 
@@ -518,7 +518,6 @@ const HRDashboard = () => {
                                     <button
                                         type="button"
                                         className="btn-close btn-close-white"
-                                        style={{ fontSize: '0.5rem' }}
                                         onClick={() => setSearchSkills(prev => prev.filter(s => s !== skill))}
                                     ></button>
                                 </span>
@@ -612,81 +611,88 @@ const HRDashboard = () => {
     );
 
     return (
-        <div className="container-fluid" style={{ fontFamily: 'Pompiere, cursive', backgroundColor: '#FCF6D9', minHeight: '100vh', padding: 0 }}>
+        <div className="container-fluid" style={{ backgroundColor: '#f8f9fa', minHeight: '100vh', padding: 0 }}>
             <div className="row g-0">
                 {/* Sidebar */}
-                <div className="col-md-3 col-lg-2 d-md-block shadow-sm" style={{ backgroundColor: '#fff', minHeight: '100vh', position: 'sticky', top: 0, height: '100vh', overflowY: 'auto' }}>
-                    <div className="p-4">
-                        <h4 className="fw-bold mb-4" style={{ color: '#CF4B00' }}>HR Portal</h4>
-                        <div className="list-group list-group-flush">
-                            <button
-                                onClick={() => setActiveSection('overview')}
-                                className={`list-group-item list-group-item-action border-0 py-3 ${activeSection === 'overview' ? 'active' : ''}`}
-                                style={activeSection === 'overview' ? { backgroundColor: '#9CC6DB', color: '#fff' } : {}}
-                            >
-                                <i className="bi bi-speedometer2 me-2"></i> Overview
-                            </button>
-                            <button
-                                onClick={() => setActiveSection('people')}
-                                className={`list-group-item list-group-item-action border-0 py-3 ${activeSection === 'people' ? 'active' : ''}`}
-                                style={activeSection === 'people' ? { backgroundColor: '#9CC6DB', color: '#fff' } : {}}
-                            >
-                                <i className="bi bi-people-fill me-2"></i> People Management
-                            </button>
-                            <button
-                                onClick={() => setActiveSection('projects')}
-                                className={`list-group-item list-group-item-action border-0 py-3 ${activeSection === 'projects' ? 'active' : ''}`}
-                                style={activeSection === 'projects' ? { backgroundColor: '#9CC6DB', color: '#fff' } : {}}
-                            >
-                                <i className="bi bi-folder me-2"></i> Project Management
-                            </button>
-                            <button
-                                onClick={() => setActiveSection('bench')}
-                                className={`list-group-item list-group-item-action border-0 py-3 ${activeSection === 'bench' ? 'active' : ''}`}
-                                style={activeSection === 'bench' ? { backgroundColor: '#9CC6DB', color: '#fff' } : {}}
-                            >
-                                <i className="bi bi-people me-2"></i> Bench & Allocation
-                            </button>
-                            <button
-                                onClick={() => setActiveSection('catalog')}
-                                className={`list-group-item list-group-item-action border-0 py-3 ${activeSection === 'catalog' ? 'active' : ''}`}
-                                style={activeSection === 'catalog' ? { backgroundColor: '#9CC6DB', color: '#fff' } : {}}
-                            >
-                                <i className="bi bi-list-check me-2"></i> Skill Catalog
-                            </button>
-                            <button
-                                onClick={() => setActiveSection('talent')}
-                                className={`list-group-item list-group-item-action border-0 py-3 ${activeSection === 'talent' ? 'active' : ''}`}
-                                style={activeSection === 'talent' ? { backgroundColor: '#9CC6DB', color: '#fff' } : {}}
-                            >
-                                <i className="bi bi-search me-2"></i> Talent Discovery
-                            </button>
-
+                {/* Sidebar */}
+                <div className="col-md-3 col-lg-2 sidebar">
+                    <div className="d-flex flex-column px-3 pt-4">
+                        <div className="sidebar-header">
+                            <h4 className="sidebar-title">HR Portal</h4>
                         </div>
-                    </div>
-                    <div className="mt-auto p-4 border-top">
-                        <small className="text-muted">Logged in as: <br /><strong>{user?.sub}</strong></small>
+                        <ul className="nav flex-column w-100 gap-2">
+                            <li className="nav-item w-100 mb-2">
+                                <button
+                                    onClick={() => setActiveSection('overview')}
+                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'overview' ? 'active' : ''}`}
+                                >
+                                    <i className="bi bi-speedometer2 icon-std"></i>
+                                    <span className="d-none d-sm-inline">Overview</span>
+                                </button>
+                            </li>
+                            <li className="nav-item w-100 mb-2">
+                                <button
+                                    onClick={() => setActiveSection('people')}
+                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'people' ? 'active' : ''}`}
+                                >
+                                    <i className="bi bi-people-fill icon-std"></i>
+                                    <span className="d-none d-sm-inline">People</span>
+                                </button>
+                            </li>
+                            <li className="nav-item w-100 mb-2">
+                                <button
+                                    onClick={() => setActiveSection('projects')}
+                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'projects' ? 'active' : ''}`}
+                                >
+                                    <i className="bi bi-folder icon-std"></i>
+                                    <span className="d-none d-sm-inline">Projects</span>
+                                </button>
+                            </li>
+                            <li className="nav-item w-100 mb-2">
+                                <button
+                                    onClick={() => setActiveSection('bench')}
+                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'bench' ? 'active' : ''}`}
+                                >
+                                    <i className="bi bi-people icon-std"></i>
+                                    <span className="d-none d-sm-inline">Bench & Alloc</span>
+                                </button>
+                            </li>
+                            <li className="nav-item w-100 mb-2">
+                                <button
+                                    onClick={() => setActiveSection('catalog')}
+                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'catalog' ? 'active' : ''}`}
+                                >
+                                    <i className="bi bi-list-check icon-std"></i>
+                                    <span className="d-none d-sm-inline">Catalog</span>
+                                </button>
+                            </li>
+                            <li className="nav-item w-100 mb-2">
+                                <button
+                                    onClick={() => setActiveSection('talent')}
+                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'talent' ? 'active' : ''}`}
+                                >
+                                    <i className="bi bi-search icon-std"></i>
+                                    <span className="d-none d-sm-inline">Talent</span>
+                                </button>
+                            </li>
+                        </ul>
                     </div>
                 </div>
 
                 {/* Main Content */}
                 <div className="col-md-9 col-lg-10" style={{ padding: 0 }}>
-                    <header className="px-5 py-4 mb-4 shadow-sm" style={{ backgroundColor: '#FCF6D9' }}>
+                    <header className="page-header px-5 pt-4">
                         <div className="d-flex justify-content-between align-items-center">
                             <div>
-                                <h1 className="display-6 fw-bold m-0" style={{ color: '#CF4B00' }}>
+                                <h1 className="page-title text-dark">
                                     {activeSection === 'overview' && 'Dashboard Overview'}
                                     {activeSection === 'people' && 'People Management'}
                                     {activeSection === 'projects' && 'Project Management'}
-                                    {activeSection === 'bench' && 'Bench Management & Allocation'}
+                                    {activeSection === 'bench' && 'Bench Management'}
                                     {activeSection === 'catalog' && 'Skill Catalog'}
                                     {activeSection === 'talent' && 'Talent Discovery'}
-
                                 </h1>
                                 <p className="lead text-muted m-0 small">Manage your organization's workforce and projects from one place.</p>
-                            </div>
-                            <div className="text-end">
-                                <small className="text-muted">Welcome, <strong>{user?.sub.split('@')[0]}</strong></small>
                             </div>
                         </div>
                     </header>

@@ -136,12 +136,11 @@ const ProjectManagement = () => {
                                             <span className="text-muted extra-small align-self-center">No skills</span>
                                         ) : (
                                             formData.techStack.map(tech => (
-                                                <span key={tech} className="badge bg-secondary d-flex align-items-center gap-1 extra-small" style={{ fontSize: '0.65rem' }}>
+                                                <span key={tech} className="badge bg-secondary d-flex align-items-center gap-1 extra-small">
                                                     {tech}
                                                     <button
                                                         type="button"
                                                         className="btn-close btn-close-white"
-                                                        style={{ fontSize: '0.4rem' }}
                                                         onClick={() => setFormData(prev => ({ ...prev, techStack: prev.techStack.filter(t => t !== tech) }))}
                                                     ></button>
                                                 </span>
@@ -262,10 +261,10 @@ const ProjectManagement = () => {
                                                     {proj.techStack && proj.techStack.length > 0 ? (
                                                         <div className="d-flex flex-wrap gap-1">
                                                             {proj.techStack.slice(0, 3).map((tech, idx) => (
-                                                                <span key={idx} className="badge bg-info text-dark extra-small" style={{ fontSize: '0.65rem' }}>{tech}</span>
+                                                                <span key={idx} className="badge bg-info text-dark extra-small">{tech}</span>
                                                             ))}
                                                             {proj.techStack.length > 3 && (
-                                                                <span className="badge bg-secondary extra-small" style={{ fontSize: '0.65rem' }}>+{proj.techStack.length - 3}</span>
+                                                                <span className="badge bg-secondary extra-small">+{proj.techStack.length - 3}</span>
                                                             )}
                                                         </div>
                                                     ) : (
@@ -274,7 +273,7 @@ const ProjectManagement = () => {
                                                 </td>
                                                 <td>{proj.employeesRequired || '-'}</td>
                                                 <td>
-                                                    <span className={`badge extra-small ${proj.status === 'ACTIVE' ? 'bg-success' : proj.status === 'COMPLETED' ? 'bg-secondary' : 'bg-warning text-dark'}`} style={{ fontSize: '0.65rem' }}>
+                                                    <span className={`badge extra-small ${proj.status === 'ACTIVE' ? 'bg-success' : proj.status === 'COMPLETED' ? 'bg-secondary' : 'bg-warning text-dark'}`}>
                                                         {proj.status}
                                                     </span>
                                                 </td>

@@ -163,69 +163,60 @@ const ManagerDashboard = () => {
     );
 
     return (
-        <div className="container-fluid p-0" style={{ backgroundColor: '#f8fafc', minHeight: '100vh', fontFamily: 'Pompiere, cursive' }}>
+        <div className="container-fluid p-0" style={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
             <div className="row g-0">
                 {/* SIDEBAR */}
-                <div className="col-auto col-md-3 col-lg-2 px-sm-2 px-0 bg-white shadow-sm" style={{ borderRight: '1px solid #eee' }}>
-                    <div className="d-flex flex-column align-items-center align-items-sm-start px-3 pt-4 min-vh-100 sticky-top" style={{ top: '0' }}>
-                        <div className="mb-4 d-none d-sm-block">
-                            <h4 className="fw-bold" style={{ color: '#CF4B00' }}>Manager Hub</h4>
+                <div className="col-auto col-md-3 col-lg-2 sidebar">
+                    <div className="d-flex flex-column px-3 pt-4">
+                        <div className="sidebar-header">
+                            <h4 className="sidebar-title">Manager Hub</h4>
                         </div>
-                        <ul className="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start w-100" id="menu">
+                        <ul className="nav flex-column w-100 gap-2" id="menu">
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection(null)}
-                                    className={`nav-link align-middle px-3 py-2 w-100 text-start d-flex align-items-center gap-2 ${activeSection === null ? 'active' : 'text-dark'}`}
-                                    style={activeSection === null ? { backgroundColor: '#CF4B00', color: '#fff' } : {}}
+                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === null ? 'active' : ''}`}
                                 >
-                                    <i className="bi bi-speedometer2"></i>
-                                    <span className="ms-1 d-none d-sm-inline">Dashboard</span>
+                                    <i className="bi bi-speedometer2 icon-std"></i>
+                                    <span className="d-none d-sm-inline">Dashboard</span>
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('team')}
-                                    className={`nav-link align-middle px-3 py-2 w-100 text-start d-flex align-items-center gap-2 ${activeSection === 'team' ? 'active' : 'text-dark'}`}
-                                    style={activeSection === 'team' ? { backgroundColor: '#CF4B00', color: '#fff' } : {}}
+                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'team' ? 'active' : ''}`}
                                 >
-                                    <i className="bi bi-people"></i>
-                                    <span className="ms-1 d-none d-sm-inline">My Team</span>
+                                    <i className="bi bi-people icon-std"></i>
+                                    <span className="d-none d-sm-inline">My Team</span>
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('alloc_requests')}
-                                    className={`nav-link align-middle px-3 py-2 w-100 text-start d-flex align-items-center gap-2 ${activeSection === 'alloc_requests' ? 'active' : 'text-dark'}`}
-                                    style={activeSection === 'alloc_requests' ? { backgroundColor: '#CF4B00', color: '#fff' } : {}}
+                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'alloc_requests' ? 'active' : ''}`}
                                 >
-                                    <i className="bi bi-patch-check"></i>
-                                    <span className="ms-1 d-none d-sm-inline">Allocations</span>
+                                    <i className="bi bi-patch-check icon-std"></i>
+                                    <span className="d-none d-sm-inline">Allocations</span>
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('pending_skills')}
-                                    className={`nav-link align-middle px-3 py-2 w-100 text-start d-flex align-items-center gap-2 ${activeSection === 'pending_skills' ? 'active' : 'text-dark'}`}
-                                    style={activeSection === 'pending_skills' ? { backgroundColor: '#CF4B00', color: '#fff' } : {}}
+                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'pending_skills' ? 'active' : ''}`}
                                 >
-                                    <i className="bi bi-star"></i>
-                                    <span className="ms-1 d-none d-sm-inline">Verifications</span>
+                                    <i className="bi bi-star icon-std"></i>
+                                    <span className="d-none d-sm-inline">Verifications</span>
                                 </button>
                             </li>
-
                         </ul>
-                        <div className="sidebar-footer mt-auto pb-5 d-none d-sm-block border-top w-100 pt-3">
-                            <p className="small text-muted mb-1">Manager Session</p>
-                            <p className="small fw-bold text-dark text-truncate mb-0">{user?.sub}</p>
-                        </div>
                     </div>
                 </div>
 
                 {/* MAIN CONTENT AREA */}
                 <div className="col p-4 p-md-5">
-                    <header className="mb-5 text-center">
-                        <h1 className="display-4 fw-bold mb-0" style={{ color: '#CF4B00' }}>
-                            {'Manager Control Panel'}
+                    <header className="page-header text-center">
+                        <h1 className="page-title">
+                            Manager Control Panel
                         </h1>
                         <p className="lead text-muted">Welcome back, {user?.sub?.split('@')[0] || 'Manager'}</p>
                     </header>
@@ -426,7 +417,7 @@ const ManagerDashboard = () => {
                                                                                         <td className="px-4 py-3 fw-bold text-primary">{proj.name}</td>
                                                                                         <td>{proj.companyName}</td>
                                                                                         <td className="px-4 text-end">
-                                                                                            <span className="badge bg-success-subtle text-success border border-success rounded-pill px-3" style={{ fontSize: '0.75rem' }}>
+                                                                                            <span className="badge bg-success-subtle text-success border border-success rounded-pill px-3">
                                                                                                 {proj.status}
                                                                                             </span>
                                                                                         </td>
@@ -463,7 +454,7 @@ const ManagerDashboard = () => {
                                                                                     <tr key={idx}>
                                                                                         <td className="px-4 py-3">
                                                                                             <div className="fw-bold small">{member.name || 'Employee'}</div>
-                                                                                            <div className="text-muted" style={{ fontSize: '0.7rem' }}>{member.email}</div>
+                                                                                            <div className="text-muted">{member.email}</div>
                                                                                         </td>
                                                                                         <td className="fw-bold small px-4 text-end">{member.projectName}</td>
                                                                                     </tr>

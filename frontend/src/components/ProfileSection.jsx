@@ -42,7 +42,7 @@ const ProfileSection = () => {
         <div className="card shadow-sm border-0 overflow-hidden rounded-4">
             <div className="card-header bg-primary text-white p-3 text-center border-0">
                 <div className="mb-2">
-                    <div className="bg-white text-primary rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm" style={{ width: '60px', height: '60px', fontSize: '1.5rem' }}>
+                    <div className="bg-white text-primary rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm" style={{ width: '60px', height: '60px' }}>
                         <i className="bi bi-person-fill"></i>
                     </div>
                 </div>
@@ -55,25 +55,25 @@ const ProfileSection = () => {
                 <div className="row g-3 mb-4">
                     <div className="col-md-3">
                         <div className="p-2 border rounded-3 bg-light h-100 text-center">
-                            <h6 className="text-muted text-uppercase x-small fw-bold mb-1" style={{ fontSize: '0.7rem' }}>First Name</h6>
+                            <h6 className="text-muted text-uppercase x-small fw-bold mb-1">First Name</h6>
                             <span className="fw-bold">{profile.firstName}</span>
                         </div>
                     </div>
                     <div className="col-md-3">
                         <div className="p-2 border rounded-3 bg-light h-100 text-center">
-                            <h6 className="text-muted text-uppercase x-small fw-bold mb-1" style={{ fontSize: '0.7rem' }}>Last Name</h6>
+                            <h6 className="text-muted text-uppercase x-small fw-bold mb-1">Last Name</h6>
                             <span className="fw-bold">{profile.lastName}</span>
                         </div>
                     </div>
                     <div className="col-md-3">
                         <div className="p-2 border rounded-3 bg-light h-100 text-center">
-                            <h6 className="text-muted text-uppercase x-small fw-bold mb-1" style={{ fontSize: '0.7rem' }}>Role</h6>
+                            <h6 className="text-muted text-uppercase x-small fw-bold mb-1">Role</h6>
                             <span className="fw-bold">{profile.role}</span>
                         </div>
                     </div>
                     <div className="col-md-3">
                         <div className="p-2 border rounded-3 bg-light h-100 text-center">
-                            <h6 className="text-muted text-uppercase x-small fw-bold mb-1" style={{ fontSize: '0.7rem' }}>Account ID</h6>
+                            <h6 className="text-muted text-uppercase x-small fw-bold mb-1">Account ID</h6>
                             <span className="small font-monospace text-muted text-truncate d-block">{profile.id.substring(0, 8)}...</span>
                         </div>
                     </div>
@@ -83,7 +83,7 @@ const ProfileSection = () => {
                 {profile.managerName && (
                     <div className="mb-4">
                         <div className="p-2 border rounded-3 bg-light d-flex align-items-center justify-content-between px-3">
-                            <span className="text-muted text-uppercase x-small fw-bold" style={{ fontSize: '0.7rem' }}>Reporting Manager</span>
+                            <span className="text-muted text-uppercase x-small fw-bold">Reporting Manager</span>
                             <div className="d-flex align-items-center gap-2">
                                 <i className="bi bi-people text-info"></i>
                                 <span className="fw-bold">{profile.managerName}</span>
@@ -144,12 +144,12 @@ const ProfileSection = () => {
                         {profile.skills && profile.skills.length > 0 ? (
                             <div className="d-flex flex-wrap gap-2">
                                 {profile.skills.map(skill => (
-                                    <div key={skill.id} className="d-flex align-items-center border rounded-pill px-2 py-1 bg-white shadow-sm" style={{ fontSize: '0.85rem' }}>
+                                    <div key={skill.id} className="d-flex align-items-center border rounded-pill px-2 py-1 bg-white shadow-sm">
                                         <span className={`badge rounded-circle me-2 p-1 ${skill.proficiencyLevel === 'ADVANCED' ? 'bg-success' :
                                             skill.proficiencyLevel === 'INTERMEDIATE' ? 'bg-info' : 'bg-secondary'
                                             }`} style={{ width: '8px', height: '8px' }}> </span>
                                         <span className="fw-bold text-dark me-1">{skill.skillName}</span>
-                                        <span className="text-muted" style={{ fontSize: '0.75rem' }}>({skill.proficiencyLevel.substring(0, 3)})</span>
+                                        <span className="text-muted">({skill.proficiencyLevel.substring(0, 3)})</span>
                                     </div>
                                 ))}
                             </div>
