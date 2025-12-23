@@ -17,25 +17,28 @@ const ManagerDashboard = () => {
         skills: null
     });
     const [pendingAllocations, setPendingAllocations] = useState([]);
+    const [allActiveProjects, setAllActiveProjects] = useState([]);
     const [actionLoading, setActionLoading] = useState(false);
 
     const fetchData = async () => {
         try {
             setLoading(prev => ({ ...prev, data: true }));
-            const [teamRes, utilRes, pendingAllocRes] = await Promise.all([
+            const [teamRes, utilRes, pendingAllocRes, allProjRes] = await Promise.all([
                 api.get('/users/team'),
                 api.get('/utilization/team'),
-                api.get('/allocation-requests/pending')
+                api.get('/allocation-requests/pending'),
+                api.get('/projects/active')
             ]);
 
             const merged = teamRes.data.map(member => {
-                const util = utilRes.data.find(u => u.employeeId === member.id) || {};
+                const util = utilRes.data.find(u => u.email === member.email);
                 return {
                     ...member,
-                    allocationStatus: util.allocationStatus || 'BENCH',
-                    projectName: util.projectName || null,
-                    status: util.projectName ? 'ACTIVE' : 'BENCH',
-                    assignmentId: util.assignmentId || null
+                    name: `${member.firstName} ${member.lastName}`.trim() || 'Employee',
+                    projectName: util ? util.projectName : null,
+                    allocationStatus: util ? util.allocationStatus : 'BENCH',
+                    status: util ? 'ACTIVE' : 'BENCH',
+                    assignmentId: util ? util.assignmentId : null
                 };
             });
 
@@ -44,6 +47,7 @@ const ManagerDashboard = () => {
                 ...req,
                 id: req.id || req.assignmentId
             })));
+            setAllActiveProjects(allProjRes.data);
             setError(prev => ({ ...prev, data: null }));
         } catch (err) {
             console.error('Error fetching dashboard data:', err);
@@ -249,7 +253,7 @@ const ManagerDashboard = () => {
                                 <div className="col-md-3">
                                     <SectionCard
                                         title="Active Projects"
-                                        count={loading.data ? '...' : mergedTeam.filter(m => m.projectName).length}
+                                        count={loading.data ? '...' : allActiveProjects.length}
                                         sectionId="allocations"
                                         color="#9CC6DB"
                                     />
@@ -395,53 +399,85 @@ const ManagerDashboard = () => {
                                 )}
 
                                 {activeSection === 'allocations' && (
-                                    <div className="card shadow border-0 rounded-4 overflow-hidden mb-5">
-                                        <div className="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
-                                            <h3 className="fw-bold mb-0">Active Project Assignments</h3>
-                                            <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={() => setActiveSection(null)}>Close</button>
+                                    <div className="animate-fade-in">
+                                        <div className="row g-4">
+                                            {/* Organization Projects */}
+                                            <div className="col-lg-6">
+                                                <div className="card shadow border-0 rounded-4 h-100 overflow-hidden">
+                                                    <div className="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
+                                                        <h4 className="fw-bold mb-0">Organization Projects</h4>
+                                                    </div>
+                                                    <div className="card-body p-0">
+                                                        {loading.data ? renderLoading() :
+                                                            error.data ? renderError(error.data) :
+                                                                allActiveProjects.length === 0 ? renderEmpty('No active organization projects found.') : (
+                                                                    <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'scroll', overflowX: 'hidden' }}>
+                                                                        <table className="table table-hover align-middle mb-0">
+                                                                            <thead className="table-light sticky-top" style={{ zIndex: 1 }}>
+                                                                                <tr>
+                                                                                    <th className="px-4 py-3">Project Name</th>
+                                                                                    <th className="py-3">Company</th>
+                                                                                    <th className="px-4 py-3 text-end">Status</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                {allActiveProjects.map((proj, idx) => (
+                                                                                    <tr key={idx}>
+                                                                                        <td className="px-4 py-3 fw-bold text-primary">{proj.name}</td>
+                                                                                        <td>{proj.companyName}</td>
+                                                                                        <td className="px-4 text-end">
+                                                                                            <span className="badge bg-success-subtle text-success border border-success rounded-pill px-3" style={{ fontSize: '0.75rem' }}>
+                                                                                                {proj.status}
+                                                                                            </span>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                ))}
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                )}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Team Assignments */}
+                                            <div className="col-lg-6">
+                                                <div className="card shadow border-0 rounded-4 h-100 overflow-hidden">
+                                                    <div className="card-header bg-white p-4 border-0">
+                                                        <h4 className="fw-bold mb-0">Active Team Assignments</h4>
+                                                    </div>
+                                                    <div className="card-body p-0">
+                                                        {loading.data ? renderLoading() :
+                                                            error.data ? renderError(error.data) :
+                                                                mergedTeam.filter(m => m.projectName).length === 0 ? renderEmpty('No active team assignments.') : (
+                                                                    <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'scroll', overflowX: 'hidden' }}>
+                                                                        <table className="table table-hover align-middle mb-0">
+                                                                            <thead className="table-light sticky-top" style={{ zIndex: 1 }}>
+                                                                                <tr>
+                                                                                    <th className="px-4 py-3">Employee</th>
+                                                                                    <th className="py-3 px-4 text-end">Project</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                {mergedTeam.filter(m => m.projectName).map((member, idx) => (
+                                                                                    <tr key={idx}>
+                                                                                        <td className="px-4 py-3">
+                                                                                            <div className="fw-bold small">{member.name || 'Employee'}</div>
+                                                                                            <div className="text-muted" style={{ fontSize: '0.7rem' }}>{member.email}</div>
+                                                                                        </td>
+                                                                                        <td className="fw-bold small px-4 text-end">{member.projectName}</td>
+                                                                                    </tr>
+                                                                                ))}
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                )}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="card-body p-0">
-                                            {loading.data ? renderLoading() :
-                                                error.data ? renderError(error.data) :
-                                                    mergedTeam.filter(m => m.projectName).length === 0 ? renderEmpty('No active project assignments.') : (
-                                                        <div className="table-responsive">
-                                                            <table className="table table-hover align-middle mb-0">
-                                                                <thead className="table-light">
-                                                                    <tr>
-                                                                        <th className="px-4 py-3">Employee</th>
-                                                                        <th className="py-3">Project</th>
-                                                                        <th className="py-3">Billing</th>
-                                                                        <th className="px-4 py-3 text-end">Actions</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    {mergedTeam.filter(m => m.projectName).map((member, idx) => (
-                                                                        <tr key={idx}>
-                                                                            <td className="px-4 py-3">
-                                                                                <div className="fw-bold">{member.name || 'Employee'}</div>
-                                                                                <div className="small text-muted">{member.email}</div>
-                                                                            </td>
-                                                                            <td className="fw-bold">{member.projectName}</td>
-                                                                            <td>
-                                                                                <span className={`badge rounded-pill ${member.allocationStatus === 'BILLABLE' ? 'bg-success' : 'bg-primary'}`}>
-                                                                                    {member.allocationStatus}
-                                                                                </span>
-                                                                            </td>
-                                                                            <td className="px-4 text-end">
-                                                                                <button
-                                                                                    className="btn btn-outline-danger btn-sm rounded-pill px-3"
-                                                                                    onClick={() => handleEndAllocation(member.assignmentId)}
-                                                                                    disabled={actionLoading || !member.assignmentId}
-                                                                                >
-                                                                                    End Assignment
-                                                                                </button>
-                                                                            </td>
-                                                                        </tr>
-                                                                    ))}
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    )}
+                                        <div className="text-center mt-4">
+                                            <button className="btn btn-outline-secondary btn-sm rounded-pill px-4" onClick={() => setActiveSection(null)}>Close Projects View</button>
                                         </div>
                                     </div>
                                 )}

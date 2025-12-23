@@ -122,6 +122,10 @@ public class SkillService {
             throw new AccessDeniedException("You are not authorized to delete this skill");
         }
 
+        if (skill.getStatus() != SkillStatus.PENDING) {
+            throw new RuntimeException("Only pending skills can be deleted. Approved or Rejected skills are locked.");
+        }
+
         employeeSkillRepository.delete(skill);
     }
 
