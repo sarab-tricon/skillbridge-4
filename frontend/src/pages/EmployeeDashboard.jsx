@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
+import ProfileSection from '../components/ProfileSection';
 
 const EmployeeDashboard = () => {
     const { user } = useAuth();
@@ -552,6 +553,15 @@ const EmployeeDashboard = () => {
                                     <span className="ms-1 d-none d-sm-inline">Utilization</span>
                                 </button>
                             </li>
+                            <li className="nav-item w-100 mb-2">
+                                <button
+                                    onClick={() => setActiveSection('profile')}
+                                    className={`nav-link align-middle px-3 py-2 w-100 text-start d-flex align-items-center gap-2 ${activeSection === 'profile' ? 'active bg-primary' : 'text-dark'}`}
+                                >
+                                    <i className="bi bi-person-circle"></i>
+                                    <span className="ms-1 d-none d-sm-inline">My Profile</span>
+                                </button>
+                            </li>
                         </ul>
                         <div className="sidebar-footer mt-auto pb-5 d-none d-sm-block border-top w-100 pt-3">
                             <p className="small text-muted mb-1">Logged in as</p>
@@ -577,6 +587,7 @@ const EmployeeDashboard = () => {
                                 {activeSection === 'skills' && 'Skill Management'}
                                 {activeSection === 'allocation' && 'My Projects'}
                                 {activeSection === 'utilization' && 'Personal Utilization'}
+                                {activeSection === 'profile' && 'My Profile'}
                             </h1>
                         </header>
 
@@ -585,6 +596,7 @@ const EmployeeDashboard = () => {
                             {activeSection === 'skills' && renderSkills()}
                             {activeSection === 'allocation' && renderAllocation()}
                             {activeSection === 'utilization' && renderUtilization()}
+                            {activeSection === 'profile' && <ProfileSection />}
                         </div>
                     </div>
                 </div>

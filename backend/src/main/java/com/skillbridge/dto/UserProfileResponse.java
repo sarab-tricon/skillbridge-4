@@ -1,6 +1,8 @@
 package com.skillbridge.dto;
 
 import com.skillbridge.enums.Role;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,4 +21,11 @@ public class UserProfileResponse {
     private Role role;
     private UUID managerId;
     private String managerName;
+    private String projectName;
+    private String companyName;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private String billingStatus;
+    private String assignmentStatus;
+    private List<SkillResponse> skills;
 }

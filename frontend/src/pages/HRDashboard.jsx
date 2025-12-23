@@ -5,6 +5,7 @@ import BenchAllocation from '../components/BenchAllocation';
 import ProjectManagement from '../components/ProjectManagement';
 import SkillCatalog from '../components/SkillCatalog';
 
+
 const HRDashboard = () => {
     const { user, role } = useAuth();
     const [activeSection, setActiveSection] = useState('overview');
@@ -579,6 +580,7 @@ const HRDashboard = () => {
                             >
                                 <i className="bi bi-search me-2"></i> Talent Discovery
                             </button>
+
                         </div>
                     </div>
                     <div className="mt-auto p-4 border-top">
@@ -598,6 +600,7 @@ const HRDashboard = () => {
                                     {activeSection === 'bench' && 'Bench Management & Allocation'}
                                     {activeSection === 'catalog' && 'Skill Catalog'}
                                     {activeSection === 'talent' && 'Talent Discovery'}
+
                                 </h1>
                                 <p className="lead text-muted m-0 small">Manage your organization's workforce and projects from one place.</p>
                             </div>
@@ -614,6 +617,7 @@ const HRDashboard = () => {
                         {activeSection === 'bench' && <BenchAllocation />}
                         {activeSection === 'catalog' && <SkillCatalog />}
                         {activeSection === 'talent' && renderTalentDiscovery()}
+
                     </div>
                 </div>
             </div>
