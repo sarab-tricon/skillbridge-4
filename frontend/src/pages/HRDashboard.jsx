@@ -30,6 +30,7 @@ const HRDashboard = () => {
         managerId: ''
     });
     const [managers, setManagers] = useState([]);
+    const [hrs, setHrs] = useState([]);
     const [onboardingLoading, setOnboardingLoading] = useState(false);
     const [onboardingSuccess, setOnboardingSuccess] = useState(null);
     const [onboardingError, setOnboardingError] = useState(null);
@@ -40,6 +41,8 @@ const HRDashboard = () => {
     const [talentResults, setTalentResults] = useState(null);
     const [talentLoading, setTalentLoading] = useState(false);
     const [talentError, setTalentError] = useState(null);
+
+    const [peopleTab, setPeopleTab] = useState('EMPLOYEES'); // 'EMPLOYEES', 'MANAGERS', 'HRS'
 
     // -- Effects --
     useEffect(() => {
@@ -52,6 +55,7 @@ const HRDashboard = () => {
         await Promise.all([
             fetchManagers(),
             fetchEmployees(),
+            fetchHRs(),
             fetchBenchUsers(),
             fetchCatalog()
         ]);
@@ -63,6 +67,15 @@ const HRDashboard = () => {
             setManagers(response.data);
         } catch (err) {
             console.error('Failed to fetch managers:', err);
+        }
+    };
+
+    const fetchHRs = async () => {
+        try {
+            const response = await api.get('/users/hrs');
+            setHrs(response.data);
+        } catch (err) {
+            console.error('Failed to fetch HRs:', err);
         }
     };
 
@@ -122,6 +135,14 @@ const HRDashboard = () => {
                 managerId: ''
             });
             fetchEmployees(); // Refresh list
+            fetchManagers();
+            fetchHRs();
+
+            // Switch to the relevant tab
+            if (formData.role === 'MANAGER') setPeopleTab('MANAGERS');
+            else if (formData.role === 'HR') setPeopleTab('HRS');
+            else setPeopleTab('EMPLOYEES');
+
         } catch (err) {
             console.error('Failed to create user:', err);
             const errorMsg = err.response?.data?.message || err.message || 'Failed to create user.';
@@ -194,11 +215,11 @@ const HRDashboard = () => {
             <h3 className="fw-bold mb-4" style={{ color: '#CF4B00' }}>Dashboard Overview</h3>
             <div className="row g-4">
                 <StatCard
-                    title="Total Employees"
-                    value={stats.totalEmployees}
+                    title="Employee Management"
+                    value={employees.length + managers.length + hrs.length}
                     icon="bi-people-fill"
                     color="#0d6efd"
-                    onClick={() => setActiveSection('people')}
+                    onClick={() => { setActiveSection('people'); setPeopleTab('EMPLOYEES'); }}
                 />
                 <StatCard
                     title="On Bench"
@@ -228,13 +249,7 @@ const HRDashboard = () => {
                     color="#0dcaf0"
                     onClick={() => setActiveSection('talent')}
                 />
-                <StatCard
-                    title="Onboard New"
-                    value="+"
-                    icon="bi-person-plus-fill"
-                    color="#CF4B00"
-                    onClick={() => setActiveSection('people')}
-                />
+
             </div>
         </div>
     );
@@ -246,57 +261,105 @@ const HRDashboard = () => {
                     {renderOnboarding()}
                 </div>
                 <div className="col-lg-8">
-                    {renderEmployeeDirectory()}
+                    {renderPeopleDirectory()}
                 </div>
             </div>
         </div>
     );
 
-    const renderEmployeeDirectory = () => (
-        <div className="card shadow-sm border-0" style={{ backgroundColor: '#fff', borderTop: '5px solid #0d6efd' }}>
-            <div className="card-body p-4">
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h3 className="card-title fw-bold m-0" style={{ color: '#0d6efd' }}>
-                        <i className="bi bi-people-fill me-2"></i>Employee Directory
-                    </h3>
-                    <button className="btn btn-outline-primary btn-sm" onClick={fetchEmployees}>
-                        <i className="bi bi-arrow-clockwise me-1"></i> Refresh
-                    </button>
-                </div>
 
-                <div className="table-responsive" style={{ maxHeight: 'calc(100vh - 350px)', overflowY: 'auto', overflowX: 'hidden', border: '1px solid #dee2e6' }}>
-                    <table className="table table-hover align-middle mb-0">
-                        <thead className="table-light sticky-top">
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Manager Name</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {employees.length > 0 ? (
-                                employees.map(emp => (
-                                    <tr key={emp.id}>
-                                        <td className="fw-bold">{emp.firstName} {emp.lastName}</td>
-                                        <td>{emp.email}</td>
-                                        <td><span className="badge bg-secondary">{emp.role}</span></td>
-                                        <td><small className="text-muted">{emp.managerName || 'N/A'}</small></td>
-                                        <td><span className="badge bg-success">Active</span></td>
-                                    </tr>
-                                ))
-                            ) : (
+
+    const renderPeopleDirectory = () => {
+        const getList = () => {
+            switch (peopleTab) {
+                case 'MANAGERS': return managers;
+                case 'HRS': return hrs;
+                default: return employees;
+            }
+        };
+
+        const currentList = getList();
+        const title = peopleTab === 'MANAGERS' ? 'Managers' : peopleTab === 'HRS' ? 'HR Administrators' : 'Employee Directory';
+
+        return (
+            <div className="card shadow-sm border-0" style={{ backgroundColor: '#fff', borderTop: '5px solid #0d6efd' }}>
+                <div className="card-body p-4">
+                    <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                        <h4 className="card-title fw-bold m-0" style={{ color: '#0d6efd' }}>
+                            <i className="bi bi-people-fill me-2"></i>{title}
+                        </h4>
+                        <div className="d-flex gap-2">
+                            <div className="btn-group btn-group-sm" role="group">
+                                <button
+                                    type="button"
+                                    className={`btn ${peopleTab === 'EMPLOYEES' ? 'btn-primary' : 'btn-outline-primary'}`}
+                                    onClick={() => setPeopleTab('EMPLOYEES')}
+                                >
+                                    Employees
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`btn ${peopleTab === 'MANAGERS' ? 'btn-primary' : 'btn-outline-primary'}`}
+                                    onClick={() => setPeopleTab('MANAGERS')}
+                                >
+                                    Managers
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`btn ${peopleTab === 'HRS' ? 'btn-primary' : 'btn-outline-primary'}`}
+                                    onClick={() => setPeopleTab('HRS')}
+                                >
+                                    HR Ops
+                                </button>
+                            </div>
+                            <button className="btn btn-outline-secondary btn-sm" onClick={() => { fetchEmployees(); fetchManagers(); fetchHRs(); }}>
+                                <i className="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div
+                        className="table-responsive"
+                        style={{
+                            maxHeight: 'calc(100vh - 350px)',
+                            overflowY: 'auto',
+                            overflowX: 'auto',
+                            border: '1px solid #dee2e6'
+                        }}
+                    >
+                        <table className="table table-sm table-hover align-middle mb-0 small">
+                            <thead className="table-light sticky-top">
                                 <tr>
-                                    <td colSpan="5" className="text-center py-4 text-muted">No employees found.</td>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    {peopleTab === 'EMPLOYEES' && <th>Manager Name</th>}
+                                    <th>Status</th>
                                 </tr>
-                            )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {currentList.length > 0 ? (
+                                    currentList.map(user => (
+                                        <tr key={user.id}>
+                                            <td className="fw-bold">{user.firstName} {user.lastName}</td>
+                                            <td>{user.email}</td>
+                                            <td><span className="badge bg-secondary">{user.role}</span></td>
+                                            {peopleTab === 'EMPLOYEES' && <td><small className="text-muted">{user.managerName || 'N/A'}</small></td>}
+                                            <td><span className="badge bg-success">Active</span></td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="5" className="text-center py-4 text-muted">No users found.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     const renderOnboarding = () => (
         <div className="card shadow-sm border-0" style={{ backgroundColor: '#fff', borderTop: '5px solid #9CC6DB' }}>
@@ -513,8 +576,8 @@ const HRDashboard = () => {
                                                 <div className="d-flex flex-wrap gap-1">
                                                     {res.matches.map((match, i) => (
                                                         <span key={i} className={`badge ${match.proficiencyLevel === 'ADVANCED' ? 'bg-success' :
-                                                                match.proficiencyLevel === 'INTERMEDIATE' ? 'bg-primary' :
-                                                                    'bg-warning text-dark'
+                                                            match.proficiencyLevel === 'INTERMEDIATE' ? 'bg-primary' :
+                                                                'bg-warning text-dark'
                                                             }`}>
                                                             {match.skillName}
                                                         </span>
@@ -522,8 +585,8 @@ const HRDashboard = () => {
                                                 </div>
                                             ) : (
                                                 <span className={`badge ${res.proficiencyLevel === 'ADVANCED' ? 'bg-success' :
-                                                        res.proficiencyLevel === 'INTERMEDIATE' ? 'bg-primary' :
-                                                            'bg-warning text-dark'
+                                                    res.proficiencyLevel === 'INTERMEDIATE' ? 'bg-primary' :
+                                                        'bg-warning text-dark'
                                                     }`}>
                                                     {res.skillName}
                                                 </span>
