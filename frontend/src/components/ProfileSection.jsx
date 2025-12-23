@@ -146,7 +146,7 @@ const ProfileSection = () => {
                                 {profile.skills.map(skill => (
                                     <div key={skill.id} className="d-flex align-items-center border rounded-pill px-2 py-1 bg-white shadow-sm" style={{ fontSize: '0.85rem' }}>
                                         <span className={`badge rounded-circle me-2 p-1 ${skill.proficiencyLevel === 'ADVANCED' ? 'bg-success' :
-                                                skill.proficiencyLevel === 'INTERMEDIATE' ? 'bg-info' : 'bg-secondary'
+                                            skill.proficiencyLevel === 'INTERMEDIATE' ? 'bg-info' : 'bg-secondary'
                                             }`} style={{ width: '8px', height: '8px' }}> </span>
                                         <span className="fw-bold text-dark me-1">{skill.skillName}</span>
                                         <span className="text-muted" style={{ fontSize: '0.75rem' }}>({skill.proficiencyLevel.substring(0, 3)})</span>
@@ -161,7 +161,7 @@ const ProfileSection = () => {
                     </div>
                 </div>
             </div>
-            <style jsx>{`
+            <style>{`
                 @media (min-width: 768px) {
                     .border-end-md { border-right: 1px solid #dee2e6; }
                 }

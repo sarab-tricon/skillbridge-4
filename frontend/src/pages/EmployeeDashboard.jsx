@@ -576,14 +576,7 @@ const EmployeeDashboard = () => {
                 <div className="col p-4 p-md-5" style={{ backgroundColor: '#f8f9fa' }}>
                     <div className="max-width-xl mx-auto">
                         <header className="mb-4">
-                            <h4 className="text-muted mb-1">
-                                Welcome back, {user?.sub?.split('@')[0]}
-                                {profile?.managerName && (
-                                    <span className="ms-2 small text-muted">
-                                        [reports to: <span className="fw-semibold text-dark">{profile.managerName}</span>]
-                                    </span>
-                                )}
-                            </h4>
+                            <h4 className="text-muted mb-1">Welcome back, {user?.sub?.split('@')[0]}</h4>
                             <h1 className="display-5 fw-bold text-dark">
                                 {activeSection === 'overview' && 'Dashboard Overview'}
                                 {activeSection === 'skills' && 'Skill Management'}
