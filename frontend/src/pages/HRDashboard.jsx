@@ -432,13 +432,19 @@ const HRDashboard = () => {
 
     const renderTalentDiscovery = () => (
         <div className="card shadow-sm border-0 h-100" style={{ backgroundColor: '#fff', borderTop: '5px solid #9CC6DB' }}>
-            <div className="card-body p-4">
-                <h3 className="card-title fw-bold mb-4" style={{ color: '#CF4B00' }}>
-                    <i className="bi bi-search me-2"></i>Talent Discovery
-                </h3>
+            <div className="card-body p-3">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h4 className="card-title fw-bold m-0" style={{ color: '#CF4B00' }}>
+                        <i className="bi bi-search me-2"></i>Talent Discovery
+                    </h4>
+                    <div className="d-flex gap-2">
+                        <span className="badge bg-success small" style={{ fontSize: '0.7rem' }}>Advanced</span>
+                        <span className="badge bg-primary small" style={{ fontSize: '0.7rem' }}>Intermediate</span>
+                        <span className="badge bg-warning text-dark small" style={{ fontSize: '0.7rem' }}>Beginner</span>
+                    </div>
+                </div>
 
-                <form onSubmit={handleTalentSearch} className="mb-4">
-                    <label className="form-label fw-bold">Search by Skills</label>
+                <form onSubmit={handleTalentSearch} className="mb-3">
                     <div className="d-flex flex-wrap gap-2 mb-2 p-2 border rounded bg-light" style={{ minHeight: '38px' }}>
                         {searchSkills.length === 0 ? (
                             <span className="text-muted small align-self-center">Select skills to search...</span>
@@ -456,7 +462,7 @@ const HRDashboard = () => {
                             ))
                         )}
                     </div>
-                    <div className="input-group">
+                    <div className="input-group input-group-sm">
                         <select
                             className="form-select"
                             style={{ border: '2px solid #9CC6DB' }}
@@ -468,7 +474,7 @@ const HRDashboard = () => {
                                 e.target.value = '';
                             }}
                         >
-                            <option value="">+ Add Skill to Search</option>
+                            <option value="">+ Add Skill</option>
                             {catalogSkills.map(skill => (
                                 <option key={skill.id} value={skill.name}>{skill.name}</option>
                             ))}
@@ -479,7 +485,7 @@ const HRDashboard = () => {
                             style={{ backgroundColor: '#CF4B00' }}
                             disabled={talentLoading || searchSkills.length === 0}
                         >
-                            <i className="bi bi-search me-2"></i>Search Talent
+                            <i className="bi bi-search me-2"></i>Search
                         </button>
                     </div>
                 </form>
@@ -489,27 +495,39 @@ const HRDashboard = () => {
                         <div className="spinner-border text-info" role="status"></div>
                     </div>
                 ) : talentResults && talentResults.length > 0 ? (
-                    <div className="table-responsive">
-                        <table className="table table-sm table-hover">
-                            <thead className="table-light">
+                    <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                        <table className="table table-sm table-hover align-middle mb-0">
+                            <thead className="table-light sticky-top">
                                 <tr>
                                     <th>Name</th>
                                     <th>Skill</th>
-                                    <th>Level</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {talentResults.map((res, idx) => (
                                     <tr key={idx}>
-                                        <td>{res.employeeName}</td>
-                                        <td>{res.skillName}</td>
+                                        <td className="fw-bold">{res.employeeName}</td>
                                         <td>
-                                            <span className={`badge ${res.proficiencyLevel === 'ADVANCED' ? 'bg-success' :
-                                                res.proficiencyLevel === 'INTERMEDIATE' ? 'bg-info text-dark' : 'bg-secondary'
-                                                }`}>
-                                                {res.proficiencyLevel}
-                                            </span>
+                                            {res.matches && res.matches.length > 0 ? (
+                                                <div className="d-flex flex-wrap gap-1">
+                                                    {res.matches.map((match, i) => (
+                                                        <span key={i} className={`badge ${match.proficiencyLevel === 'ADVANCED' ? 'bg-success' :
+                                                                match.proficiencyLevel === 'INTERMEDIATE' ? 'bg-primary' :
+                                                                    'bg-warning text-dark'
+                                                            }`}>
+                                                            {match.skillName}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <span className={`badge ${res.proficiencyLevel === 'ADVANCED' ? 'bg-success' :
+                                                        res.proficiencyLevel === 'INTERMEDIATE' ? 'bg-primary' :
+                                                            'bg-warning text-dark'
+                                                    }`}>
+                                                    {res.skillName}
+                                                </span>
+                                            )}
                                         </td>
                                         <td>
                                             <span className={`badge ${res.status === 'APPROVED' ? 'bg-success' :
@@ -524,7 +542,7 @@ const HRDashboard = () => {
                         </table>
                     </div>
                 ) : (
-                    talentResults !== null && <p className="text-muted text-center">No results found.</p>
+                    talentResults !== null && <p className="text-muted text-center small mt-4">No results found.</p>
                 )}
             </div>
         </div>

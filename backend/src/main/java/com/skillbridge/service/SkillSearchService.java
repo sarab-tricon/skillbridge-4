@@ -107,29 +107,42 @@ public class SkillSearchService {
                     List<EmployeeSkill> employeeSkills = entry.getValue();
                     User employee = userMap.get(employeeId);
 
-                    // Combine skill names
-                    String combinedSkills = employeeSkills.stream()
-                            .map(EmployeeSkill::getSkillName)
-                            .distinct()
+                    // Map individual skills to SkillResponse
+                    List<com.skillbridge.dto.SkillResponse> matches = employeeSkills.stream()
+                            .map(s -> com.skillbridge.dto.SkillResponse.builder()
+                                    .id(s.getId())
+                                    .skillName(s.getSkillName())
+                                    .proficiencyLevel(s.getProficiencyLevel())
+                                    .status(s.getStatus())
+                                    .build())
+                            .sorted(Comparator.comparing(com.skillbridge.dto.SkillResponse::getProficiencyLevel)
+                                    .reversed())
+                            .collect(Collectors.toList());
+
+                    // Combine skill names (legacy support/display summary)
+                    String combinedSkills = matches.stream()
+                            .map(com.skillbridge.dto.SkillResponse::getSkillName)
                             .collect(Collectors.joining(", "));
 
-                    // Get highest proficiency level
-                    com.skillbridge.enums.ProficiencyLevel highestLevel = employeeSkills.stream()
-                            .map(EmployeeSkill::getProficiencyLevel)
+                    // Get highest proficiency level (legacy support)
+                    com.skillbridge.enums.ProficiencyLevel highestLevel = matches.stream()
+                            .map(com.skillbridge.dto.SkillResponse::getProficiencyLevel)
                             .max(Comparator.comparingInt(Enum::ordinal))
                             .orElse(com.skillbridge.enums.ProficiencyLevel.BEGINNER);
 
-                    // Get first status (all should be APPROVED anyway)
-                    SkillStatus status = employeeSkills.get(0).getStatus();
+                    // Get first status (legacy)
+                    SkillStatus status = matches.isEmpty() ? SkillStatus.PENDING : matches.get(0).getStatus();
 
                     return SkillSearchResponse.builder()
                             .userId(employee.getId())
                             .email(employee.getEmail())
-                            .employeeName(employee.getEmail())
+                            .employeeName(employee.getFirstName() + " " + employee.getLastName()) // Fix: Use name
+                                                                                                  // instead of email
                             .skillName(combinedSkills)
                             .proficiencyLevel(highestLevel)
                             .status(status)
                             .managerId(employee.getManagerId())
+                            .matches(matches)
                             .build();
                 })
                 .sorted(Comparator.comparing(SkillSearchResponse::getProficiencyLevel).reversed())

@@ -20,4 +20,5 @@ public class SkillSearchResponse {
     private ProficiencyLevel proficiencyLevel;
     private SkillStatus status;
     private UUID managerId;
+    private java.util.List<SkillResponse> matches;
 }
