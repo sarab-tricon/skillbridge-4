@@ -410,108 +410,104 @@ const EmployeeDashboard = () => {
     };
 
     const renderAllocation = () => (
-        <div className="card shadow-sm border-0">
-            <div className="card-body p-3 p-md-4">
-                <h2 className="fw-bold mb-3 text-center">Project Assignment</h2>
-                {loadingAlloc ? (
-                    <div className="text-center py-4">
-                        <div className="spinner-border text-primary" role="status"></div>
-                    </div>
-                ) : errorAlloc ? (
-                    <div className="alert alert-danger">{errorAlloc}</div>
-                ) : (!allocation || allocation.assignmentStatus === 'ENDED' || allocation.assignmentStatus === 'REJECTED') ? (
-                    <div className="row justify-content-center g-3">
-                        <div className="col-md-6">
-                            <div className="text-center mb-4">
-                                <i className="bi bi-briefcase h1 text-muted opacity-25"></i>
-                                <h3 className="text-muted">Currently on Bench</h3>
-                                <p className="small text-muted mb-0">Select a project to request an allocation.</p>
-                            </div>
+        <div className="py-2">
+            {loadingAlloc ? (
+                <div className="text-center py-4">
+                    <div className="spinner-border text-primary" role="status"></div>
+                </div>
+            ) : errorAlloc ? (
+                <div className="alert alert-danger">{errorAlloc}</div>
+            ) : (!allocation || allocation.assignmentStatus === 'ENDED' || allocation.assignmentStatus === 'REJECTED') ? (
+                <div className="row justify-content-center g-3">
+                    <div className="col-md-6">
+                        <div className="text-center mb-4">
+                            <i className="bi bi-briefcase h1 text-muted opacity-25"></i>
+                            <h3 className="text-muted">Currently on Bench</h3>
+                            <p className="small text-muted mb-0">Select a project to request an allocation.</p>
+                        </div>
 
-                            <div className="card shadow-sm border-0 p-3 bg-light">
-                                <h5 className="fw-bold mb-3 text-center">Request Allocation</h5>
-                                <form onSubmit={handleRequestAllocation}>
-                                    <div className="mb-3">
-                                        <select
-                                            className="form-select shadow-none border-2"
-                                            value={selectedProject}
-                                            onChange={(e) => setSelectedProject(e.target.value)}
-                                            required
-                                        >
-                                            <option value="">-- Choose a Project --</option>
-                                            {availableProjects.map(proj => (
-                                                <option key={proj.id} value={proj.id}>{proj.name}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    {requestAllocError && <div className="alert alert-danger p-2 small mb-3">{requestAllocError}</div>}
-                                    <button type="submit" className="btn btn-accent w-100 py-2 shadow-sm" disabled={requestingAlloc || !selectedProject}>
-                                        {requestingAlloc ? 'Submitting...' : 'Send Request'}
-                                    </button>
-                                </form>
+                        <div className="card shadow-sm border-0 p-3 bg-light">
+                            <h5 className="fw-bold mb-3 text-center">Request Allocation</h5>
+                            <form onSubmit={handleRequestAllocation}>
+                                <div className="mb-3">
+                                    <select
+                                        className="form-select shadow-none border-2"
+                                        value={selectedProject}
+                                        onChange={(e) => setSelectedProject(e.target.value)}
+                                        required
+                                    >
+                                        <option value="">-- Choose a Project --</option>
+                                        {availableProjects.map(proj => (
+                                            <option key={proj.id} value={proj.id}>{proj.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                {requestAllocError && <div className="alert alert-danger p-2 small mb-3">{requestAllocError}</div>}
+                                <button type="submit" className="btn btn-accent w-100 py-2 shadow-sm" disabled={requestingAlloc || !selectedProject}>
+                                    {requestingAlloc ? 'Submitting...' : 'Send Request'}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div className="row justify-content-center">
+                    <div className="col-md-10 col-lg-8">
+                        <div className={`card border-2 shadow-sm rounded-4 overflow-hidden ${allocation.assignmentStatus === 'PENDING' ? 'border-warning' : 'border-primary'}`}>
+                            <div className={`card-header text-white p-3 text-center border-0 ${allocation.assignmentStatus === 'PENDING' ? 'bg-warning text-dark' : 'bg-primary'}`}>
+                                <h4 className="mb-0">Project Details</h4>
+                            </div>
+                            <div className="card-body p-3 p-md-4 text-center">
+                                <div className="mb-3">
+                                    <span className={`badge rounded-pill px-4 py-2 fs-6 ${allocation.assignmentStatus === 'ACTIVE' ? 'bg-success' :
+                                        allocation.assignmentStatus === 'PENDING' ? 'bg-warning text-dark' : 'bg-secondary'
+                                        }`}>
+                                        {allocation.assignmentStatus}
+                                    </span>
+                                </div>
+                                <div className="border-top pt-3">
+                                    <p className="text-muted small text-uppercase fw-bold mb-1">Current Status</p>
+                                    <p className="h4 mb-0">{allocation.assignmentStatus === 'ACTIVE' ? 'Allocated to Project' : 'Awaiting Peer/Manager Approval'}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                ) : (
-                    <div className="row justify-content-center">
-                        <div className="col-md-10 col-lg-8">
-                            <div className={`card border-2 shadow-sm rounded-4 overflow-hidden ${allocation.assignmentStatus === 'PENDING' ? 'border-warning' : 'border-primary'}`}>
-                                <div className={`card-header text-white p-3 text-center border-0 ${allocation.assignmentStatus === 'PENDING' ? 'bg-warning text-dark' : 'bg-primary'}`}>
-                                    <h4 className="mb-0">Project Details</h4>
-                                </div>
-                                <div className="card-body p-3 p-md-4 text-center">
-                                    <div className="mb-3">
-                                        <span className={`badge rounded-pill px-4 py-2 fs-6 ${allocation.assignmentStatus === 'ACTIVE' ? 'bg-success' :
-                                            allocation.assignmentStatus === 'PENDING' ? 'bg-warning text-dark' : 'bg-secondary'
-                                            }`}>
-                                            {allocation.assignmentStatus}
-                                        </span>
-                                    </div>
-                                    <div className="border-top pt-3">
-                                        <p className="text-muted small text-uppercase fw-bold mb-1">Current Status</p>
-                                        <p className="h4 mb-0">{allocation.assignmentStatus === 'ACTIVE' ? 'Allocated to Project' : 'Awaiting Peer/Manager Approval'}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
+                </div>
+            )}
         </div>
     );
 
     const renderUtilization = () => (
-        <div className="card shadow-sm border-0 text-center mx-auto" style={{ maxWidth: '600px' }}>
-            <div className="card-body p-3 p-md-4">
-                <h2 className="fw-bold mb-3">Utilization Overview</h2>
-                {loadingUtil ? (
-                    <div className="spinner-border text-primary" role="status"></div>
-                ) : errorUtil ? (
-                    <div className="alert alert-danger">{errorUtil}</div>
-                ) : (
-                    <div>
-                        <div className="utilization-disk mx-auto mb-3" style={{
-                            width: '160px',
-                            height: '160px',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: 'var(--color-bg)',
-                            border: '8px solid var(--color-primary)',
-                            boxShadow: '0 5px 15px rgba(0,0,0,0.05)'
-                        }}>
-                            <span className="h1 fw-bold text-accent mb-0">
-                                {utilization?.allocationStatus === 'BILLABLE' ? '100%' : utilization?.allocationStatus === 'INVESTMENT' ? '100%' : '0%'}
-                            </span>
-                        </div>
-                        <h3 className="fw-bold text-dark mt-3">{utilization?.allocationStatus || 'UNKNOWN'}</h3>
-                        <p className="text-muted small mb-0 px-3">
-                            Calculation based on your active project assignments and billing status.
-                        </p>
+        <div className="text-center mx-auto" style={{ maxWidth: '600px', paddingTop: '1.5rem' }}>
+            {loadingUtil ? (
+                <div className="spinner-border text-primary" role="status"></div>
+            ) : errorUtil ? (
+                <div className="alert alert-danger">{errorUtil}</div>
+            ) : (
+                <div className="py-2">
+                    <div className="utilization-disk mx-auto mb-4" style={{
+                        width: '180px',
+                        height: '180px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: 'white',
+                        border: '10px solid var(--color-primary)',
+                        boxShadow: '0 8px 25px rgba(0,0,0,0.08)'
+                    }}>
+                        <span className="h1 fw-bold text-accent mb-0" style={{ fontSize: '2.5rem' }}>
+                            {utilization?.allocationStatus === 'BILLABLE' ? '100%' : utilization?.allocationStatus === 'INVESTMENT' ? '100%' : '0%'}
+                        </span>
                     </div>
-                )}
-            </div>
+                    <div className="badge rounded-pill bg-light text-primary px-4 py-2 border mb-3 fs-6 fw-bold">
+                        {utilization?.allocationStatus || 'UNKNOWN'} Status
+                    </div>
+                    <p className="text-muted small mb-0 px-3 opacity-75">
+                        Your current utilization is calculated based on active project assignments and billing status.
+                    </p>
+                </div>
+            )}
         </div>
     );
 
@@ -577,19 +573,18 @@ const EmployeeDashboard = () => {
                 {/* MAIN CONTENT AREA */}
                 <div className="col h-100 main-content-area" style={{ backgroundColor: 'var(--color-bg)', overflowY: activeSection === 'profile' ? 'hidden' : 'auto', scrollbarGutter: 'stable' }}>
                     <div className="max-width-xl mx-auto py-3 py-md-4 px-3 px-md-4">
-                        {activeSection !== 'profile' && (
-                            <header className="page-header mb-4">
-                                {activeSection === 'overview' && (
-                                    <h4 className="text-muted mb-1">Welcome back, {user?.sub?.split('@')[0]}</h4>
-                                )}
-                                <h1 className="page-title">
-                                    {activeSection === 'overview' && 'Dashboard Overview'}
-                                    {activeSection === 'skills' && 'Skill Management'}
-                                    {activeSection === 'allocation' && 'My Projects'}
-                                    {activeSection === 'utilization' && 'Personal Utilization'}
-                                </h1>
-                            </header>
-                        )}
+                        <header className="page-header mb-4">
+                            {activeSection === 'overview' && (
+                                <h4 className="text-muted mb-1">Welcome back, {user?.sub?.split('@')[0]}</h4>
+                            )}
+                            <h1 className="page-title">
+                                {activeSection === 'overview' && 'Dashboard Overview'}
+                                {activeSection === 'skills' && 'Skill Management'}
+                                {activeSection === 'allocation' && 'My Projects'}
+                                {activeSection === 'utilization' && 'Personal Utilization'}
+                                {activeSection === 'profile' && 'My Profile'}
+                            </h1>
+                        </header>
 
                         <div className="animate-fade-in">
                             {activeSection === 'overview' && renderOverview()}
