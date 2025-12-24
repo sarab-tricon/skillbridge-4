@@ -565,21 +565,16 @@ const EmployeeDashboard = () => {
                                 </button>
                             </li>
                         </ul>
-<<<<<<< HEAD
-=======
-
->>>>>>> 9cb2a1f10e65666ce2f54f9bb3fb5eb5ae392049
                     </div>
                 </div>
 
                 {/* MAIN CONTENT AREA */}
-                <div className="col p-4 p-md-5" style={{ backgroundColor: '#f8f9fa' }}>
+                <div className="col p-4 p-md-5" style={{ backgroundColor: 'var(--color-bg)' }}>
                     <div className="max-width-xl mx-auto">
-<<<<<<< HEAD
                         {activeSection !== 'profile' && (
-                            <header className="mb-4">
+                            <header className="page-header mb-4">
                                 <h4 className="text-muted mb-1">Welcome back, {user?.sub?.split('@')[0]}</h4>
-                                <h1 className="display-5 fw-bold text-dark">
+                                <h1 className="page-title">
                                     {activeSection === 'overview' && 'Dashboard Overview'}
                                     {activeSection === 'skills' && 'Skill Management'}
                                     {activeSection === 'allocation' && 'My Projects'}
@@ -587,18 +582,6 @@ const EmployeeDashboard = () => {
                                 </h1>
                             </header>
                         )}
-=======
-                        <header className="page-header">
-                            <h4 className="text-muted mb-2">Welcome back, {user?.sub?.split('@')[0]}</h4>
-                            <h1 className="page-title text-dark">
-                                {activeSection === 'overview' && 'Dashboard Overview'}
-                                {activeSection === 'skills' && 'Skill Management'}
-                                {activeSection === 'allocation' && 'My Projects'}
-                                {activeSection === 'utilization' && 'Personal Utilization'}
-                                {activeSection === 'profile' && 'My Profile'}
-                            </h1>
-                        </header>
->>>>>>> 9cb2a1f10e65666ce2f54f9bb3fb5eb5ae392049
 
                         <div className="animate-fade-in">
                             {activeSection === 'overview' && renderOverview()}
