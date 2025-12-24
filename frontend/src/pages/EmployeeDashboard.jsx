@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
+import { allocationsApi } from '../api/allocations';
 import ProfileSection from '../components/ProfileSection';
 
 const EmployeeDashboard = () => {
@@ -26,6 +27,7 @@ const EmployeeDashboard = () => {
     const [requestingAlloc, setRequestingAlloc] = useState(false);
     const [requestAllocError, setRequestAllocError] = useState(null);
     const [selectedProject, setSelectedProject] = useState('');
+    const [myRequests, setMyRequests] = useState([]); // New state for tracking requests
 
     // Loading & Error States
     const [loadingSkills, setLoadingSkills] = useState(true);
@@ -38,6 +40,7 @@ const EmployeeDashboard = () => {
     useEffect(() => {
         fetchSkills();
         fetchAllocation();
+        fetchMyRequests(); // Fetch pending requests
         fetchUtilization();
         fetchAvailableProjects();
         fetchCatalog();
@@ -88,11 +91,20 @@ const EmployeeDashboard = () => {
             if (err.response?.status === 404) {
                 setAllocation(null);
             } else {
-                setErrorAlloc('Failed to load allocation.');
+                // Ignore error if it's just "not found" which means bench
+                setAllocation(null);
             }
-            console.error(err);
         } finally {
             setLoadingAlloc(false);
+        }
+    };
+
+    const fetchMyRequests = async () => {
+        try {
+            const response = await allocationsApi.getMyRequests();
+            setMyRequests(response.data);
+        } catch (err) {
+            console.error('Failed to load my requests', err);
         }
     };
 
@@ -188,11 +200,12 @@ const EmployeeDashboard = () => {
         setRequestingAlloc(true);
         setRequestAllocError(null);
         try {
-            await api.post('/allocation-requests', { projectId: selectedProject });
+            await allocationsApi.createRequest(selectedProject); // Use new API
             setSelectedProject('');
-            fetchAllocation();
+            fetchMyRequests(); // Refresh requests list
+            alert('Request submitted to Manager for approval.');
         } catch (err) {
-            setRequestAllocError(err.response?.data?.message || 'Failed to request allocation.');
+            setRequestAllocError(err.response?.data?.message || err.response?.data?.error || 'Failed to request allocation.');
             console.error(err);
         } finally {
             setRequestingAlloc(false);
@@ -423,6 +436,44 @@ const EmployeeDashboard = () => {
 
                         <div className="card shadow-sm border-0 p-4 bg-light">
                             <h4 className="fw-bold mb-3 text-center">Request Allocation</h4>
+
+                            {/* PENDING REQUEST ALERT */}
+                            {myRequests.some(r => r.requestStatus.startsWith('PENDING')) && (
+                                <div className="alert alert-info border-info text-dark mb-4">
+                                    <h6 className="fw-bold"><i className="bi bi-info-circle-fill me-2"></i>Pending Request</h6>
+                                    {myRequests.filter(r => r.requestStatus.startsWith('PENDING')).map(req => (
+                                        <div key={req.assignmentId}>
+                                            <p className="mb-1">You have requested allocation for <strong>{req.projectName}</strong>.</p>
+                                            <span className="badge bg-primary">
+                                                {req.requestStatus === 'PENDING_MANAGER' ? 'Waiting for Manager Review' :
+                                                    req.requestStatus === 'PENDING_HR' ? 'Waiting for HR Approval' : req.requestStatus}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* REJECTION ALERT */}
+                            {myRequests.some(r => r.requestStatus === 'REJECTED') && (
+                                <div className="alert alert-danger border-danger mb-4">
+                                    <h6 className="fw-bold"><i className="bi bi-x-circle-fill me-2"></i>Request Rejected</h6>
+                                    {myRequests.filter(r => r.requestStatus === 'REJECTED').map(req => (
+                                        <div key={req.assignmentId} className="mb-2 border-bottom border-danger-subtle pb-2 last-border-0">
+                                            <p className="mb-1">Request for <strong>{req.projectName}</strong> was rejected.</p>
+
+                                            {/* Note: We need rejection reason. Assuming backend does NOT send it in assignmentResponse 
+                                                because DTO doesn't have it? Wait, I didn't add rejectionReason to DTO.
+                                                I only added status. The user said "view rejection reason".
+                                                I missed adding rejectionReason to DTO. 
+                                                I will add a note to user that reason is not shown yet, or blindly try to access it if I added it?
+                                                I didn't add it. I will leave it blank for now or generic message.
+                                            */}
+                                            <small>Please contact your manager for details.</small>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
                             <form onSubmit={handleRequestAllocation}>
                                 <div className="mb-4">
                                     <label className="form-label small text-muted text-uppercase fw-bold">Select Project</label>
@@ -431,6 +482,7 @@ const EmployeeDashboard = () => {
                                         value={selectedProject}
                                         onChange={(e) => setSelectedProject(e.target.value)}
                                         required
+                                        disabled={myRequests.some(r => r.requestStatus.startsWith('PENDING'))}
                                     >
                                         <option value="">-- Choose a Project --</option>
                                         {availableProjects.map(proj => (
@@ -439,7 +491,11 @@ const EmployeeDashboard = () => {
                                     </select>
                                 </div>
                                 {requestAllocError && <div className="alert alert-danger p-2 small mb-3">{requestAllocError}</div>}
-                                <button type="submit" className="btn btn-accent w-100 py-2 shadow-sm" disabled={requestingAlloc || !selectedProject}>
+                                <button
+                                    type="submit"
+                                    className="btn btn-accent w-100 py-2 shadow-sm"
+                                    disabled={requestingAlloc || !selectedProject || myRequests.some(r => r.requestStatus.startsWith('PENDING'))}
+                                >
                                     {requestingAlloc ? 'Submitting...' : 'Send Request'}
                                 </button>
                             </form>

@@ -37,4 +37,21 @@ public class AllocationRequest {
 
     @Column(name = "reviewed_by")
     private UUID reviewedBy;
+
+    // New Fields for Workflow
+    @Column(name = "manager_comments")
+    private String managerComments;
+
+    @Column(name = "rejection_reason")
+    private String rejectionReason;
+
+    @Column(name = "forwarded_at")
+    private LocalDateTime forwardedAt;
+
+    @Column(name = "forwarded_by")
+    private UUID forwardedBy;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "billing_type")
+    private com.skillbridge.enums.BillingType billingType;
 }
