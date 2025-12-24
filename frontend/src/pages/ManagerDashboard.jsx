@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
+import { allocationsApi } from '../api/allocations';
 
 
 const ManagerDashboard = () => {
@@ -19,6 +20,13 @@ const ManagerDashboard = () => {
     const [pendingAllocations, setPendingAllocations] = useState([]);
     const [allActiveProjects, setAllActiveProjects] = useState([]);
     const [actionLoading, setActionLoading] = useState(false);
+
+    // Modal State
+    const [selectedRequest, setSelectedRequest] = useState(null);
+    const [showForwardModal, setShowForwardModal] = useState(false);
+    const [showRejectModal, setShowRejectModal] = useState(false);
+    const [modalComment, setModalComment] = useState('');
+    const [modalReason, setModalReason] = useState('');
 
     const fetchData = async () => {
         try {
@@ -45,7 +53,8 @@ const ManagerDashboard = () => {
             setMergedTeam(merged);
             setPendingAllocations(pendingAllocRes.data.map(req => ({
                 ...req,
-                id: req.id || req.assignmentId
+                id: req.id || req.assignmentId,
+                selectedBillingType: req.billingType || 'BILLABLE' // Initialize with default
             })));
             setAllActiveProjects(allProjRes.data);
             setError(prev => ({ ...prev, data: null }));
@@ -69,6 +78,58 @@ const ManagerDashboard = () => {
         } finally {
             setLoading(prev => ({ ...prev, skills: false }));
         }
+    };
+
+    // New functions for allocation request actions
+    const handleForward = async () => {
+        setActionLoading(true);
+        try {
+            // Find current state of this request to get latest billing type selection
+            const requestState = pendingAllocations.find(r => r.id === selectedRequest.id);
+            const billingTypeToSubmit = requestState?.selectedBillingType || 'BILLABLE';
+
+            await allocationsApi.forwardToHr(selectedRequest.id, modalComment, billingTypeToSubmit);
+            setShowForwardModal(false);
+            setModalComment('');
+            fetchData(); // Refresh list
+        } catch (error) {
+            console.error('Failed to forward request:', error);
+            alert(error.response?.data || 'Failed to forward request');
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleReject = async () => {
+        if (!modalReason.trim()) {
+            alert('Rejection reason is mandatory');
+            return;
+        }
+        setActionLoading(true);
+        try {
+            await allocationsApi.rejectRequest(selectedRequest.id, modalReason); // Use selectedRequest.id
+            setShowRejectModal(false);
+            setModalReason('');
+            fetchData(); // Refresh list
+        } catch (error) {
+            console.error('Failed to reject request:', error);
+            alert(error.response?.data || 'Failed to reject request');
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const openForwardModal = (req) => {
+        // Ensure billing type is set in state (it is by default, but UI selector updates it)
+        setSelectedRequest(req);
+        setModalComment('');
+        setShowForwardModal(true);
+    };
+
+    const openRejectModal = (req) => {
+        setSelectedRequest(req);
+        setModalReason('');
+        setShowRejectModal(true);
     };
 
     useEffect(() => {
@@ -356,6 +417,13 @@ const ManagerDashboard = () => {
                                                                                     id={`billing-${req.id}`}
                                                                                     className="form-select form-select-sm border-2 rounded-3"
                                                                                     style={{ maxWidth: '140px' }}
+                                                                                    value={req.selectedBillingType}
+                                                                                    onChange={(e) => {
+                                                                                        const newVal = e.target.value;
+                                                                                        setPendingAllocations(prev => prev.map(p =>
+                                                                                            p.id === req.id ? { ...p, selectedBillingType: newVal } : p
+                                                                                        ));
+                                                                                    }}
                                                                                 >
                                                                                     <option value="BILLABLE">Billable</option>
                                                                                     <option value="INVESTMENT">Investment</option>
@@ -364,15 +432,15 @@ const ManagerDashboard = () => {
                                                                             <td className="px-4 text-center">
                                                                                 <div className="d-flex justify-content-center gap-2">
                                                                                     <button
-                                                                                        className="btn btn-success btn-sm rounded-pill px-4"
-                                                                                        onClick={() => handleAllocationAction(req.id, 'APPROVED', document.getElementById(`billing-${req.id}`).value)}
+                                                                                        className="btn btn-outline-primary btn-sm rounded-pill px-4"
+                                                                                        onClick={() => openForwardModal(req)}
                                                                                         disabled={actionLoading}
                                                                                     >
-                                                                                        Approve
+                                                                                        Forward to HR
                                                                                     </button>
                                                                                     <button
                                                                                         className="btn btn-outline-danger btn-sm rounded-pill px-4"
-                                                                                        onClick={() => handleAllocationAction(req.id, 'REJECTED')}
+                                                                                        onClick={() => openRejectModal(req)}
                                                                                         disabled={actionLoading}
                                                                                     >
                                                                                         Reject
@@ -534,6 +602,72 @@ const ManagerDashboard = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Forward Modal */}
+            {showForwardModal && (
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content border-0 shadow rounded-4">
+                            <div className="modal-header border-0 pb-0">
+                                <h5 className="modal-title fw-bold">Forward to HR</h5>
+                                <button type="button" className="btn-close" onClick={() => setShowForwardModal(false)}></button>
+                            </div>
+                            <div className="modal-body">
+                                <p className="text-muted mb-3">Add comments for HR (optional):</p>
+                                <textarea
+                                    className="form-control mb-3"
+                                    rows="3"
+                                    value={modalComment}
+                                    onChange={(e) => setModalComment(e.target.value)}
+                                    placeholder="e.g., Recommend approval based on skills..."
+                                ></textarea>
+
+                                <div className="alert alert-light border small">
+                                    <strong>Confirm Forwarding:</strong>
+                                    <br />
+                                    Assigning <strong>{pendingAllocations.find(r => r.id === selectedRequest?.id)?.selectedBillingType}</strong> billing type.
+                                </div>
+                            </div>
+                            <div className="modal-footer border-0 pt-0">
+                                <button type="button" className="btn btn-light rounded-pill" onClick={() => setShowForwardModal(false)}>Cancel</button>
+                                <button type="button" className="btn btn-primary rounded-pill px-4" onClick={handleForward} disabled={actionLoading}>
+                                    {actionLoading ? 'Forwarding...' : 'Forward Request'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Reject Modal */}
+            {showRejectModal && (
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content border-0 shadow rounded-4">
+                            <div className="modal-header border-0 pb-0">
+                                <h5 className="modal-title fw-bold text-danger">Reject Request</h5>
+                                <button type="button" className="btn-close" onClick={() => setShowRejectModal(false)}></button>
+                            </div>
+                            <div className="modal-body">
+                                <p className="text-muted mb-3">Please provide a reason for rejection (mandatory):</p>
+                                <textarea
+                                    className="form-control"
+                                    rows="3"
+                                    value={modalReason}
+                                    onChange={(e) => setModalReason(e.target.value)}
+                                    placeholder="e.g., Skills do not match project requirements..."
+                                ></textarea>
+                            </div>
+                            <div className="modal-footer border-0 pt-0">
+                                <button type="button" className="btn btn-light rounded-pill" onClick={() => setShowRejectModal(false)}>Cancel</button>
+                                <button type="button" className="btn btn-danger rounded-pill px-4" onClick={handleReject} disabled={actionLoading}>
+                                    {actionLoading ? 'Rejecting...' : 'Confirm Rejection'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <style>{`
                 .nav-link {

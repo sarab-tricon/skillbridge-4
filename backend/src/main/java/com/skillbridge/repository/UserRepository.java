@@ -14,5 +14,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     java.util.List<User> findByManagerId(UUID managerId);
 
+    java.util.List<User> findAllByManagerId(UUID managerId);
+
     java.util.List<User> findByRole(com.skillbridge.enums.Role role);
 }

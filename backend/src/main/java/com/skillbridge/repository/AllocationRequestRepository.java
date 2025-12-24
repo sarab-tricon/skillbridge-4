@@ -11,4 +11,6 @@ public interface AllocationRequestRepository extends JpaRepository<AllocationReq
     List<AllocationRequest> findByStatus(String status);
 
     List<AllocationRequest> findByEmployeeId(UUID employeeId);
+
+    boolean existsByEmployeeIdAndStatusIn(UUID employeeId, List<String> statuses);
 }

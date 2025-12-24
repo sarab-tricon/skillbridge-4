@@ -4,6 +4,7 @@ import api from '../api/axios';
 import BenchAllocation from '../components/BenchAllocation';
 import ProjectManagement from '../components/ProjectManagement';
 import SkillCatalog from '../components/SkillCatalog';
+import AllocationApprovals from '../components/AllocationApprovals';
 
 
 const HRDashboard = () => {
@@ -650,6 +651,15 @@ const HRDashboard = () => {
                             </li>
                             <li className="nav-item w-100 mb-2">
                                 <button
+                                    onClick={() => setActiveSection('approvals')}
+                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'approvals' ? 'active' : ''}`}
+                                >
+                                    <i className="bi bi-check-circle icon-std"></i>
+                                    <span className="d-none d-sm-inline">Approvals</span>
+                                </button>
+                            </li>
+                            <li className="nav-item w-100 mb-2">
+                                <button
                                     onClick={() => setActiveSection('bench')}
                                     className={`nav-link sidebar-link w-100 text-start ${activeSection === 'bench' ? 'active' : ''}`}
                                 >
@@ -688,6 +698,7 @@ const HRDashboard = () => {
                                     {activeSection === 'overview' && 'Dashboard Overview'}
                                     {activeSection === 'people' && 'People Management'}
                                     {activeSection === 'projects' && 'Project Management'}
+                                    {activeSection === 'approvals' && 'Allocation Approvals'}
                                     {activeSection === 'bench' && 'Bench Management'}
                                     {activeSection === 'catalog' && 'Skill Catalog'}
                                     {activeSection === 'talent' && 'Talent Discovery'}
@@ -701,6 +712,7 @@ const HRDashboard = () => {
                         {activeSection === 'overview' && renderOverview()}
                         {activeSection === 'people' && renderPeopleManagement()}
                         {activeSection === 'projects' && <ProjectManagement />}
+                        {activeSection === 'approvals' && <AllocationApprovals />}
                         {activeSection === 'bench' && <BenchAllocation />}
                         {activeSection === 'catalog' && <SkillCatalog />}
                         {activeSection === 'talent' && renderTalentDiscovery()}

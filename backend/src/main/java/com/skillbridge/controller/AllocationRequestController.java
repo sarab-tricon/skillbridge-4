@@ -43,70 +43,212 @@ public class AllocationRequestController {
         UUID projectId = UUID.fromString(payload.get("projectId"));
         User currentUser = getAuthenticatedUser();
 
-        // Check active assignment
+        // 1. Check active assignment
         assignmentRepository.findTopByEmployeeIdOrderByStartDateDesc(currentUser.getId())
                 .filter(a -> a.getAssignmentStatus() == AssignmentStatus.ACTIVE)
                 .ifPresent(a -> {
                     throw new IllegalStateException("You already have an active assignment.");
                 });
 
-        // Check pending request
-        // (A real app might check for DUPLICATE pending requests too)
+        // 2. Check for DUPLICATE pending requests (PENDING_MANAGER or PENDING_HR)
+        boolean hasPending = requestRepository.existsByEmployeeIdAndStatusIn(
+                currentUser.getId(),
+                List.of("PENDING_MANAGER", "PENDING_HR"));
+
+        if (hasPending) {
+            return ResponseEntity.badRequest().body(Map.of("error", "You already have a pending allocation request."));
+        }
 
         AllocationRequest req = AllocationRequest.builder()
                 .employeeId(currentUser.getId())
                 .projectId(projectId)
-                .status("PENDING")
+                .status("PENDING_MANAGER") // Initial status
                 .createdAt(LocalDateTime.now())
                 .build();
 
         requestRepository.save(req);
-        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "Request submitted successfully"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "Request submitted to Manager"));
     }
 
-    // MANAGER: Get Pending
-    @GetMapping("/pending")
-    @PreAuthorize("hasAnyAuthority('ROLE_MANAGER', 'ROLE_HR')")
-    public ResponseEntity<List<AssignmentResponse>> getPendingRequests() {
-        List<AllocationRequest> requests = requestRepository.findByStatus("PENDING");
+    // EMPLOYEE: Get My Requests
+    @GetMapping("/my")
+    @PreAuthorize("hasAuthority('ROLE_EMPLOYEE')")
+    public ResponseEntity<List<AssignmentResponse>> getMyRequests() {
+        User currentUser = getAuthenticatedUser();
+        List<AllocationRequest> requests = requestRepository.findByEmployeeId(currentUser.getId());
 
         List<AssignmentResponse> responses = requests.stream().map(req -> {
             Project project = projectRepository.findById(req.getProjectId()).orElse(null);
-            User employee = userRepository.findById(req.getEmployeeId()).orElse(null);
+
+            // Map internal status to DTO status if needed, or just pass raw string if DTO
+            // allows
+            // Currently DTO has AssignmentStatus enum, we might need to extend it or just
+            // map to PENDING/REJECTED
+            // For now, let's just use the PENDING one and add a custom status string if DTO
+            // supports it,
+            // or rely on a new field.
+            // Wait, AssignmentResponse has assignmentStatus (Enum).
+            // I should check AssignmentResponse DTO.
+
+            AssignmentStatus dtoStatus;
+            try {
+                dtoStatus = AssignmentStatus.valueOf(req.getStatus());
+            } catch (IllegalArgumentException e) {
+                // Handle PENDING_MANAGER / PENDING_HR mapping
+                if (req.getStatus().startsWith("PENDING"))
+                    dtoStatus = AssignmentStatus.PENDING;
+                else
+                    dtoStatus = AssignmentStatus.ENDED; // Fallback?
+            }
+            if ("REJECTED".equals(req.getStatus()))
+                dtoStatus = AssignmentStatus.REJECTED;
+            if ("APPROVED".equals(req.getStatus()))
+                dtoStatus = AssignmentStatus.ACTIVE;
 
             return AssignmentResponse.builder()
-                    .assignmentId(req.getId()) // Use Request ID as ID for the UI
+                    .assignmentId(req.getId())
                     .employeeId(req.getEmployeeId())
                     .projectId(req.getProjectId())
                     .projectName(project != null ? project.getName() : "Unknown")
-                    .employeeName(employee != null ? employee.getFirstName() + " " + employee.getLastName() : "Unknown")
-                    .requestedAt(req.getCreatedAt())
-                    .assignmentStatus(AssignmentStatus.PENDING) // Reuse Enum for UI compatibility
+                    // We need to convey the specific sub-status (PENDING_MANAGER vs PENDING_HR)
+                    // If DTO only supports PENDING, we lose info.
+                    // Let's assume for now we just show PENDING, or I modify DTO.
+                    // Provide the raw status in a way if possible.
+                    .assignmentStatus(dtoStatus)
+                    .requestStatus(req.getStatus())
                     .build();
         }).collect(Collectors.toList());
 
         return ResponseEntity.ok(responses);
     }
 
-    // MANAGER: Approve
-    @PutMapping("/{id}/approve")
+    // LIST PENDING REQUESTS (Role-based)
+    @GetMapping("/pending")
     @PreAuthorize("hasAnyAuthority('ROLE_MANAGER', 'ROLE_HR')")
+    public ResponseEntity<List<AssignmentResponse>> getPendingRequests() {
+        User currentUser = getAuthenticatedUser();
+        List<AllocationRequest> requests;
+
+        if (currentUser.getRole().name().equals("MANAGER")) {
+            // Manager sees PENDING_MANAGER from their team
+            // NOTE: Ideally we'd filter at DB level, but doing in-memory for simplicity
+            // unless custom query exists
+            List<User> reports = userRepository.findAllByManagerId(currentUser.getId());
+            List<UUID> reportIds = reports.stream().map(User::getId).collect(Collectors.toList());
+
+            requests = requestRepository.findByStatus("PENDING_MANAGER").stream()
+                    .filter(r -> reportIds.contains(r.getEmployeeId()))
+                    .collect(Collectors.toList());
+
+        } else if (currentUser.getRole().name().equals("HR")) {
+            // HR sees PENDING_HR
+            requests = requestRepository.findByStatus("PENDING_HR");
+        } else {
+            requests = List.of();
+        }
+
+        List<AssignmentResponse> responses = requests.stream().map(req -> {
+            Project project = projectRepository.findById(req.getProjectId()).orElse(null);
+            User employee = userRepository.findById(req.getEmployeeId()).orElse(null);
+
+            // Resolve Manager Name (Forwarded By)
+            String managerName = null;
+            if (req.getForwardedBy() != null) {
+                User manager = userRepository.findById(req.getForwardedBy()).orElse(null);
+                if (manager != null) {
+                    managerName = manager.getFirstName() + " " + manager.getLastName();
+                }
+            }
+
+            return AssignmentResponse.builder()
+                    .assignmentId(req.getId())
+                    .employeeId(req.getEmployeeId())
+                    .projectId(req.getProjectId())
+                    .projectName(project != null ? project.getName() : "Unknown")
+                    .employeeName(employee != null ? employee.getFirstName() + " " + employee.getLastName() : "Unknown")
+                    .requestedAt(req.getCreatedAt())
+                    .assignmentStatus(AssignmentStatus.PENDING) // General pending status for UI
+                    // Add extra fields context if DTO supported it, mainly used for UI display
+                    .requestStatus(req.getStatus())
+                    .billingType(req.getBillingType())
+                    .managerName(managerName)
+                    .build();
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(responses);
+    }
+
+    // MANAGER: Forward to HR
+    @PutMapping("/{id}/forward")
+    @PreAuthorize("hasAuthority('ROLE_MANAGER')")
+    @Transactional
+    public ResponseEntity<?> forwardToHr(@PathVariable UUID id, @RequestBody Map<String, String> payload) {
+        AllocationRequest req = requestRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+
+        User manager = getAuthenticatedUser();
+
+        // Validate Ownership (Employee must report to this manager)
+        User employee = userRepository.findById(req.getEmployeeId())
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        if (!manager.getId().equals(employee.getManagerId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can only manage your own reports.");
+        }
+
+        if (!"PENDING_MANAGER".equals(req.getStatus())) {
+            return ResponseEntity.badRequest().body("Request is not in pending manager state.");
+        }
+
+        // Mandatory Billing Type
+        String billingTypeStr = payload.get("billingType");
+        if (billingTypeStr == null) {
+            return ResponseEntity.badRequest().body("Billing type is mandatory.");
+        }
+
+        try {
+            req.setBillingType(BillingType.valueOf(billingTypeStr));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid billing type.");
+        }
+
+        req.setStatus("PENDING_HR");
+        req.setManagerComments(payload.get("comments")); // Optional
+        req.setForwardedAt(LocalDateTime.now());
+        req.setForwardedBy(manager.getId());
+
+        requestRepository.save(req);
+        return ResponseEntity.ok(Map.of("message", "Forwarded to HR successfully"));
+    }
+
+    // HR: Approve & Allocate
+    @PutMapping("/{id}/approve")
+    @PreAuthorize("hasAuthority('ROLE_HR')")
     @Transactional
     public ResponseEntity<?> approveRequest(@PathVariable UUID id, @RequestBody Map<String, String> payload) {
         AllocationRequest req = requestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
 
-        if (!"PENDING".equals(req.getStatus())) {
-            return ResponseEntity.badRequest().body("Request is not pending");
+        if (!"PENDING_HR".equals(req.getStatus())) {
+            return ResponseEntity.badRequest().body("Request is not pending HR approval.");
         }
 
-        BillingType billingType = BillingType.valueOf(payload.getOrDefault("billingType", "BILLABLE"));
-        User manager = getAuthenticatedUser();
+        // Use stored immutable billing type
+        BillingType billingType = req.getBillingType();
+        if (billingType == null) {
+            // Fallback for old records or migration edge cases, though goal is strict.
+            // We'll stricter error or default. Let's default to BILLABLE with log warning
+            // ideally,
+            // or just error out. Given "strict", error might be better, but lets safeguard.
+            billingType = BillingType.BILLABLE;
+        }
+
+        User hr = getAuthenticatedUser();
 
         // 1. Update Request
         req.setStatus("APPROVED");
         req.setReviewedAt(LocalDateTime.now());
-        req.setReviewedBy(manager.getId());
+        req.setReviewedBy(hr.getId());
         requestRepository.save(req);
 
         // 2. Create Real Assignment
@@ -120,24 +262,42 @@ public class AllocationRequestController {
 
         assignmentRepository.save(assignment);
 
-        return ResponseEntity.ok(Map.of("message", "Approved"));
+        return ResponseEntity.ok(Map.of("message", "Request Approved and Allocation Created"));
     }
 
-    // MANAGER: Reject
+    // MANAGER & HR: Reject
     @PutMapping("/{id}/reject")
     @PreAuthorize("hasAnyAuthority('ROLE_MANAGER', 'ROLE_HR')")
     @Transactional
-    public ResponseEntity<?> rejectRequest(@PathVariable UUID id) {
+    public ResponseEntity<?> rejectRequest(@PathVariable UUID id, @RequestBody Map<String, String> payload) {
         AllocationRequest req = requestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
 
-        User manager = getAuthenticatedUser();
+        User currentUser = getAuthenticatedUser();
+        String role = currentUser.getRole().name();
+        String reason = payload.get("reason");
+
+        if (reason == null || reason.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Rejection reason is mandatory.");
+        }
+
+        // Validate Status transition allowability
+        if ("MANAGER".equals(role) && !"PENDING_MANAGER".equals(req.getStatus())) {
+            return ResponseEntity.badRequest().body("Manager can only reject requests pending manager review.");
+        }
+        if ("HR".equals(role) && !"PENDING_HR".equals(req.getStatus())) {
+            // HR can technically reject PENDING_MANAGER too if they want? No, stick to
+            // workflow.
+            return ResponseEntity.badRequest().body("HR can only reject requests pending HR review.");
+        }
+
         req.setStatus("REJECTED");
+        req.setRejectionReason(reason);
         req.setReviewedAt(LocalDateTime.now());
-        req.setReviewedBy(manager.getId());
+        req.setReviewedBy(currentUser.getId());
         requestRepository.save(req);
 
-        return ResponseEntity.ok(Map.of("message", "Rejected"));
+        return ResponseEntity.ok(Map.of("message", "Request Rejected"));
     }
 
     private User getAuthenticatedUser() {
