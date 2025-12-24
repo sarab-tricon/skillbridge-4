@@ -612,7 +612,7 @@ const HRDashboard = () => {
     );
 
     return (
-        <div className="container-fluid" style={{ backgroundColor: '#f8f9fa', minHeight: '100vh', padding: 0 }}>
+        <div className="container-fluid" style={{ backgroundColor: 'var(--color-bg)', minHeight: '100vh', padding: 0 }}>
             <div className="row g-0">
                 {/* Sidebar */}
                 {/* Sidebar */}

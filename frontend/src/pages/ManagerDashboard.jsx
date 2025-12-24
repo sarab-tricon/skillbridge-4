@@ -224,7 +224,7 @@ const ManagerDashboard = () => {
     );
 
     return (
-        <div className="container-fluid p-0" style={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
+        <div className="container-fluid p-0" style={{ backgroundColor: 'var(--color-bg)', minHeight: '100vh' }}>
             <div className="row g-0">
                 {/* SIDEBAR */}
                 <div className="col-auto col-md-3 col-lg-2 sidebar">
