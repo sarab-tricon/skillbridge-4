@@ -39,17 +39,17 @@ const ProfileSection = ({ onNavigateToSkills }) => {
     if (!profile) return null;
 
     return (
-        <div className="mx-auto" style={{ maxWidth: '700px' }}>
-            <div className="card shadow-sm border-0 rounded-3">
+        <div className="mx-auto" style={{ maxWidth: '1000px' }}>
+            <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
                 {/* Header */}
-                <div className="card-header py-2 px-3 border-0" style={{ backgroundColor: 'var(--color-primary)' }}>
+                <div className="card-header py-3 px-4 border-0" style={{ backgroundColor: 'var(--color-primary)' }}>
                     <div className="d-flex align-items-center gap-3">
                         <div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: '45px', height: '45px', fontSize: '1.25rem', backgroundColor: 'white', color: 'var(--color-accent)' }}>
                             <i className="bi bi-person-fill"></i>
                         </div>
                         <div className="flex-grow-1 text-white">
-                            <h6 className="fw-bold mb-0">{profile.firstName} {profile.lastName}</h6>
-                            <small className="opacity-75">{profile.email}</small>
+                            <h5 className="fw-bold mb-1">{profile.firstName} {profile.lastName}</h5>
+                            <div className="opacity-75">{profile.email}</div>
                         </div>
                         <div className="d-flex gap-2">
                             <div className="bg-light text-dark rounded px-2 py-1 text-center">
@@ -71,8 +71,8 @@ const ProfileSection = ({ onNavigateToSkills }) => {
                 </div>
 
                 {/* Body */}
-                <div className="card-body p-3">
-                    <div className="row g-3">
+                <div className="card-body p-4">
+                    <div className="row g-4">
                         {/* Project Details */}
                         <div className="col-md-6">
                             <h6 className="fw-bold mb-2 small" style={{ color: 'var(--color-accent)' }}>
@@ -133,19 +133,21 @@ const ProfileSection = ({ onNavigateToSkills }) => {
                                     </button>
                                 )}
                             </div>
-                            {profile.skills && profile.skills.length > 0 ? (
-                                <div className="d-flex flex-wrap gap-1">
-                                    {profile.skills.map(skill => (
-                                        <span key={skill.id} className="badge bg-light text-dark border px-2 py-1" style={{ fontSize: '0.75rem' }}>
-                                            <span className={`d-inline-block rounded-circle me-1 ${skill.proficiencyLevel === 'ADVANCED' ? 'bg-success' :
+                            {profile.skills && profile.skills.filter(s => s.status === 'APPROVED').length > 0 ? (
+                                <div className="d-flex flex-wrap gap-2">
+                                    {profile.skills
+                                        .filter(s => s.status === 'APPROVED')
+                                        .map(skill => (
+                                            <span key={skill.id} className="badge bg-white text-dark border px-3 py-2 rounded-pill shadow-sm d-flex align-items-center gap-2" style={{ fontSize: '0.85rem' }}>
+                                                <span className={`d-inline-block rounded-circle ${skill.proficiencyLevel === 'ADVANCED' ? 'bg-success' :
                                                     skill.proficiencyLevel === 'INTERMEDIATE' ? 'bg-info' : 'bg-secondary'
-                                                }`} style={{ width: '6px', height: '6px' }}></span>
-                                            {skill.skillName}
-                                        </span>
-                                    ))}
+                                                    }`} style={{ width: '8px', height: '8px' }}></span>
+                                                {skill.skillName}
+                                            </span>
+                                        ))}
                                 </div>
                             ) : (
-                                <p className="text-muted small mb-0">No skills added yet.</p>
+                                <p className="text-muted small mb-0">No approved skills added yet.</p>
                             )}
                         </div>
                     </div>

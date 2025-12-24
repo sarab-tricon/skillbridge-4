@@ -21,6 +21,7 @@ const EmployeeDashboard = () => {
     const [addingSkill, setAddingSkill] = useState(false);
     const [addSkillError, setAddSkillError] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
+    const [selectedSkillLevel, setSelectedSkillLevel] = useState('BEGINNER'); // Tab state
 
     // Allocation States
     const [availableProjects, setAvailableProjects] = useState([]);
@@ -213,36 +214,48 @@ const EmployeeDashboard = () => {
     };
 
     const renderOverview = () => (
-        <div className="row g-4">
+        <div className="row g-3 g-md-4">
             <div className="col-md-4">
                 <div className="card h-100 shadow-sm border-0 border-top-primary">
-                    <div className="card-body p-4 text-center">
-                        <i className="bi bi-person-badge display-4 text-primary mb-3"></i>
+                    <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
+                        <i className="bi bi-person-badge h1 text-primary mb-2"></i>
                         <h5 className="card-title fw-bold">My Skills</h5>
-                        <p className="display-6 fw-bold text-accent">{skills.length}</p>
-                        <button className="btn btn-outline-primary btn-sm mt-2" onClick={() => setActiveSection('skills')}>Manage Skills</button>
+                        <div className="mb-3">
+                            <p className="h2 fw-bold text-accent mb-0">{skills.filter(s => s.status === 'APPROVED').length}</p>
+                        </div>
+                        <div className="mt-auto">
+                            <button className="btn btn-outline-primary btn-sm px-4" onClick={() => setActiveSection('skills')}>Manage</button>
+                        </div>
                     </div>
                 </div>
             </div>
             <div className="col-md-4">
                 <div className="card h-100 shadow-sm border-0 border-top-primary">
-                    <div className="card-body p-4 text-center">
-                        <i className="bi bi-briefcase display-4 text-primary mb-3"></i>
+                    <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
+                        <i className="bi bi-briefcase h1 text-primary mb-2"></i>
                         <h5 className="card-title fw-bold">Assignment</h5>
-                        <p className="h4 mt-3 text-muted">{allocation?.projectName || 'Bench'}</p>
-                        <button className="btn btn-outline-primary btn-sm mt-2" onClick={() => setActiveSection('allocation')}>View Details</button>
+                        <div className="mb-3">
+                            <p className="h5 text-muted mb-0">{allocation?.projectName || 'Bench'}</p>
+                        </div>
+                        <div className="mt-auto">
+                            <button className="btn btn-outline-primary btn-sm px-4" onClick={() => setActiveSection('allocation')}>View</button>
+                        </div>
                     </div>
                 </div>
             </div>
             <div className="col-md-4">
                 <div className="card h-100 shadow-sm border-0 border-top-primary">
-                    <div className="card-body p-4 text-center">
-                        <i className="bi bi-graph-up display-4 text-primary mb-3"></i>
+                    <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
+                        <i className="bi bi-graph-up h1 text-primary mb-2"></i>
                         <h5 className="card-title fw-bold">Utilization</h5>
-                        <p className="display-6 fw-bold text-accent">
-                            {utilization?.allocationStatus === 'BILLABLE' ? '100%' : utilization?.allocationStatus === 'INVESTMENT' ? '100%' : '0%'}
-                        </p>
-                        <button className="btn btn-outline-primary btn-sm mt-2" onClick={() => setActiveSection('utilization')}>Detailed Stats</button>
+                        <div className="mb-3">
+                            <p className="h2 fw-bold text-accent mb-0">
+                                {utilization?.allocationStatus === 'BILLABLE' ? '100%' : utilization?.allocationStatus === 'INVESTMENT' ? '100%' : '0%'}
+                            </p>
+                        </div>
+                        <div className="mt-auto">
+                            <button className="btn btn-outline-primary btn-sm px-4" onClick={() => setActiveSection('utilization')}>Stats</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -250,7 +263,7 @@ const EmployeeDashboard = () => {
     );
 
     const renderSkills = () => {
-        const levels = ['ADVANCED', 'INTERMEDIATE', 'BEGINNER'];
+        const levels = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'];
         const groupedSkills = levels.reduce((acc, level) => {
             acc[level] = skills.filter(s => s.proficiencyLevel === level);
             return acc;
@@ -258,17 +271,12 @@ const EmployeeDashboard = () => {
 
         return (
             <div>
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h2 className="fw-bold">My Personal Skills</h2>
-                </div>
-
-                <div className="row g-4">
-                    <div className="col-lg-4">
-                        <div id="skill-form-container" className="card shadow-sm border-0 p-4 sticky-top" style={{ top: '100px', zIndex: 1, backgroundColor: '#fff', borderLeft: '5px solid var(--color-accent)' }}>
+                <div className="row g-4 h-100">
+                    <div className="col-lg-4 h-100">
+                        <div id="skill-form-container" className="card shadow-sm border-0 p-4 sticky-top scrollable-form" style={{ top: '0', zIndex: 1, backgroundColor: '#fff', borderLeft: '5px solid var(--color-accent)', maxHeight: '100%', overflowY: 'auto' }}>
                             <h4 className="fw-bold mb-3">{editingSkill ? 'Edit Skill' : 'Add New Skill'}</h4>
                             <form onSubmit={editingSkill ? handleUpdateSkill : handleAddSkill}>
                                 <div className="mb-3">
-                                    <label className="form-label small text-muted text-uppercase fw-bold">Skill Name</label>
                                     <label className="form-label small text-muted text-uppercase fw-bold">Skill Name</label>
                                     <select
                                         className="form-select border-2 shadow-none"
@@ -324,6 +332,22 @@ const EmployeeDashboard = () => {
                     </div>
 
                     <div className="col-lg-8">
+                        {/* Tab Navigation */}
+                        <div className="nav nav-pills mb-4 bg-white p-2 rounded-4 shadow-sm d-flex justify-content-between gap-2">
+                            {levels.map(level => (
+                                <button
+                                    key={level}
+                                    className={`nav-link flex-grow-1 fw-bold rounded-pill py-2 transition-all ${selectedSkillLevel === level ? 'active-accent text-white' : 'text-muted hover-light'}`}
+                                    onClick={() => setSelectedSkillLevel(level)}
+                                >
+                                    {level}
+                                    <span className={`ms-2 badge rounded-pill ${selectedSkillLevel === level ? 'bg-white text-dark' : 'bg-light text-muted'}`}>
+                                        {groupedSkills[level]?.length || 0}
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+
                         {loadingSkills ? (
                             <div className="card shadow-sm border-0 p-5 text-center">
                                 <div className="spinner-border text-primary" role="status"></div>
@@ -331,78 +355,65 @@ const EmployeeDashboard = () => {
                             </div>
                         ) : errorSkills ? (
                             <div className="alert alert-warning">{errorSkills}</div>
-                        ) : skills.length === 0 ? (
-                            <div className="card shadow-sm border-0 p-5 text-center">
-                                <p className="text-muted italic mb-0">You haven't added any skills yet.</p>
-                            </div>
                         ) : (
-                            <div className="d-flex flex-column gap-4">
-                                {levels.map(level => (
-                                    groupedSkills[level].length > 0 && (
-                                        <div key={level} className="card shadow-sm border-0 overflow-hidden rounded-4">
-                                            <div className={`card-header py-3 px-4 border-0 d-flex justify-content-between align-items-center ${level === 'ADVANCED' ? 'bg-success text-white' :
-                                                level === 'INTERMEDIATE' ? 'bg-info text-dark' : 'bg-secondary text-white'
-                                                }`}>
-                                                <h5 className="mb-0 fw-bold d-flex align-items-center gap-2">
-                                                    <i className={`bi ${level === 'ADVANCED' ? 'bi-award-fill' : level === 'INTERMEDIATE' ? 'bi-shield-check' : 'bi-speedometer'}`}></i>
-                                                    {level}
-                                                </h5>
-                                                <span className="badge bg-white text-dark rounded-pill px-3">{groupedSkills[level].length}</span>
-                                            </div>
-                                            <div className="card-body p-0">
-                                                <div className="table-responsive">
-                                                    <table className="table table-hover align-middle mb-0">
-                                                        <thead className="table-light small text-uppercase fw-bold text-muted">
-                                                            <tr>
-                                                                <th className="px-4 py-3">Skill Definition</th>
-                                                                <th className="px-4 py-3 text-center">Verification</th>
-                                                                <th className="px-4 py-3 text-end">Actions</th>
+                            <div className="animate-fade-in">
+                                <div className="card shadow-sm border-0 overflow-hidden rounded-4">
+                                    <div className="card-header py-3 px-4 border-0 d-flex justify-content-between align-items-center bg-accent-header">
+                                        <h5 className="mb-0 fw-bold d-flex align-items-center gap-2">
+                                            <i className={`bi ${selectedSkillLevel === 'ADVANCED' ? 'bi-award-fill' : selectedSkillLevel === 'INTERMEDIATE' ? 'bi-shield-check' : 'bi-speedometer'}`}></i>
+                                            {selectedSkillLevel} Skills
+                                        </h5>
+                                    </div>
+                                    <div className="card-body p-0">
+                                        <div className="table-responsive scrollable-table-container" style={{ maxHeight: 'calc(100vh - 380px)', overflowY: 'auto' }}>
+                                            <table className="table table-hover align-middle mb-0">
+                                                <thead className="table-light small text-uppercase fw-bold text-muted sticky-top" style={{ zIndex: 5, background: '#f8f9fa' }}>
+                                                    <tr>
+                                                        <th className="px-4 py-3">Skill Name</th>
+                                                        <th className="px-4 py-3 text-center">Status</th>
+                                                        <th className="px-4 py-3 text-end">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {groupedSkills[selectedSkillLevel] && groupedSkills[selectedSkillLevel].length > 0 ? (
+                                                        groupedSkills[selectedSkillLevel].map((skill) => (
+                                                            <tr key={skill.id} className={editingSkill?.id === skill.id ? 'table-info' : ''}>
+                                                                <td className="px-4 py-3">
+                                                                    <div className="fw-bold text-dark">{skill.skillName}</div>
+                                                                </td>
+                                                                <td className="px-4 py-3 text-center">
+                                                                    <span className={`badge px-3 py-2 rounded-pill ${skill.status === 'APPROVED' ? 'bg-success' :
+                                                                        skill.status === 'PENDING' ? 'bg-secondary' : 'bg-danger'
+                                                                        }`} style={{ minWidth: '90px', letterSpacing: '0.5px' }}>
+                                                                        {skill.status}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="px-4 py-3 text-end">
+                                                                    <button
+                                                                        className="btn btn-sm btn-primary rounded-pill px-4 shadow-sm"
+                                                                        onClick={() => {
+                                                                            setEditingSkill(skill);
+                                                                            setAddSkillError(null);
+                                                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                                        }}
+                                                                    >
+                                                                        <i className="bi bi-pencil-square me-1"></i> Edit
+                                                                    </button>
+                                                                </td>
                                                             </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {groupedSkills[level].map((skill) => (
-                                                                <tr key={skill.id} className={editingSkill?.id === skill.id ? 'table-info' : ''}>
-                                                                    <td className="px-4 py-3">
-                                                                        <div className="fw-bold text-dark">{skill.skillName}</div>
-                                                                    </td>
-                                                                    <td className="px-4 py-3 text-center">
-                                                                        <span className={`badge px-3 py-2 rounded-pill ${skill.status === 'APPROVED' ? 'bg-success' :
-                                                                            skill.status === 'PENDING' ? 'bg-secondary' : 'bg-danger'
-                                                                            }`} style={{ minWidth: '90px', letterSpacing: '0.5px' }}>
-                                                                            {skill.status}
-                                                                        </span>
-                                                                    </td>
-                                                                    <td className="px-4 py-3 text-end">
-                                                                        <div className="d-flex justify-content-end gap-2">
-                                                                            <button
-                                                                                className="btn btn-sm btn-primary rounded-pill px-3 shadow-sm"
-                                                                                onClick={() => {
-                                                                                    setEditingSkill(skill);
-                                                                                    setAddSkillError(null);
-                                                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                                                                }}
-                                                                            >
-                                                                                Edit
-                                                                            </button>
-                                                                            {skill.status === 'PENDING' && (
-                                                                                <button
-                                                                                    className="btn btn-sm btn-danger rounded-pill px-3 shadow-sm"
-                                                                                    onClick={() => handleDeleteSkill(skill.id)}
-                                                                                >
-                                                                                    Delete
-                                                                                </button>
-                                                                            )}
-                                                                        </div>
-                                                                    </td>
-                                                                </tr>
-                                                            ))}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <tr>
+                                                            <td colSpan="3" className="text-center py-5 text-muted">
+                                                                No {selectedSkillLevel.toLowerCase()} skills found.
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
                                         </div>
-                                    )
-                                ))}
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>
@@ -412,28 +423,23 @@ const EmployeeDashboard = () => {
     };
 
     const renderAllocation = () => (
-        <div className="card shadow-sm border-0 p-4">
-            <h2 className="fw-bold mb-4 text-center">Project Assignment</h2>
+        <div className="py-2">
             {loadingAlloc ? (
-                <div className="text-center py-5">
+                <div className="text-center py-4">
                     <div className="spinner-border text-primary" role="status"></div>
                 </div>
             ) : errorAlloc ? (
                 <div className="alert alert-danger">{errorAlloc}</div>
             ) : (!allocation || allocation.assignmentStatus === 'ENDED' || allocation.assignmentStatus === 'REJECTED') ? (
-                <div className="row justify-content-center">
+                <div className="row justify-content-center g-3">
                     <div className="col-md-6">
-                        <div className="text-center mb-5">
-                            <div className="display-4 text-muted mb-3 opacity-25">
-                                <i className="bi bi-briefcase"></i>
-                            </div>
+                        <div className="text-center mb-4">
+                            <i className="bi bi-briefcase h1 text-muted opacity-25"></i>
                             <h3 className="text-muted">Currently on Bench</h3>
-                            {allocation?.assignmentStatus === 'REJECTED' && (
-                                <div className="alert alert-warning small mt-2">Your previous request was not approved.</div>
-                            )}
-                            <p className="lead">Select a project below to request an allocation.</p>
+                            <p className="small text-muted mb-0">Select a project to request an allocation.</p>
                         </div>
 
+<<<<<<< HEAD
                         <div className="card shadow-sm border-0 p-4 bg-light">
                             <h4 className="fw-bold mb-3 text-center">Request Allocation</h4>
 
@@ -474,9 +480,12 @@ const EmployeeDashboard = () => {
                                 </div>
                             )}
 
+=======
+                        <div className="card shadow-sm border-0 p-3 bg-light">
+                            <h5 className="fw-bold mb-3 text-center">Request Allocation</h5>
+>>>>>>> b3e99d787a746905ed7f9577d1613ef73f5826cb
                             <form onSubmit={handleRequestAllocation}>
-                                <div className="mb-4">
-                                    <label className="form-label small text-muted text-uppercase fw-bold">Select Project</label>
+                                <div className="mb-3">
                                     <select
                                         className="form-select shadow-none border-2"
                                         value={selectedProject}
@@ -504,25 +513,22 @@ const EmployeeDashboard = () => {
                 </div>
             ) : (
                 <div className="row justify-content-center">
-                    <div className="col-md-8">
+                    <div className="col-md-10 col-lg-8">
                         <div className={`card border-2 shadow-sm rounded-4 overflow-hidden ${allocation.assignmentStatus === 'PENDING' ? 'border-warning' : 'border-primary'}`}>
-                            <div className={`card-header text-white p-4 text-center border-0 ${allocation.assignmentStatus === 'PENDING' ? 'bg-warning text-dark' : 'bg-primary'}`}>
-                                <h3 className="mb-0">Project Details</h3>
+                            <div className={`card-header text-white p-3 text-center border-0 ${allocation.assignmentStatus === 'PENDING' ? 'bg-warning text-dark' : 'bg-primary'}`}>
+                                <h4 className="mb-0">Project Details</h4>
                             </div>
-                            <div className="card-body p-4 text-center">
-                                <div className="mb-4">
+                            <div className="card-body p-3 p-md-4 text-center">
+                                <div className="mb-3">
                                     <span className={`badge rounded-pill px-4 py-2 fs-6 ${allocation.assignmentStatus === 'ACTIVE' ? 'bg-success' :
                                         allocation.assignmentStatus === 'PENDING' ? 'bg-warning text-dark' : 'bg-secondary'
                                         }`}>
                                         {allocation.assignmentStatus}
                                     </span>
                                 </div>
-                                <div className="row g-3">
-                                    <div className="col-12 border-bottom pb-3">
-                                        <p className="text-muted small text-uppercase fw-bold mb-1">Status</p>
-                                        <p className="h4 mb-0">{allocation.assignmentStatus === 'ACTIVE' ? 'Allocated' : 'Awaiting Approval'}</p>
-                                    </div>
-
+                                <div className="border-top pt-3">
+                                    <p className="text-muted small text-uppercase fw-bold mb-1">Current Status</p>
+                                    <p className="h4 mb-0">{allocation.assignmentStatus === 'ACTIVE' ? 'Allocated to Project' : 'Awaiting Peer/Manager Approval'}</p>
                                 </div>
                             </div>
                         </div>
@@ -533,32 +539,33 @@ const EmployeeDashboard = () => {
     );
 
     const renderUtilization = () => (
-        <div className="card shadow-sm border-0 p-4 text-center">
-            <h2 className="fw-bold mb-5">Utilization Overview</h2>
+        <div className="text-center mx-auto" style={{ maxWidth: '600px', paddingTop: '1.5rem' }}>
             {loadingUtil ? (
                 <div className="spinner-border text-primary" role="status"></div>
             ) : errorUtil ? (
                 <div className="alert alert-danger">{errorUtil}</div>
             ) : (
-                <div className="py-5">
+                <div className="py-2">
                     <div className="utilization-disk mx-auto mb-4" style={{
-                        width: '200px',
-                        height: '200px',
+                        width: '180px',
+                        height: '180px',
                         borderRadius: '50%',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        backgroundColor: 'var(--color-bg)',
+                        backgroundColor: 'white',
                         border: '10px solid var(--color-primary)',
-                        boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                        boxShadow: '0 8px 25px rgba(0,0,0,0.08)'
                     }}>
-                        <span className="display-4 fw-bold text-accent">
+                        <span className="h1 fw-bold text-accent mb-0" style={{ fontSize: '2.5rem' }}>
                             {utilization?.allocationStatus === 'BILLABLE' ? '100%' : utilization?.allocationStatus === 'INVESTMENT' ? '100%' : '0%'}
                         </span>
                     </div>
-                    <h3 className="fw-bold text-dark mt-4">{utilization?.allocationStatus || 'UNKNOWN'}</h3>
-                    <p className="text-muted max-width-600 mx-auto">
-                        Your utilization is calculated based on your active project assignments and their billing status.
+                    <div className="badge rounded-pill bg-light text-primary px-4 py-2 border mb-3 fs-6 fw-bold">
+                        {utilization?.allocationStatus || 'UNKNOWN'} Status
+                    </div>
+                    <p className="text-muted small mb-0 px-3 opacity-75">
+                        Your current utilization is calculated based on active project assignments and billing status.
                     </p>
                 </div>
             )}
@@ -566,10 +573,10 @@ const EmployeeDashboard = () => {
     );
 
     return (
-        <div className="container-fluid p-0 overflow-hidden" style={{ minHeight: 'calc(100vh - 70px)' }}>
-            <div className="row g-0">
+        <div className="container-fluid p-0 overflow-hidden" style={{ height: 'calc(100vh - 70px)', position: 'fixed', width: '100%' }}>
+            <div className="row g-0 h-100">
                 {/* SIDEBAR */}
-                <div className="col-auto col-md-3 col-xl-2 sidebar">
+                <div className="sidebar-container h-100">
                     <div className="d-flex flex-column px-3 pt-4">
                         <div className="sidebar-header">
                             <h4 className="sidebar-title">Menu</h4>
@@ -625,19 +632,20 @@ const EmployeeDashboard = () => {
                 </div>
 
                 {/* MAIN CONTENT AREA */}
-                <div className="col p-4 p-md-5" style={{ backgroundColor: 'var(--color-bg)' }}>
-                    <div className="max-width-xl mx-auto">
-                        {activeSection !== 'profile' && (
-                            <header className="page-header mb-4">
+                <div className="col h-100 main-content-area" style={{ backgroundColor: 'var(--color-bg)', overflowY: activeSection === 'profile' ? 'hidden' : 'auto', scrollbarGutter: 'stable' }}>
+                    <div className="max-width-xl mx-auto py-3 py-md-4 px-3 px-md-4">
+                        <header className="page-header mb-4">
+                            {activeSection === 'overview' && (
                                 <h4 className="text-muted mb-1">Welcome back, {user?.sub?.split('@')[0]}</h4>
-                                <h1 className="page-title">
-                                    {activeSection === 'overview' && 'Dashboard Overview'}
-                                    {activeSection === 'skills' && 'Skill Management'}
-                                    {activeSection === 'allocation' && 'My Projects'}
-                                    {activeSection === 'utilization' && 'Personal Utilization'}
-                                </h1>
-                            </header>
-                        )}
+                            )}
+                            <h1 className="page-title">
+                                {activeSection === 'overview' && 'Dashboard Overview'}
+                                {activeSection === 'skills' && 'Skill Management'}
+                                {activeSection === 'allocation' && 'My Projects'}
+                                {activeSection === 'utilization' && 'Personal Utilization'}
+                                {activeSection === 'profile' && 'My Profile'}
+                            </h1>
+                        </header>
 
                         <div className="animate-fade-in">
                             {activeSection === 'overview' && renderOverview()}
@@ -652,9 +660,11 @@ const EmployeeDashboard = () => {
 
             <style>{`
                 .nav-link {
-                    transition: all 0.2s ease;
+                    transition: none; /* Disable transition to prevent shaking during state changes */
                     border-radius: 8px !important;
                     font-weight: 500;
+                    box-sizing: border-box;
+                    border: 1px solid transparent; /* Reserve space for active border */
                 }
                 .nav-link:hover:not(.active) {
                     background-color: #f0f7ff;
@@ -675,6 +685,47 @@ const EmployeeDashboard = () => {
                 }
                 .max-width-xl {
                     max-width: 1200px;
+                }
+                .sidebar-container {
+                    width: 280px;
+                    flex-shrink: 0;
+                    background-color: #fff;
+                    border-right: 1px solid #eee;
+                    overflow-y: auto;
+                }
+                .main-content-area {
+                    flex-grow: 1;
+                    min-width: 0; /* Important for flex-child overflow */
+                }
+                .scrollable-table-container::-webkit-scrollbar,
+                .scrollable-form::-webkit-scrollbar {
+                    width: 6px;
+                }
+                .scrollable-table-container::-webkit-scrollbar-track,
+                .scrollable-form::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                }
+                .scrollable-table-container::-webkit-scrollbar-thumb,
+                .scrollable-form::-webkit-scrollbar-thumb {
+                    background: #ccc;
+                    border-radius: 10px;
+                }
+                .scrollable-table-container::-webkit-scrollbar-thumb:hover,
+                .scrollable-form::-webkit-scrollbar-thumb:hover {
+                    background: var(--color-accent);
+                }
+                .nav-link.active-accent {
+                    background-color: rgba(207, 75, 0, 0.12) !important;
+                    color: var(--color-accent) !important;
+                    border: 1px solid var(--color-accent) !important;
+                }
+                .bg-accent-header {
+                    background-color: rgba(207, 75, 0, 0.08) !important;
+                    color: var(--color-accent) !important;
+                    border-bottom: 1px solid rgba(207, 75, 0, 0.15);
+                }
+                .bg-accent-header h5 {
+                    color: var(--color-accent) !important;
                 }
                 .nav-link i {
                     font-size: 1.25rem;
