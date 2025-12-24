@@ -33,13 +33,13 @@ const Navbar = () => {
                     margin: 0
                 }}
             >
-                <Link
+                <div
                     className="navbar-brand d-flex align-items-center fw-bold mb-0"
-                    to="/"
                     style={{
                         fontSize: '1.25rem',
                         color: 'var(--color-accent)',
-                        margin: 0
+                        margin: 0,
+                        cursor: 'default'
                     }}
                 >
                     <img
@@ -50,7 +50,7 @@ const Navbar = () => {
                         style={{ mixBlendMode: 'multiply', filter: 'brightness(1.1)' }}
                     />
                     SkillBridge
-                </Link>
+                </div>
                 {isAuthenticated && !['/', '/login'].includes(location.pathname) && (
                     <div className="d-flex align-items-center gap-3">
                         <div className="d-flex align-items-center text-muted small">
