@@ -204,33 +204,45 @@ const EmployeeDashboard = () => {
         <div className="row g-3 g-md-4">
             <div className="col-md-4">
                 <div className="card h-100 shadow-sm border-0 border-top-primary">
-                    <div className="card-body p-3 p-md-4 text-center">
+                    <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
                         <i className="bi bi-person-badge h1 text-primary mb-2"></i>
                         <h5 className="card-title fw-bold">My Skills</h5>
-                        <p className="h2 fw-bold text-accent mb-2">{skills.filter(s => s.status === 'APPROVED').length}</p>
-                        <button className="btn btn-outline-primary btn-sm" onClick={() => setActiveSection('skills')}>Manage</button>
+                        <div className="mb-3">
+                            <p className="h2 fw-bold text-accent mb-0">{skills.filter(s => s.status === 'APPROVED').length}</p>
+                        </div>
+                        <div className="mt-auto">
+                            <button className="btn btn-outline-primary btn-sm px-4" onClick={() => setActiveSection('skills')}>Manage</button>
+                        </div>
                     </div>
                 </div>
             </div>
             <div className="col-md-4">
                 <div className="card h-100 shadow-sm border-0 border-top-primary">
-                    <div className="card-body p-3 p-md-4 text-center">
+                    <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
                         <i className="bi bi-briefcase h1 text-primary mb-2"></i>
                         <h5 className="card-title fw-bold">Assignment</h5>
-                        <p className="h5 text-muted mb-2">{allocation?.projectName || 'Bench'}</p>
-                        <button className="btn btn-outline-primary btn-sm" onClick={() => setActiveSection('allocation')}>View</button>
+                        <div className="mb-3">
+                            <p className="h5 text-muted mb-0">{allocation?.projectName || 'Bench'}</p>
+                        </div>
+                        <div className="mt-auto">
+                            <button className="btn btn-outline-primary btn-sm px-4" onClick={() => setActiveSection('allocation')}>View</button>
+                        </div>
                     </div>
                 </div>
             </div>
             <div className="col-md-4">
                 <div className="card h-100 shadow-sm border-0 border-top-primary">
-                    <div className="card-body p-3 p-md-4 text-center">
+                    <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
                         <i className="bi bi-graph-up h1 text-primary mb-2"></i>
                         <h5 className="card-title fw-bold">Utilization</h5>
-                        <p className="h2 fw-bold text-accent mb-2">
-                            {utilization?.allocationStatus === 'BILLABLE' ? '100%' : utilization?.allocationStatus === 'INVESTMENT' ? '100%' : '0%'}
-                        </p>
-                        <button className="btn btn-outline-primary btn-sm" onClick={() => setActiveSection('utilization')}>Stats</button>
+                        <div className="mb-3">
+                            <p className="h2 fw-bold text-accent mb-0">
+                                {utilization?.allocationStatus === 'BILLABLE' ? '100%' : utilization?.allocationStatus === 'INVESTMENT' ? '100%' : '0%'}
+                            </p>
+                        </div>
+                        <div className="mt-auto">
+                            <button className="btn btn-outline-primary btn-sm px-4" onClick={() => setActiveSection('utilization')}>Stats</button>
+                        </div>
                     </div>
                 </div>
             </div>
