@@ -430,60 +430,70 @@ const EmployeeDashboard = () => {
                 </div>
             ) : errorAlloc ? (
                 <div className="alert alert-danger">{errorAlloc}</div>
-            ) : (!allocation || allocation.assignmentStatus === 'ENDED' || allocation.assignmentStatus === 'REJECTED') ? (
+            ) : !allocation ||
+                allocation.assignmentStatus === 'ENDED' ||
+                allocation.assignmentStatus === 'REJECTED' ? (
                 <div className="row justify-content-center g-3">
                     <div className="col-md-6">
                         <div className="text-center mb-4">
                             <i className="bi bi-briefcase h1 text-muted opacity-25"></i>
                             <h3 className="text-muted">Currently on Bench</h3>
-                            <p className="small text-muted mb-0">Select a project to request an allocation.</p>
+                            <p className="small text-muted mb-0">
+                                Select a project to request an allocation.
+                            </p>
                         </div>
 
-<<<<<<< HEAD
                         <div className="card shadow-sm border-0 p-4 bg-light">
                             <h4 className="fw-bold mb-3 text-center">Request Allocation</h4>
 
-                            {/* PENDING REQUEST ALERT */}
                             {myRequests.some(r => r.requestStatus.startsWith('PENDING')) && (
                                 <div className="alert alert-info border-info text-dark mb-4">
-                                    <h6 className="fw-bold"><i className="bi bi-info-circle-fill me-2"></i>Pending Request</h6>
-                                    {myRequests.filter(r => r.requestStatus.startsWith('PENDING')).map(req => (
-                                        <div key={req.assignmentId}>
-                                            <p className="mb-1">You have requested allocation for <strong>{req.projectName}</strong>.</p>
-                                            <span className="badge bg-primary">
-                                                {req.requestStatus === 'PENDING_MANAGER' ? 'Waiting for Manager Review' :
-                                                    req.requestStatus === 'PENDING_HR' ? 'Waiting for HR Approval' : req.requestStatus}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    <h6 className="fw-bold">
+                                        <i className="bi bi-info-circle-fill me-2"></i>
+                                        Pending Request
+                                    </h6>
+                                    {myRequests
+                                        .filter(r => r.requestStatus.startsWith('PENDING'))
+                                        .map(req => (
+                                            <div key={req.assignmentId}>
+                                                <p className="mb-1">
+                                                    You have requested allocation for{' '}
+                                                    <strong>{req.projectName}</strong>.
+                                                </p>
+                                                <span className="badge bg-primary">
+                                                    {req.requestStatus === 'PENDING_MANAGER'
+                                                        ? 'Waiting for Manager Review'
+                                                        : req.requestStatus === 'PENDING_HR'
+                                                            ? 'Waiting for HR Approval'
+                                                            : req.requestStatus}
+                                                </span>
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
-                            {/* REJECTION ALERT */}
                             {myRequests.some(r => r.requestStatus === 'REJECTED') && (
                                 <div className="alert alert-danger border-danger mb-4">
-                                    <h6 className="fw-bold"><i className="bi bi-x-circle-fill me-2"></i>Request Rejected</h6>
-                                    {myRequests.filter(r => r.requestStatus === 'REJECTED').map(req => (
-                                        <div key={req.assignmentId} className="mb-2 border-bottom border-danger-subtle pb-2 last-border-0">
-                                            <p className="mb-1">Request for <strong>{req.projectName}</strong> was rejected.</p>
-
-                                            {/* Note: We need rejection reason. Assuming backend does NOT send it in assignmentResponse 
-                                                because DTO doesn't have it? Wait, I didn't add rejectionReason to DTO.
-                                                I only added status. The user said "view rejection reason".
-                                                I missed adding rejectionReason to DTO. 
-                                                I will add a note to user that reason is not shown yet, or blindly try to access it if I added it?
-                                                I didn't add it. I will leave it blank for now or generic message.
-                                            */}
-                                            <small>Please contact your manager for details.</small>
-                                        </div>
-                                    ))}
+                                    <h6 className="fw-bold">
+                                        <i className="bi bi-x-circle-fill me-2"></i>
+                                        Request Rejected
+                                    </h6>
+                                    {myRequests
+                                        .filter(r => r.requestStatus === 'REJECTED')
+                                        .map(req => (
+                                            <div
+                                                key={req.assignmentId}
+                                                className="mb-2 border-bottom border-danger-subtle pb-2"
+                                            >
+                                                <p className="mb-1">
+                                                    Request for <strong>{req.projectName}</strong> was rejected.
+                                                </p>
+                                                <small>Please contact your manager for details.</small>
+                                            </div>
+                                        ))}
                                 </div>
                             )}
 
-=======
-                        <div className="card shadow-sm border-0 p-3 bg-light">
-                            <h5 className="fw-bold mb-3 text-center">Request Allocation</h5>
->>>>>>> b3e99d787a746905ed7f9577d1613ef73f5826cb
                             <form onSubmit={handleRequestAllocation}>
                                 <div className="mb-3">
                                     <select
@@ -491,19 +501,35 @@ const EmployeeDashboard = () => {
                                         value={selectedProject}
                                         onChange={(e) => setSelectedProject(e.target.value)}
                                         required
-                                        disabled={myRequests.some(r => r.requestStatus.startsWith('PENDING'))}
+                                        disabled={myRequests.some(r =>
+                                            r.requestStatus.startsWith('PENDING')
+                                        )}
                                     >
                                         <option value="">-- Choose a Project --</option>
                                         {availableProjects.map(proj => (
-                                            <option key={proj.id} value={proj.id}>{proj.name}</option>
+                                            <option key={proj.id} value={proj.id}>
+                                                {proj.name}
+                                            </option>
                                         ))}
                                     </select>
                                 </div>
-                                {requestAllocError && <div className="alert alert-danger p-2 small mb-3">{requestAllocError}</div>}
+
+                                {requestAllocError && (
+                                    <div className="alert alert-danger p-2 small mb-3">
+                                        {requestAllocError}
+                                    </div>
+                                )}
+
                                 <button
                                     type="submit"
                                     className="btn btn-accent w-100 py-2 shadow-sm"
-                                    disabled={requestingAlloc || !selectedProject || myRequests.some(r => r.requestStatus.startsWith('PENDING'))}
+                                    disabled={
+                                        requestingAlloc ||
+                                        !selectedProject ||
+                                        myRequests.some(r =>
+                                            r.requestStatus.startsWith('PENDING')
+                                        )
+                                    }
                                 >
                                     {requestingAlloc ? 'Submitting...' : 'Send Request'}
                                 </button>
@@ -514,21 +540,44 @@ const EmployeeDashboard = () => {
             ) : (
                 <div className="row justify-content-center">
                     <div className="col-md-10 col-lg-8">
-                        <div className={`card border-2 shadow-sm rounded-4 overflow-hidden ${allocation.assignmentStatus === 'PENDING' ? 'border-warning' : 'border-primary'}`}>
-                            <div className={`card-header text-white p-3 text-center border-0 ${allocation.assignmentStatus === 'PENDING' ? 'bg-warning text-dark' : 'bg-primary'}`}>
+                        <div
+                            className={`card border-2 shadow-sm rounded-4 overflow-hidden ${allocation.assignmentStatus === 'PENDING'
+                                    ? 'border-warning'
+                                    : 'border-primary'
+                                }`}
+                        >
+                            <div
+                                className={`card-header text-white p-3 text-center border-0 ${allocation.assignmentStatus === 'PENDING'
+                                        ? 'bg-warning text-dark'
+                                        : 'bg-primary'
+                                    }`}
+                            >
                                 <h4 className="mb-0">Project Details</h4>
                             </div>
+
                             <div className="card-body p-3 p-md-4 text-center">
                                 <div className="mb-3">
-                                    <span className={`badge rounded-pill px-4 py-2 fs-6 ${allocation.assignmentStatus === 'ACTIVE' ? 'bg-success' :
-                                        allocation.assignmentStatus === 'PENDING' ? 'bg-warning text-dark' : 'bg-secondary'
-                                        }`}>
+                                    <span
+                                        className={`badge rounded-pill px-4 py-2 fs-6 ${allocation.assignmentStatus === 'ACTIVE'
+                                                ? 'bg-success'
+                                                : allocation.assignmentStatus === 'PENDING'
+                                                    ? 'bg-warning text-dark'
+                                                    : 'bg-secondary'
+                                            }`}
+                                    >
                                         {allocation.assignmentStatus}
                                     </span>
                                 </div>
+
                                 <div className="border-top pt-3">
-                                    <p className="text-muted small text-uppercase fw-bold mb-1">Current Status</p>
-                                    <p className="h4 mb-0">{allocation.assignmentStatus === 'ACTIVE' ? 'Allocated to Project' : 'Awaiting Peer/Manager Approval'}</p>
+                                    <p className="text-muted small text-uppercase fw-bold mb-1">
+                                        Current Status
+                                    </p>
+                                    <p className="h4 mb-0">
+                                        {allocation.assignmentStatus === 'ACTIVE'
+                                            ? 'Allocated to Project'
+                                            : 'Awaiting Approval'}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -537,6 +586,7 @@ const EmployeeDashboard = () => {
             )}
         </div>
     );
+
 
     const renderUtilization = () => (
         <div className="text-center mx-auto" style={{ maxWidth: '600px', paddingTop: '1.5rem' }}>
