@@ -124,10 +124,10 @@ public class UserService {
         if (user.getManagerId() != null) {
             managerName = userRepository.findById(user.getManagerId())
                     .map(m -> {
-                        if (m.getFirstName() != null && m.getLastName() != null) {
-                            return m.getFirstName() + " " + m.getLastName();
-                        }
-                        return m.getEmail(); // Fallback to email
+                        String fName = m.getFirstName() != null ? m.getFirstName().trim() : "";
+                        String lName = m.getLastName() != null ? m.getLastName().trim() : "";
+                        String fullName = (fName + " " + lName).trim();
+                        return !fullName.isEmpty() ? fullName : m.getEmail();
                     })
                     .orElse("Unknown");
         }
