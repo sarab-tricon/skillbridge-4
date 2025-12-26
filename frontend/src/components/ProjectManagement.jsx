@@ -2,10 +2,14 @@ import { useState, useEffect } from 'react';
 import api from '../api/axios';
 
 const ProjectManagement = () => {
+    const [activeTab, setActiveTab] = useState('ACTIVE'); // 'ACTIVE', 'UPCOMING', 'COMPLETED'
     const [projects, setProjects] = useState([]);
+    const [allEmployees, setAllEmployees] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [selectedProject, setSelectedProject] = useState(null);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -14,13 +18,13 @@ const ProjectManagement = () => {
         startDate: '',
         endDate: '',
         employeesRequired: 1,
-        status: 'ACTIVE'
+        status: 'PLANNED'
     });
 
     const [catalogSkills, setCatalogSkills] = useState([]);
 
     useEffect(() => {
-        fetchProjects();
+        fetchData();
         fetchCatalog();
     }, []);
 
@@ -33,13 +37,34 @@ const ProjectManagement = () => {
         }
     };
 
-    const fetchProjects = async () => {
+    const fetchData = async () => {
         setLoading(true);
         try {
-            const response = await api.get('/projects');
-            setProjects(response.data);
+            const [projectsRes, employeesRes] = await Promise.all([
+                api.get('/projects'),
+                api.get('/users/employees')
+            ]);
+            setProjects(projectsRes.data);
+
+            // Fetch utilization for each employee to get assignments
+            const employeesWithUtil = await Promise.all(
+                employeesRes.data.map(async (emp) => {
+                    try {
+                        const utilRes = await api.get(`/assignments/employee/${emp.id}/utilization`);
+                        return {
+                            ...emp,
+                            assignments: utilRes.data.assignments || []
+                        };
+                    } catch {
+                        return { ...emp, assignments: [] };
+                    }
+                })
+            );
+            setAllEmployees(employeesWithUtil);
+
         } catch (err) {
-            console.error('Failed to fetch projects:', err);
+            console.error('Failed to fetch data:', err);
+            setError('Failed to load projects data.');
         } finally {
             setLoading(false);
         }
@@ -66,9 +91,10 @@ const ProjectManagement = () => {
                 startDate: '',
                 endDate: '',
                 employeesRequired: 1,
-                status: 'ACTIVE'
+                status: 'PLANNED'
             });
-            fetchProjects();
+            fetchData();
+            setShowAddModal(false);
         } catch (err) {
             console.error('Failed to create project:', err);
             setError(err.response?.data?.message || 'Failed to create project.');
@@ -77,217 +103,524 @@ const ProjectManagement = () => {
         }
     };
 
+    const handleEndProject = async (projectId) => {
+        if (!window.confirm('Are you sure you want to end this project?')) return;
+
+        try {
+            await api.put(`/projects/${projectId}/status`, { status: 'COMPLETED' });
+            setSuccess('Project ended successfully!');
+            fetchData();
+            setSelectedProject(null); // Close modal if open
+        } catch (err) {
+            console.error('Failed to end project:', err);
+            setError(err.response?.data?.message || 'Failed to end project.');
+        }
+    };
+
+    // Callback when card is clicked
+    const handleProjectClick = (project) => {
+        setSelectedProject(project);
+    };
+
+    // Filter projects based on active tab
+    const getFilteredProjects = () => {
+        switch (activeTab) {
+            case 'UPCOMING':
+                return projects.filter(p => p.status === 'PLANNED');
+            case 'ACTIVE':
+                return projects.filter(p => p.status === 'ACTIVE');
+            case 'COMPLETED':
+                return projects.filter(p => p.status === 'COMPLETED');
+            default:
+                return projects;
+        }
+    };
+
+    const filteredProjects = getFilteredProjects();
+
+    // Tab configuration
+    const tabs = [
+        { key: 'ACTIVE', label: 'Active Projects', icon: 'bi-play-circle-fill', color: '#28a745' },
+        { key: 'UPCOMING', label: 'Upcoming Projects', icon: 'bi-calendar-plus', color: '#ffc107' },
+        { key: 'COMPLETED', label: 'Completed Projects', icon: 'bi-check-circle-fill', color: '#6c757d' }
+    ];
+
+    // Helper to get allocation count
+    const getAllocatedCount = (projectId) => {
+        return allEmployees.filter(emp =>
+            emp.assignments && emp.assignments.some(a => a.projectId === projectId)
+        ).length;
+    };
+
     return (
-        <div className="container-fluid">
-            <div className="row">
-                <div className="col-lg-4">
-                    <div className="card shadow-sm border-0" style={{ backgroundColor: '#fff', borderTop: '5px solid #CF4B00' }}>
-                        <div className="card-body p-4">
-                            <h3 className="card-title fw-bold mb-4" style={{ color: '#CF4B00' }}>
-                                <i className="bi bi-folder-plus me-2"></i>Add Project
-                            </h3>
+        <div className="container-fluid px-0">
+            {/* Success/Error Messages */}
+            {success && (
+                <div className="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                    <i className="bi bi-check-circle-fill me-2"></i> {success}
+                    <button type="button" className="btn-close" onClick={() => setSuccess(null)}></button>
+                </div>
+            )}
 
-                            {success && (
-                                <div className="alert alert-success alert-dismissible fade show small py-2" role="alert">
-                                    <i className="bi bi-check-circle-fill me-2"></i> {success}
-                                    <button type="button" className="btn-close" onClick={() => setSuccess(null)}></button>
+            {error && (
+                <div className="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                    <i className="bi bi-exclamation-triangle-fill me-2"></i> {error}
+                    <button type="button" className="btn-close" onClick={() => setError(null)}></button>
+                </div>
+            )}
+
+            {/* Tab Navigation */}
+            <div className="mb-4">
+                <div className="d-flex gap-2 flex-wrap align-items-center justify-content-between">
+                    <div className="btn-group" role="group">
+                        {tabs.map(tab => (
+                            <button
+                                key={tab.key}
+                                type="button"
+                                className={`btn btn-lg ${activeTab === tab.key ? 'btn-primary' : 'btn-outline-primary'}`}
+                                onClick={() => setActiveTab(tab.key)}
+                                style={activeTab === tab.key ? {
+                                    backgroundColor: tab.color,
+                                    borderColor: tab.color,
+                                    color: '#fff',
+                                    fontWeight: 'bold',
+                                    boxShadow: `0 4px 12px ${tab.color}40`
+                                } : { borderColor: tab.color, color: tab.color }}
+                            >
+                                <i className={`bi ${tab.icon} me-2`}></i>
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Add Upcoming Project Button */}
+                    {activeTab === 'UPCOMING' && (
+                        <button
+                            className="btn btn-warning btn-lg text-white fw-bold"
+                            onClick={() => setShowAddModal(true)}
+                            style={{ boxShadow: '0 4px 12px rgba(255, 193, 7, 0.3)' }}
+                        >
+                            <i className="bi bi-plus-circle-fill me-2"></i>
+                            Add Upcoming Project
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="card shadow-sm border-0"
+                style={{
+                    borderTop: `5px solid ${tabs.find(t => t.key === activeTab)?.color}`,
+                    minHeight: '500px'
+                }}>
+                <div className="card-body p-4">
+                    {loading ? (
+                        <div className="text-center py-5">
+                            <div className="spinner-border text-primary" role="status">
+                                <span className="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    ) : filteredProjects.length === 0 ? (
+                        <div className="text-center py-5">
+                            <i className={`bi ${tabs.find(t => t.key === activeTab)?.icon} display-1 text-muted mb-3`}></i>
+                            <h4 className="text-muted">No {activeTab.toLowerCase()} projects found</h4>
+                        </div>
+                    ) : (
+                        <div className="row g-4">
+                            {filteredProjects.map(project => (
+                                <div key={project.id} className="col-md-6 col-lg-4">
+                                    <ProjectCard
+                                        project={project}
+                                        allocatedCount={getAllocatedCount(project.id)}
+                                        onEndProject={handleEndProject}
+                                        onClick={() => handleProjectClick(project)}
+                                        tabColor={tabs.find(t => t.key === activeTab)?.color}
+                                    />
                                 </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Add Project Modal */}
+            {showAddModal && (
+                <AddProjectModal
+                    formData={formData}
+                    setFormData={setFormData}
+                    catalogSkills={catalogSkills}
+                    onSubmit={handleSubmit}
+                    onClose={() => setShowAddModal(false)}
+                    loading={loading}
+                    handleInputChange={handleInputChange}
+                />
+            )}
+
+            {/* Project Details Modal */}
+            {selectedProject && (
+                <ProjectDetailsModal
+                    project={selectedProject}
+                    employees={allEmployees}
+                    onClose={() => setSelectedProject(null)}
+                    onEndProject={handleEndProject}
+                />
+            )}
+        </div>
+    );
+};
+
+// ProjectCard Component
+const ProjectCard = ({ project, allocatedCount = 0, onEndProject, onClick, tabColor }) => {
+    const getStatusBadge = (status) => {
+        const badges = {
+            ACTIVE: { bg: 'success', text: 'Active' },
+            PLANNED: { bg: 'warning text-dark', text: 'Upcoming' },
+            COMPLETED: { bg: 'secondary', text: 'Completed' }
+        };
+        return badges[status] || { bg: 'secondary', text: status };
+    };
+
+    const badge = getStatusBadge(project.status);
+    const progressPercent = Math.min(100, Math.round((allocatedCount / project.employeesRequired) * 100));
+
+    return (
+        <div
+            className="card h-100 shadow-sm hover-card"
+            style={{
+                border: `2px solid ${tabColor}20`,
+                borderRadius: '12px',
+                transition: 'all 0.3s ease',
+                cursor: 'pointer'
+            }}
+            onClick={onClick}
+        >
+            <div className="card-body d-flex flex-column">
+                {/* Header */}
+                <div className="d-flex justify-content-between align-items-start mb-3">
+                    <div className="flex-grow-1" style={{ minWidth: 0, marginRight: '8px' }}>
+                        <h5 className="card-title fw-bold mb-1" style={{ color: tabColor, wordWrap: 'break-word', overflowWrap: 'break-word' }} title={project.name}>
+                            {project.name}
+                        </h5>
+                        <p className="text-muted small mb-0" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }} title={project.companyName}>
+                            <i className="bi bi-building me-1"></i>
+                            {project.companyName}
+                        </p>
+                    </div>
+                </div>
+
+                <div className="mb-3 d-flex align-items-center flex-wrap gap-2">
+                    <span className={`badge bg-${badge.bg}`}>{badge.text}</span>
+                    <small className="text-muted d-flex align-items-center">
+                        <i className="bi bi-calendar-range me-1"></i>
+                        {project.startDate ? new Date(project.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD'}
+                        {' - '}
+                        {project.endDate ? new Date(project.endDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Ongoing'}
+                    </small>
+                </div>
+
+                {/* Progress Bar (Tube) */}
+                <div className="mb-3">
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                        <small className="text-muted fw-bold" style={{ fontSize: '0.75rem' }}>Team Allocation</small>
+                        <small className="text-dark fw-bold" style={{ fontSize: '0.75rem' }}>{allocatedCount} / {project.employeesRequired}</small>
+                    </div>
+                    <div className="progress" style={{ height: '8px', borderRadius: '4px', backgroundColor: '#e9ecef' }}>
+                        <div
+                            className={`progress-bar ${progressPercent >= 100 ? 'bg-success' : 'bg-info'}`}
+                            role="progressbar"
+                            style={{ width: `${progressPercent}%`, transition: 'width 0.5s ease' }}
+                            aria-valuenow={progressPercent}
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                        ></div>
+                    </div>
+                </div>
+
+                {/* Tech Stack */}
+                {project.techStack && project.techStack.length > 0 && (
+                    <div className="mb-3">
+                        <div className="d-flex flex-wrap gap-1">
+                            {project.techStack.slice(0, 4).map((tech, idx) => (
+                                <span key={idx} className="badge bg-info text-dark" style={{ fontSize: '0.7rem' }}>
+                                    {tech}
+                                </span>
+                            ))}
+                            {project.techStack.length > 4 && (
+                                <span className="badge bg-secondary" style={{ fontSize: '0.7rem' }}>
+                                    +{project.techStack.length - 4} more
+                                </span>
                             )}
+                        </div>
+                    </div>
+                )}
 
-                            {error && (
-                                <div className="alert alert-danger alert-dismissible fade show small py-2" role="alert">
-                                    <i className="bi bi-exclamation-triangle-fill me-2"></i> {error}
-                                    <button type="button" className="btn-close" onClick={() => setError(null)}></button>
+                <p className="small text-muted mt-auto mb-0 text-center">
+                    <i className="bi bi-info-circle me-1"></i>Click for details & team
+                </p>
+            </div>
+
+            <style jsx>{`
+                .hover-card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
+                }
+            `}</style>
+        </div>
+    );
+};
+
+// Project Details Modal
+const ProjectDetailsModal = ({ project, employees, onClose, onEndProject }) => {
+    // Find team members
+    // Find team members
+    const teamMembers = employees.filter(emp =>
+        emp.assignments && emp.assignments.some(a => a.projectId === project.id)
+    );
+
+    return (
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <div className="modal-dialog modal-lg modal-dialog-centered">
+                <div className="modal-content border-0 shadow-lg">
+                    <div className="modal-header bg-light">
+                        <h5 className="modal-title fw-bold text-primary">
+                            <i className="bi bi-folder-fill me-2"></i>{project.name}
+                        </h5>
+                        <button type="button" className="btn-close" onClick={onClose}></button>
+                    </div>
+                    <div className="modal-body p-4">
+                        <div className="row g-4">
+                            {/* Left: Metadata */}
+                            <div className="col-md-5 border-end">
+                                <h6 className="fw-bold mb-3 text-muted">Project Details</h6>
+
+                                <div className="mb-3">
+                                    <small className="text-muted d-block">Company</small>
+                                    <span className="fw-bold fs-5">{project.companyName}</span>
                                 </div>
-                            )}
 
-                            <form onSubmit={handleSubmit}>
-                                <div className="row g-2">
-                                    <div className="col-md-6 mb-2">
-                                        <label className="form-label fw-bold small">Project Name</label>
-                                        <input
-                                            type="text"
-                                            name="name"
-                                            className="form-control form-control-sm"
-                                            required
-                                            value={formData.name}
-                                            onChange={handleInputChange}
-                                            style={{ border: '1px solid #9CC6DB' }}
-                                        />
-                                    </div>
-                                    <div className="col-md-6 mb-2">
-                                        <label className="form-label fw-bold small">Company</label>
-                                        <input
-                                            type="text"
-                                            name="companyName"
-                                            className="form-control form-control-sm"
-                                            required
-                                            value={formData.companyName}
-                                            onChange={handleInputChange}
-                                            style={{ border: '1px solid #9CC6DB' }}
-                                        />
+                                <div className="mb-3">
+                                    <small className="text-muted d-block">Timeline</small>
+                                    <div className="d-flex align-items-center gap-2">
+                                        <span className="badge bg-light text-dark border">{new Date(project.startDate).toLocaleDateString()}</span>
+                                        <i className="bi bi-arrow-right text-muted small"></i>
+                                        <span className="badge bg-light text-dark border">{new Date(project.endDate).toLocaleDateString()}</span>
                                     </div>
                                 </div>
 
-                                <div className="mb-2">
-                                    <label className="form-label fw-bold small">Tech Stack</label>
-                                    <div className="d-flex flex-wrap gap-1 mb-1 p-1 border rounded" style={{ minHeight: '31px', backgroundColor: '#f8f9fa' }}>
-                                        {formData.techStack.length === 0 ? (
-                                            <span className="text-muted extra-small align-self-center">No skills</span>
-                                        ) : (
-                                            formData.techStack.map(tech => (
-                                                <span key={tech} className="badge bg-secondary d-flex align-items-center gap-1 extra-small">
-                                                    {tech}
-                                                    <button
-                                                        type="button"
-                                                        className="btn-close btn-close-white"
-                                                        onClick={() => setFormData(prev => ({ ...prev, techStack: prev.techStack.filter(t => t !== tech) }))}
-                                                    ></button>
-                                                </span>
-                                            ))
-                                        )}
-                                    </div>
-                                    <select
-                                        className="form-select form-select-sm"
-                                        style={{ border: '1px solid #9CC6DB' }}
-                                        onChange={(e) => {
-                                            const selectedSkill = e.target.value;
-                                            if (selectedSkill && !formData.techStack.includes(selectedSkill)) {
-                                                setFormData(prev => ({ ...prev, techStack: [...prev.techStack, selectedSkill] }));
-                                            }
-                                            e.target.value = '';
-                                        }}
-                                    >
-                                        <option value="">+ Add Skill...</option>
-                                        {catalogSkills.map(skill => (
-                                            <option key={skill.id} value={skill.name}>{skill.name}</option>
+                                <div className="mb-3">
+                                    <small className="text-muted d-block">Status</small>
+                                    <span className={`badge ${project.status === 'ACTIVE' ? 'bg-success' : 'bg-warning text-dark'}`}>
+                                        {project.status}
+                                    </span>
+                                </div>
+
+                                <div className="mb-3">
+                                    <small className="text-muted d-block">Tech Stack</small>
+                                    <div className="d-flex flex-wrap gap-1 mt-1">
+                                        {project.techStack?.map((t, i) => (
+                                            <span key={i} className="badge bg-info text-dark">{t}</span>
                                         ))}
-                                    </select>
-                                </div>
-
-                                <div className="row g-2">
-                                    <div className="col-md-6 mb-2">
-                                        <label className="form-label fw-bold small">Start Date</label>
-                                        <input
-                                            type="date"
-                                            name="startDate"
-                                            className="form-control form-control-sm"
-                                            required
-                                            value={formData.startDate}
-                                            onChange={handleInputChange}
-                                            style={{ border: '1px solid #9CC6DB' }}
-                                        />
-                                    </div>
-                                    <div className="col-md-6 mb-2">
-                                        <label className="form-label fw-bold small">End Date</label>
-                                        <input
-                                            type="date"
-                                            name="endDate"
-                                            className="form-control form-control-sm"
-                                            required
-                                            value={formData.endDate}
-                                            onChange={handleInputChange}
-                                            style={{ border: '1px solid #9CC6DB' }}
-                                        />
                                     </div>
                                 </div>
 
-                                <div className="row g-2">
-                                    <div className="col-md-6 mb-2">
-                                        <label className="form-label fw-bold small">Headcount</label>
-                                        <input
-                                            type="number"
-                                            name="employeesRequired"
-                                            className="form-control form-control-sm"
-                                            min="1"
-                                            required
-                                            value={formData.employeesRequired}
-                                            onChange={handleInputChange}
-                                            style={{ border: '1px solid #9CC6DB' }}
-                                        />
-                                    </div>
-                                    <div className="col-md-6 mb-2">
-                                        <label className="form-label fw-bold small">Status</label>
-                                        <select
-                                            name="status"
-                                            className="form-select form-select-sm"
-                                            value={formData.status}
-                                            onChange={handleInputChange}
-                                            style={{ border: '1px solid #9CC6DB' }}
+                                {project.status === 'ACTIVE' && (
+                                    <div className="mt-4">
+                                        <button
+                                            className="btn btn-outline-danger btn-sm w-100"
+                                            onClick={() => onEndProject(project.id)}
                                         >
-                                            <option value="PLANNED">PLANNED</option>
-                                            <option value="ACTIVE">ACTIVE</option>
-                                            <option value="COMPLETED">COMPLETED</option>
-                                        </select>
+                                            <i className="bi bi-stop-circle me-2"></i>End Project
+                                        </button>
                                     </div>
+                                )}
+                            </div>
+
+                            {/* Right: Allocated Team */}
+                            <div className="col-md-7">
+                                <div className="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 className="fw-bold mb-0 text-muted">Allocated Team</h6>
+                                    <span className="badge bg-primary">{teamMembers.length} / {project.employeesRequired}</span>
                                 </div>
 
+                                {teamMembers.length > 0 ? (
+                                    <div className="list-group list-group-flush border rounded overflow-auto" style={{ maxHeight: '300px' }}>
+                                        {teamMembers.map(emp => {
+                                            const projectAssignments = emp.assignments.filter(a => a.projectId === project.id);
+                                            const totalAlloc = projectAssignments.reduce((acc, curr) => acc + (curr.allocationPercent || 0), 0);
+
+                                            return (
+                                                <div key={emp.id} className="list-group-item d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <div className="fw-bold">{emp.firstName} {emp.lastName}</div>
+                                                        {projectAssignments.map((assign, idx) => (
+                                                            <div key={idx} className="small text-muted d-flex align-items-center gap-2">
+                                                                <span>{assign.projectRole || 'No Role'}</span>
+                                                                {projectAssignments.length > 1 && (
+                                                                    <span className="badge bg-light text-dark border py-0" style={{ fontSize: '0.65rem' }}>
+                                                                        {assign.allocationPercent}%
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                    <span className={`badge ${totalAlloc > 100 ? 'bg-danger' : 'bg-success'}`}>
+                                                        {totalAlloc}%
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-4 border rounded bg-light">
+                                        <i className="bi bi-people text-muted fs-3 mb-2 d-block"></i>
+                                        <span className="text-muted small">No team members allocated yet.</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// AddProjectModal Component
+const AddProjectModal = ({ formData, setFormData, catalogSkills, onSubmit, onClose, loading, handleInputChange }) => {
+    return (
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <div className="modal-dialog modal-lg modal-dialog-centered">
+                <div className="modal-content" style={{ borderRadius: '15px' }}>
+                    <div className="modal-header" style={{ borderBottom: '3px solid #ffc107' }}>
+                        <h5 className="modal-title fw-bold">
+                            <i className="bi bi-plus-circle-fill me-2 text-warning"></i>
+                            Add Upcoming Project
+                        </h5>
+                        <button type="button" className="btn-close" onClick={onClose}></button>
+                    </div>
+                    <div className="modal-body p-4">
+                        <form onSubmit={onSubmit}>
+                            <div className="row g-3">
+                                <div className="col-md-6">
+                                    <label className="form-label fw-bold">Project Name</label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        className="form-control"
+                                        required
+                                        value={formData.name}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g., E-Commerce Platform"
+                                    />
+                                </div>
+                                <div className="col-md-6">
+                                    <label className="form-label fw-bold">Company</label>
+                                    <input
+                                        type="text"
+                                        name="companyName"
+                                        className="form-control"
+                                        required
+                                        value={formData.companyName}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g., Tech Corp"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="mt-3">
+                                <label className="form-label fw-bold">Tech Stack</label>
+                                <div className="d-flex flex-wrap gap-1 mb-2 p-2 border rounded" style={{ minHeight: '45px', backgroundColor: '#f8f9fa' }}>
+                                    {formData.techStack.length === 0 ? (
+                                        <span className="text-muted small align-self-center">No skills selected</span>
+                                    ) : (
+                                        formData.techStack.map(tech => (
+                                            <span key={tech} className="badge bg-secondary d-flex align-items-center gap-2">
+                                                {tech}
+                                                <button
+                                                    type="button"
+                                                    className="btn-close btn-close-white"
+                                                    style={{ fontSize: '0.6rem' }}
+                                                    onClick={() => setFormData(prev => ({
+                                                        ...prev,
+                                                        techStack: prev.techStack.filter(t => t !== tech)
+                                                    }))}
+                                                ></button>
+                                            </span>
+                                        ))
+                                    )}
+                                </div>
+                                <select
+                                    className="form-select"
+                                    onChange={(e) => {
+                                        const selectedSkill = e.target.value;
+                                        if (selectedSkill && !formData.techStack.includes(selectedSkill)) {
+                                            setFormData(prev => ({ ...prev, techStack: [...prev.techStack, selectedSkill] }));
+                                        }
+                                        e.target.value = '';
+                                    }}
+                                >
+                                    <option value="">+ Add Skill...</option>
+                                    {catalogSkills.map(skill => (
+                                        <option key={skill.id} value={skill.name}>{skill.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="row g-3 mt-2">
+                                <div className="col-md-6">
+                                    <label className="form-label fw-bold">Start Date</label>
+                                    <input
+                                        type="date"
+                                        name="startDate"
+                                        className="form-control"
+                                        required
+                                        value={formData.startDate}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                                <div className="col-md-6">
+                                    <label className="form-label fw-bold">End Date</label>
+                                    <input
+                                        type="date"
+                                        name="endDate"
+                                        className="form-control"
+                                        required
+                                        value={formData.endDate}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="mt-3">
+                                <label className="form-label fw-bold">Employees Required</label>
+                                <input
+                                    type="number"
+                                    name="employeesRequired"
+                                    className="form-control"
+                                    min="1"
+                                    required
+                                    value={formData.employeesRequired}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+
+                            <div className="mt-4 d-flex gap-2">
                                 <button
                                     type="submit"
-                                    className="btn btn-sm w-100 text-white fw-bold mt-2"
-                                    style={{ backgroundColor: '#CF4B00' }}
+                                    className="btn btn-warning btn-lg text-white fw-bold flex-grow-1"
                                     disabled={loading}
                                 >
                                     {loading ? 'Creating...' : 'Create Project'}
                                 </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="col-lg-8">
-                    <div className="card shadow-sm border-0 h-100" style={{ backgroundColor: '#fff', borderTop: '5px solid #9CC6DB' }}>
-                        <div className="card-body p-4">
-                            <h3 className="card-title fw-bold mb-4" style={{ color: '#9CC6DB' }}>
-                                <i className="bi bi-list-task me-2"></i>Organization Projects
-                            </h3>
-                            <div className="table-responsive" style={{ maxHeight: 'calc(100vh - 250px)', overflowY: 'scroll', overflowX: 'hidden', border: '1px solid #dee2e6' }}>
-                                <table className="table table-hover align-middle mb-0">
-                                    <thead className="table-light sticky-top">
-                                        <tr>
-                                            <th>Project</th>
-                                            <th>Company</th>
-                                            <th>Tech Stack</th>
-                                            <th>Employees</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {projects.map(proj => (
-                                            <tr key={proj.id}>
-                                                <td className="fw-bold">{proj.name}</td>
-                                                <td>{proj.companyName}</td>
-                                                <td>
-                                                    {proj.techStack && proj.techStack.length > 0 ? (
-                                                        <div className="d-flex flex-wrap gap-1">
-                                                            {proj.techStack.slice(0, 3).map((tech, idx) => (
-                                                                <span key={idx} className="badge bg-info text-dark extra-small">{tech}</span>
-                                                            ))}
-                                                            {proj.techStack.length > 3 && (
-                                                                <span className="badge bg-secondary extra-small">+{proj.techStack.length - 3}</span>
-                                                            )}
-                                                        </div>
-                                                    ) : (
-                                                        <span className="text-muted">-</span>
-                                                    )}
-                                                </td>
-                                                <td>{proj.employeesRequired || '-'}</td>
-                                                <td>
-                                                    <span className={`badge extra-small ${proj.status === 'ACTIVE' ? 'bg-success' : proj.status === 'COMPLETED' ? 'bg-secondary' : 'bg-warning text-dark'}`}>
-                                                        {proj.status}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                        {projects.length === 0 && !loading && (
-                                            <tr>
-                                                <td colSpan="5" className="text-center text-muted py-4">No projects found.</td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                                <button
+                                    type="button"
+                                    className="btn btn-outline-secondary btn-lg"
+                                    onClick={onClose}
+                                >
+                                    Cancel
+                                </button>
                             </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>

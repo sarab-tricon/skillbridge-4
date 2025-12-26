@@ -114,6 +114,7 @@ public class AllocationRequestController {
                     // If DTO only supports PENDING, we lose info.
                     // Let's assume for now we just show PENDING, or I modify DTO.
                     // Provide the raw status in a way if possible.
+                    .employeeName(currentUser.getFirstName() + " " + currentUser.getLastName())
                     .assignmentStatus(dtoStatus)
                     .requestStatus(req.getStatus())
                     .build();

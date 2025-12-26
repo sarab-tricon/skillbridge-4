@@ -20,6 +20,7 @@ const ManagerDashboard = () => {
     const [pendingAllocations, setPendingAllocations] = useState([]);
     const [allActiveProjects, setAllActiveProjects] = useState([]);
     const [actionLoading, setActionLoading] = useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
     // Modal State
     const [selectedRequest, setSelectedRequest] = useState(null);
@@ -39,7 +40,7 @@ const ManagerDashboard = () => {
             ]);
 
             const merged = teamRes.data.map(member => {
-                const util = utilRes.data.find(u => u.email === member.email);
+                const util = utilRes.data?.find(u => u.employeeId === member.id);
                 return {
                     ...member,
                     name: `${member.firstName} ${member.lastName}`.trim() || 'Employee',
@@ -227,46 +228,58 @@ const ManagerDashboard = () => {
         <div className="container-fluid p-0" style={{ backgroundColor: 'var(--color-bg)', minHeight: '100vh' }}>
             <div className="row g-0">
                 {/* SIDEBAR */}
-                <div className="col-auto col-md-3 col-lg-2 sidebar">
-                    <div className="d-flex flex-column px-3 pt-4">
-                        <div className="sidebar-header">
-                            <h4 className="sidebar-title">Manager Hub</h4>
+                <div className={`col-auto sidebar transition-width ${isSidebarCollapsed ? 'sidebar-collapsed' : 'col-md-3 col-lg-2'}`} style={{ backgroundColor: '#fff', borderRight: '1px solid #dee2e6' }}>
+                    <div className="d-flex flex-column px-2 px-md-3 pt-4 h-100">
+                        <div className="sidebar-header d-flex align-items-center justify-content-between mb-4 px-2">
+                            {!isSidebarCollapsed && <h4 className="sidebar-title m-0 fw-bold text-primary">Manager Hub</h4>}
+                            <button
+                                className={`btn btn-sm ${isSidebarCollapsed ? 'btn-primary w-100' : 'btn-outline-primary border-0 ms-auto'} transition-all`}
+                                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                                title={isSidebarCollapsed ? "Expand" : "Collapse"}
+                                style={{ width: isSidebarCollapsed ? 'auto' : '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            >
+                                <i className={`bi ${isSidebarCollapsed ? 'bi-chevron-double-right' : 'bi-chevron-double-left'} fs-6`}></i>
+                            </button>
                         </div>
                         <ul className="nav flex-column w-100 gap-2" id="menu">
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection(null)}
-                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === null ? 'active' : ''}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === null ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    title={isSidebarCollapsed ? "Dashboard" : ""}
                                 >
-                                    <i className="bi bi-speedometer2 icon-std"></i>
-                                    <span className="d-none d-sm-inline">Dashboard</span>
+                                    <i className="bi bi-speedometer2 icon-std fs-5"></i>
+                                    {!isSidebarCollapsed && <span className="ms-2">Dashboard</span>}
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('team')}
-                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'team' ? 'active' : ''}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'team' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    title={isSidebarCollapsed ? "My Team" : ""}
                                 >
-                                    <i className="bi bi-people icon-std"></i>
-                                    <span className="d-none d-sm-inline">My Team</span>
+                                    <i className="bi bi-people icon-std fs-5"></i>
+                                    {!isSidebarCollapsed && <span className="ms-2">My Team</span>}
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('alloc_requests')}
-                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'alloc_requests' ? 'active' : ''}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'alloc_requests' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    title={isSidebarCollapsed ? "Allocations" : ""}
                                 >
-                                    <i className="bi bi-patch-check icon-std"></i>
-                                    <span className="d-none d-sm-inline">Allocations</span>
+                                    <i className="bi bi-patch-check icon-std fs-5"></i>
+                                    {!isSidebarCollapsed && <span className="ms-2">Allocations</span>}
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('pending_skills')}
-                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'pending_skills' ? 'active' : ''}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'pending_skills' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    title={isSidebarCollapsed ? "Verifications" : ""}
                                 >
-                                    <i className="bi bi-star icon-std"></i>
-                                    <span className="d-none d-sm-inline">Verifications</span>
+                                    <i className="bi bi-star icon-std fs-5"></i>
+                                    {!isSidebarCollapsed && <span className="ms-2">Verifications</span>}
                                 </button>
                             </li>
                         </ul>
@@ -676,6 +689,13 @@ const ManagerDashboard = () => {
                     font-weight: 500;
                     border: none;
                     background: none;
+                    height: 48px;
+                }
+                .sidebar.transition-width {
+                    transition: width 0.3s ease, flex-basis 0.3s ease;
+                }
+                .sidebar-collapsed {
+                    width: 70px !important;
                 }
                 .nav-link.active {
                     background-color: #CF4B00 !important;

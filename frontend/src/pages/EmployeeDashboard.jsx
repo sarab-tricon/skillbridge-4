@@ -38,6 +38,9 @@ const EmployeeDashboard = () => {
     const [errorAlloc, setErrorAlloc] = useState(null);
     const [errorUtil, setErrorUtil] = useState(null);
 
+    // Sidebar State
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
     useEffect(() => {
         fetchSkills();
         fetchAllocation();
@@ -231,14 +234,24 @@ const EmployeeDashboard = () => {
             </div>
             <div className="col-md-4">
                 <div className="card h-100 shadow-sm border-0 border-top-primary">
-                    <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
-                        <i className="bi bi-briefcase h1 text-primary mb-2"></i>
-                        <h5 className="card-title fw-bold">Assignment</h5>
-                        <div className="mb-3">
-                            <p className="h5 text-muted mb-0">{allocation?.projectName || 'Bench'}</p>
+                    <div className="card-body p-4 text-center d-flex flex-column">
+                        <i className="bi bi-briefcase display-4 text-primary mb-3"></i>
+                        <h5 className="card-title fw-bold">Assignments</h5>
+                        <div className="mt-3">
+                            {utilization?.assignments && utilization.assignments.length > 0 ? (
+                                <ul className="list-unstyled mb-0">
+                                    {utilization.assignments.map((assign, idx) => (
+                                        <li key={idx} className="h5 text-muted mb-1 text-truncate" title={assign.projectName}>
+                                            {assign.projectName}
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="h4 text-muted">Bench</p>
+                            )}
                         </div>
                         <div className="mt-auto">
-                            <button className="btn btn-outline-primary btn-sm px-4" onClick={() => setActiveSection('allocation')}>View</button>
+                            <button className="btn btn-outline-primary btn-sm mt-3" onClick={() => setActiveSection('utilization')}>View Details</button>
                         </div>
                     </div>
                 </div>
@@ -248,13 +261,11 @@ const EmployeeDashboard = () => {
                     <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
                         <i className="bi bi-graph-up h1 text-primary mb-2"></i>
                         <h5 className="card-title fw-bold">Utilization</h5>
-                        <div className="mb-3">
-                            <p className="h2 fw-bold text-accent mb-0">
-                                {utilization?.allocationStatus === 'BILLABLE' ? '100%' : utilization?.allocationStatus === 'INVESTMENT' ? '100%' : '0%'}
-                            </p>
-                        </div>
+                        <p className="display-6 fw-bold text-accent">
+                            {utilization?.totalUtilization || 0}%
+                        </p>
                         <div className="mt-auto">
-                            <button className="btn btn-outline-primary btn-sm px-4" onClick={() => setActiveSection('utilization')}>Stats</button>
+                            <button className="btn btn-outline-primary btn-sm mt-2" onClick={() => setActiveSection('utilization')}>Detailed Stats</button>
                         </div>
                     </div>
                 </div>
@@ -542,14 +553,14 @@ const EmployeeDashboard = () => {
                     <div className="col-md-10 col-lg-8">
                         <div
                             className={`card border-2 shadow-sm rounded-4 overflow-hidden ${allocation.assignmentStatus === 'PENDING'
-                                    ? 'border-warning'
-                                    : 'border-primary'
+                                ? 'border-warning'
+                                : 'border-primary'
                                 }`}
                         >
                             <div
                                 className={`card-header text-white p-3 text-center border-0 ${allocation.assignmentStatus === 'PENDING'
-                                        ? 'bg-warning text-dark'
-                                        : 'bg-primary'
+                                    ? 'bg-warning text-dark'
+                                    : 'bg-primary'
                                     }`}
                             >
                                 <h4 className="mb-0">Project Details</h4>
@@ -559,10 +570,10 @@ const EmployeeDashboard = () => {
                                 <div className="mb-3">
                                     <span
                                         className={`badge rounded-pill px-4 py-2 fs-6 ${allocation.assignmentStatus === 'ACTIVE'
-                                                ? 'bg-success'
-                                                : allocation.assignmentStatus === 'PENDING'
-                                                    ? 'bg-warning text-dark'
-                                                    : 'bg-secondary'
+                                            ? 'bg-success'
+                                            : allocation.assignmentStatus === 'PENDING'
+                                                ? 'bg-warning text-dark'
+                                                : 'bg-secondary'
                                             }`}
                                     >
                                         {allocation.assignmentStatus}
@@ -587,36 +598,96 @@ const EmployeeDashboard = () => {
         </div>
     );
 
-
     const renderUtilization = () => (
-        <div className="text-center mx-auto" style={{ maxWidth: '600px', paddingTop: '1.5rem' }}>
+        <div className="card shadow-sm border-0 p-4">
+            <h2 className="fw-bold mb-4">Utilization Overview</h2>
             {loadingUtil ? (
-                <div className="spinner-border text-primary" role="status"></div>
+                <div className="text-center py-5">
+                    <div className="spinner-border text-primary" role="status"></div>
+                </div>
             ) : errorUtil ? (
                 <div className="alert alert-danger">{errorUtil}</div>
             ) : (
-                <div className="py-2">
-                    <div className="utilization-disk mx-auto mb-4" style={{
-                        width: '180px',
-                        height: '180px',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: 'white',
-                        border: '10px solid var(--color-primary)',
-                        boxShadow: '0 8px 25px rgba(0,0,0,0.08)'
-                    }}>
-                        <span className="h1 fw-bold text-accent mb-0" style={{ fontSize: '2.5rem' }}>
-                            {utilization?.allocationStatus === 'BILLABLE' ? '100%' : utilization?.allocationStatus === 'INVESTMENT' ? '100%' : '0%'}
-                        </span>
+                <div className="row g-4">
+                    {/* Left Column: Chart & Summary */}
+                    <div className="col-lg-4 text-center border-end">
+                        <div className="py-3">
+                            <div className="utilization-disk mx-auto mb-4" style={{
+                                width: '180px',
+                                height: '180px',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: 'var(--color-bg)',
+                                border: '10px solid var(--color-primary)',
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                            }}>
+                                <span className="display-4 fw-bold text-accent">
+                                    {utilization?.totalUtilization || 0}%
+                                </span>
+                            </div>
+                            <h3 className="fw-bold text-dark mt-3">{utilization?.allocationStatus || 'BENCH'}</h3>
+                            <p className="text-muted small mx-auto" style={{ maxWidth: '300px' }}>
+                                Your total utilization based on active project assignments.
+                            </p>
+                        </div>
                     </div>
-                    <div className="badge rounded-pill bg-light text-primary px-4 py-2 border mb-3 fs-6 fw-bold">
-                        {utilization?.allocationStatus || 'UNKNOWN'} Status
+
+                    {/* Right Column: Allocation Details */}
+                    <div className="col-lg-8">
+                        {utilization?.assignments && utilization.assignments.length > 0 ? (
+                            <div className="h-100">
+                                <h5 className="fw-bold mb-3 text-muted text-uppercase small">Active Allocations</h5>
+                                <div className="table-responsive">
+                                    <table className="table table-hover align-middle mb-0">
+                                        <thead className="table-light">
+                                            <tr>
+                                                <th className="py-2 ps-3">Project</th>
+                                                <th className="py-2">Allocation</th>
+                                                <th className="py-2">Dates</th>
+                                                <th className="py-2 pe-3 text-end">Type</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {utilization.assignments.map((assign, idx) => (
+                                                <tr key={idx}>
+                                                    <td className="ps-3 fw-bold text-primary">{assign.projectName}</td>
+                                                    <td>
+                                                        <div className="d-flex align-items-center">
+                                                            <div className="progress flex-grow-1" style={{ height: '6px', maxWidth: '80px' }}>
+                                                                <div
+                                                                    className="progress-bar bg-accent"
+                                                                    role="progressbar"
+                                                                    style={{ width: `${assign.allocationPercent}%` }}
+                                                                ></div>
+                                                            </div>
+                                                            <span className="ms-2 small fw-bold">{assign.allocationPercent}%</span>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div className="small text-muted">
+                                                            {new Date(assign.startDate).toLocaleDateString()}
+                                                        </div>
+                                                    </td>
+                                                    <td className="pe-3 text-end">
+                                                        <span className={`badge rounded-pill px-2 py-1 small ${assign.billingType === 'BILLABLE' ? 'bg-success' : 'bg-secondary'}`}>
+                                                            {assign.billingType || 'N/A'}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="h-100 d-flex flex-column align-items-center justify-content-center text-muted border rounded bg-light p-4">
+                                <i className="bi bi-clipboard-x display-4 mb-3 opacity-25"></i>
+                                <p>No active project allocations found.</p>
+                            </div>
+                        )}
                     </div>
-                    <p className="text-muted small mb-0 px-3 opacity-75">
-                        Your current utilization is calculated based on active project assignments and billing status.
-                    </p>
                 </div>
             )}
         </div>
@@ -626,55 +697,68 @@ const EmployeeDashboard = () => {
         <div className="container-fluid p-0 overflow-hidden" style={{ height: 'calc(100vh - 70px)', position: 'fixed', width: '100%' }}>
             <div className="row g-0 h-100">
                 {/* SIDEBAR */}
-                <div className="sidebar-container h-100">
-                    <div className="d-flex flex-column px-3 pt-4">
-                        <div className="sidebar-header">
-                            <h4 className="sidebar-title">Menu</h4>
+                <div className={`col-auto sidebar transition-width ${isSidebarCollapsed ? 'sidebar-collapsed' : 'col-md-3 col-xl-2'}`} style={{ backgroundColor: '#fff', borderRight: '1px solid #dee2e6' }}>
+                    <div className="d-flex flex-column px-2 px-md-3 pt-4 h-100">
+                        <div className="sidebar-header d-flex align-items-center justify-content-between mb-4 px-2">
+                            {!isSidebarCollapsed && <h4 className="sidebar-title m-0 fw-bold text-primary">Menu</h4>}
+                            <button
+                                className={`btn btn-sm ${isSidebarCollapsed ? 'btn-primary w-100' : 'btn-outline-primary border-0 ms-auto'} transition-all`}
+                                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                                title={isSidebarCollapsed ? "Expand" : "Collapse"}
+                                style={{ width: isSidebarCollapsed ? 'auto' : '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            >
+                                <i className={`bi ${isSidebarCollapsed ? 'bi-chevron-double-right' : 'bi-chevron-double-left'} fs-6`}></i>
+                            </button>
                         </div>
                         <ul className="nav flex-column w-100 gap-2" id="menu">
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('overview')}
-                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'overview' ? 'active' : ''}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'overview' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    title={isSidebarCollapsed ? "Dashboard" : ""}
                                 >
-                                    <i className="bi bi-speedometer2 icon-std"></i>
-                                    <span className="d-none d-sm-inline">Dashboard</span>
+                                    <i className="bi bi-speedometer2 icon-std fs-5"></i>
+                                    {!isSidebarCollapsed && <span className="ms-2">Dashboard</span>}
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('skills')}
-                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'skills' ? 'active' : ''}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'skills' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    title={isSidebarCollapsed ? "My Skills" : ""}
                                 >
-                                    <i className="bi bi-star icon-std"></i>
-                                    <span className="d-none d-sm-inline">My Skills</span>
+                                    <i className="bi bi-star icon-std fs-5"></i>
+                                    {!isSidebarCollapsed && <span className="ms-2">My Skills</span>}
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('allocation')}
-                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'allocation' ? 'active' : ''}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'allocation' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    title={isSidebarCollapsed ? "Allocation" : ""}
                                 >
-                                    <i className="bi bi-briefcase icon-std"></i>
-                                    <span className="d-none d-sm-inline">Allocation</span>
+                                    <i className="bi bi-diagram-3 icon-std fs-5"></i>
+                                    {!isSidebarCollapsed && <span className="ms-2">Allocation</span>}
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('utilization')}
-                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'utilization' ? 'active' : ''}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'utilization' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    title={isSidebarCollapsed ? "Utilization" : ""}
                                 >
-                                    <i className="bi bi-graph-up icon-std"></i>
-                                    <span className="d-none d-sm-inline">Utilization</span>
+                                    <i className="bi bi-graph-up icon-std fs-5"></i>
+                                    {!isSidebarCollapsed && <span className="ms-2">Utilization</span>}
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('profile')}
-                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'profile' ? 'active' : ''}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'profile' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    title={isSidebarCollapsed ? "My Profile" : ""}
                                 >
-                                    <i className="bi bi-person-circle icon-std"></i>
-                                    <span className="d-none d-sm-inline">My Profile</span>
+                                    <i className="bi bi-person-circle icon-std fs-5"></i>
+                                    {!isSidebarCollapsed && <span className="ms-2">My Profile</span>}
                                 </button>
                             </li>
                         </ul>
@@ -702,7 +786,13 @@ const EmployeeDashboard = () => {
                             {activeSection === 'skills' && renderSkills()}
                             {activeSection === 'allocation' && renderAllocation()}
                             {activeSection === 'utilization' && renderUtilization()}
-                            {activeSection === 'profile' && <ProfileSection onNavigateToSkills={() => setActiveSection('skills')} />}
+                            {activeSection === 'profile' && (
+                                <ProfileSection
+                                    profile={profile}
+                                    utilization={utilization}
+                                    onNavigateToSkills={() => setActiveSection('skills')}
+                                />
+                            )}
                         </div>
                     </div>
                 </div>
@@ -715,6 +805,13 @@ const EmployeeDashboard = () => {
                     font-weight: 500;
                     box-sizing: border-box;
                     border: 1px solid transparent; /* Reserve space for active border */
+                    height: 48px;
+                }
+                .sidebar.transition-width {
+                    transition: width 0.3s ease, flex-basis 0.3s ease;
+                }
+                .sidebar-collapsed {
+                    width: 70px !important;
                 }
                 .nav-link:hover:not(.active) {
                     background-color: #f0f7ff;
@@ -781,7 +878,7 @@ const EmployeeDashboard = () => {
                     font-size: 1.25rem;
                 }
             `}</style>
-        </div >
+        </div>
     );
 };
 

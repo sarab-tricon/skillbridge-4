@@ -37,16 +37,12 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // 1. PUBLIC
+                        // 1. PUBLIC ENDPOINTS
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/error").permitAll()
 
-                        // 2. COMMON / AUTHENTICATED
-                        .requestMatchers("/api/users/me").authenticated()
-                        .requestMatchers("/api/utilization/me", "/api/allocations/me").authenticated()
-                        .requestMatchers("/api/catalog/skills").authenticated()
-
-                        // 3. EMPLOYEE
+                        // 2. SPECIFIC EMPLOYEE-ONLY ENDPOINTS (must come before general rules)
                         .requestMatchers("/api/assignments/my").hasAuthority("ROLE_EMPLOYEE")
                         .requestMatchers(HttpMethod.POST, "/api/allocation-requests").hasAuthority("ROLE_EMPLOYEE")
                         .requestMatchers("/api/skills/my").hasAuthority("ROLE_EMPLOYEE")
@@ -54,23 +50,26 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/skills/*").hasAuthority("ROLE_EMPLOYEE")
                         .requestMatchers(HttpMethod.DELETE, "/api/skills/*").hasAuthority("ROLE_EMPLOYEE")
 
-                        // 4. MANAGER (Shared with HR often)
+                        // 3. SPECIFIC MANAGER/HR ENDPOINTS
                         .requestMatchers("/api/users/team").hasAnyAuthority("ROLE_MANAGER", "ROLE_HR")
-                        .requestMatchers("/api/projects/active")
-                        .hasAnyAuthority("ROLE_MANAGER", "ROLE_HR", "ROLE_EMPLOYEE")
                         .requestMatchers("/api/utilization/team").hasAuthority("ROLE_MANAGER")
                         .requestMatchers("/api/skills/pending").hasAuthority("ROLE_MANAGER")
                         .requestMatchers("/api/skills/*/verify").hasAuthority("ROLE_MANAGER")
                         .requestMatchers("/api/skills/search").hasAnyAuthority("ROLE_MANAGER", "ROLE_HR")
-
-                        // Allocation Requests Review
                         .requestMatchers("/api/allocation-requests/pending").hasAnyAuthority("ROLE_MANAGER", "ROLE_HR")
                         .requestMatchers("/api/allocation-requests/*/approve")
                         .hasAnyAuthority("ROLE_MANAGER", "ROLE_HR")
                         .requestMatchers("/api/allocation-requests/*/reject").hasAnyAuthority("ROLE_MANAGER", "ROLE_HR")
 
-                        // 5. HR / ADMIN
-                        .requestMatchers(HttpMethod.POST, "/api/assignments").hasAuthority("ROLE_HR")
+                        // 3.5. SHARED AUTHENTICATED ENDPOINTS (Specific overrides before wildcards)
+                        .requestMatchers("/api/users/me").authenticated()
+                        .requestMatchers("/api/utilization/me", "/api/allocations/me").authenticated()
+                        .requestMatchers("/api/catalog/skills").authenticated()
+                        .requestMatchers("/api/projects/active")
+                        .hasAnyAuthority("ROLE_MANAGER", "ROLE_HR", "ROLE_EMPLOYEE")
+                        .requestMatchers("/api/assignments/**").authenticated()
+
+                        // 4. HR-ONLY ENDPOINTS (Wildcards)
                         .requestMatchers(HttpMethod.PUT, "/api/assignments/*/end")
                         .hasAnyAuthority("ROLE_HR", "ROLE_MANAGER")
                         .requestMatchers("/api/users/**").hasAuthority("ROLE_HR")
