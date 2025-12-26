@@ -41,11 +41,17 @@ public class ProjectAssignment {
     @Column(nullable = true)
     private BillingType billingType;
 
+    @Column(name = "project_role")
+    private String projectRole;
+
     @NotNull(message = "Start date is required")
     @Column(nullable = false)
     private LocalDate startDate;
 
     private LocalDate endDate;
+
+    @Column(name = "allocation_percent")
+    private Integer allocationPercent; // Percentage of employee time allocated (1-100)
 
     @Column(name = "requested_at")
     private java.time.LocalDateTime requestedAt;

@@ -10,6 +10,7 @@ import AllocationApprovals from '../components/AllocationApprovals';
 const HRDashboard = () => {
     const { user, role } = useAuth();
     const [activeSection, setActiveSection] = useState('overview');
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
     // -- State Management --
     const [stats, setStats] = useState({
@@ -616,37 +617,49 @@ const HRDashboard = () => {
             <div className="row g-0">
                 {/* Sidebar */}
                 {/* Sidebar */}
-                <div className="col-md-3 col-lg-2 sidebar">
-                    <div className="d-flex flex-column px-3 pt-4">
-                        <div className="sidebar-header">
-                            <h4 className="sidebar-title">HR Portal</h4>
+                {/* Sidebar */}
+                <div className={`col-auto sidebar transition-width ${isSidebarCollapsed ? 'sidebar-collapsed' : 'col-md-3 col-lg-2'}`} style={{ backgroundColor: '#fff', borderRight: '1px solid #dee2e6' }}>
+                    <div className="d-flex flex-column px-2 px-md-3 pt-4 h-100">
+                        <div className="sidebar-header d-flex align-items-center justify-content-between mb-4 px-2">
+                            {!isSidebarCollapsed && <h4 className="sidebar-title m-0 fw-bold text-primary">HR Portal</h4>}
+                            <button
+                                className={`btn btn-sm ${isSidebarCollapsed ? 'btn-primary w-100' : 'btn-outline-primary border-0 ms-auto'} transition-all`}
+                                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                                title={isSidebarCollapsed ? "Expand" : "Collapse"}
+                                style={{ width: isSidebarCollapsed ? 'auto' : '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            >
+                                <i className={`bi ${isSidebarCollapsed ? 'bi-chevron-double-right' : 'bi-chevron-double-left'} fs-6`}></i>
+                            </button>
                         </div>
                         <ul className="nav flex-column w-100 gap-2">
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('overview')}
-                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'overview' ? 'active' : ''}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'overview' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    title={isSidebarCollapsed ? "Overview" : ""}
                                 >
-                                    <i className="bi bi-speedometer2 icon-std"></i>
-                                    <span className="d-none d-sm-inline">Overview</span>
+                                    <i className="bi bi-speedometer2 icon-std fs-5"></i>
+                                    {!isSidebarCollapsed && <span className="ms-2">Overview</span>}
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('people')}
-                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'people' ? 'active' : ''}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'people' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    title={isSidebarCollapsed ? "People" : ""}
                                 >
-                                    <i className="bi bi-people-fill icon-std"></i>
-                                    <span className="d-none d-sm-inline">People</span>
+                                    <i className="bi bi-people-fill icon-std fs-5"></i>
+                                    {!isSidebarCollapsed && <span className="ms-2">People</span>}
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('projects')}
-                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'projects' ? 'active' : ''}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'projects' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    title={isSidebarCollapsed ? "Projects" : ""}
                                 >
-                                    <i className="bi bi-folder icon-std"></i>
-                                    <span className="d-none d-sm-inline">Projects</span>
+                                    <i className="bi bi-folder icon-std fs-5"></i>
+                                    {!isSidebarCollapsed && <span className="ms-2">Projects</span>}
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
@@ -661,28 +674,31 @@ const HRDashboard = () => {
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('bench')}
-                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'bench' ? 'active' : ''}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'bench' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    title={isSidebarCollapsed ? "Bench & Alloc" : ""}
                                 >
-                                    <i className="bi bi-people icon-std"></i>
-                                    <span className="d-none d-sm-inline">Bench & Alloc</span>
+                                    <i className="bi bi-people icon-std fs-5"></i>
+                                    {!isSidebarCollapsed && <span className="ms-2">Bench & Alloc</span>}
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('catalog')}
-                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'catalog' ? 'active' : ''}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'catalog' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    title={isSidebarCollapsed ? "Catalog" : ""}
                                 >
-                                    <i className="bi bi-list-check icon-std"></i>
-                                    <span className="d-none d-sm-inline">Catalog</span>
+                                    <i className="bi bi-list-check icon-std fs-5"></i>
+                                    {!isSidebarCollapsed && <span className="ms-2">Catalog</span>}
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('talent')}
-                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'talent' ? 'active' : ''}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'talent' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    title={isSidebarCollapsed ? "Talent" : ""}
                                 >
-                                    <i className="bi bi-search icon-std"></i>
-                                    <span className="d-none d-sm-inline">Talent</span>
+                                    <i className="bi bi-search icon-std fs-5"></i>
+                                    {!isSidebarCollapsed && <span className="ms-2">Talent</span>}
                                 </button>
                             </li>
                         </ul>
@@ -690,7 +706,7 @@ const HRDashboard = () => {
                 </div>
 
                 {/* Main Content */}
-                <div className="col-md-9 col-lg-10" style={{ padding: 0 }}>
+                <div className="col" style={{ padding: 0 }}>
                     <header className="page-header px-5 pt-4">
                         <div className="d-flex justify-content-between align-items-center">
                             <div>
@@ -719,6 +735,29 @@ const HRDashboard = () => {
 
                     </div>
                 </div>
+            </div>
+        </div>
+    );
+    return (
+        <div className="container-fluid" style={{ backgroundColor: '#f8f9fa', minHeight: '100vh', padding: 0 }}>
+            <div className="row g-0">
+                {/* Sidebar handled above */}
+                {/* ... */}
+
+                <style>{`
+                    .nav-link {
+                        transition: all 0.2s ease;
+                        border-radius: 8px !important;
+                        font-weight: 500;
+                        height: 48px;
+                    }
+                    .sidebar.transition-width {
+                        transition: width 0.3s ease, flex-basis 0.3s ease;
+                    }
+                    .sidebar-collapsed {
+                        width: 70px !important;
+                    }
+                `}</style>
             </div>
         </div>
     );

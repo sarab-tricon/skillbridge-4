@@ -28,30 +28,36 @@ public class DataSeeder {
         @Bean
         public CommandLineRunner seedData() {
                 return args -> {
-                        User employee = userRepository.findByEmail("employee@skillbridge.com").orElse(null);
-
-                        if (employee == null) {
-                                System.out.println("Seeding database with test users...");
-
-                                // 1. Create HR
-                                User hr = User.builder()
+                        // Check if HR exists
+                        User hr = userRepository.findByEmail("hr@skillbridge.com").orElse(null);
+                        if (hr == null) {
+                                System.out.println("Creating HR user...");
+                                hr = User.builder()
                                                 .id(UUID.fromString("11111111-1111-1111-1111-111111111111"))
                                                 .email("hr@skillbridge.com")
                                                 .password(passwordEncoder.encode("password"))
                                                 .role(Role.HR)
                                                 .build();
                                 userRepository.save(hr);
+                        }
 
-                                // 2. Create Manager
-                                User manager = User.builder()
+                        // Check if Manager exists
+                        User manager = userRepository.findByEmail("manager@skillbridge.com").orElse(null);
+                        if (manager == null) {
+                                System.out.println("Creating Manager user...");
+                                manager = User.builder()
                                                 .id(UUID.fromString("22222222-2222-2222-2222-222222222222"))
                                                 .email("manager@skillbridge.com")
                                                 .password(passwordEncoder.encode("password"))
                                                 .role(Role.MANAGER)
                                                 .build();
                                 manager = userRepository.save(manager);
+                        }
 
-                                // 3. Create Employee
+                        // Check if Employee exists
+                        User employee = userRepository.findByEmail("employee@skillbridge.com").orElse(null);
+                        if (employee == null) {
+                                System.out.println("Creating Employee user...");
                                 employee = User.builder()
                                                 .id(UUID.fromString("33333333-3333-3333-3333-333333333333"))
                                                 .email("employee@skillbridge.com")
@@ -103,6 +109,7 @@ public class DataSeeder {
                                                 .assignmentStatus(AssignmentStatus.ACTIVE)
                                                 .billingType(BillingType.BILLABLE)
                                                 .startDate(LocalDate.now().minusMonths(1))
+                                                .allocationPercent(100) // Set default allocation
                                                 .build();
                                 assignmentRepository.save(assignment);
                                 System.out.println("Project assignment seeded for employee@skillbridge.com");

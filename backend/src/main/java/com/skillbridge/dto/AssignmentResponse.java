@@ -28,4 +28,5 @@ public class AssignmentResponse {
     private String employeeName;
     private String managerName; // New field for HR visibility
     private String requestStatus; // e.g. PENDING_MANAGER, PENDING_HR, REJECTED, APPROVED
+    private String projectRole;
 }

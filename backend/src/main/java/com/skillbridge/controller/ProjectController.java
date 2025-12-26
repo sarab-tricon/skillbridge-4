@@ -33,4 +33,12 @@ public class ProjectController {
     public ResponseEntity<List<ProjectResponse>> getActiveProjects() {
         return ResponseEntity.ok(projectService.getActiveProjects());
     }
+
+    @PutMapping("/{id}/status")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ROLE_HR')")
+    public ResponseEntity<ProjectResponse> updateProjectStatus(
+            @PathVariable java.util.UUID id,
+            @Valid @RequestBody com.skillbridge.dto.UpdateProjectStatusRequest request) {
+        return ResponseEntity.ok(projectService.updateProjectStatus(id, request.getStatus()));
+    }
 }

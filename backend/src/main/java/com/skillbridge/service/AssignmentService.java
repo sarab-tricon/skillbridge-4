@@ -41,16 +41,45 @@ public class AssignmentService {
         Project project = projectRepository.findById(request.getProjectId())
                 .orElseThrow(() -> new RuntimeException("Project not found with ID: " + request.getProjectId()));
 
-        if (project.getStatus() != ProjectStatus.ACTIVE) {
-            throw new RuntimeException("Cannot assign employee to a non-active project");
+        if (project.getStatus() != ProjectStatus.ACTIVE && project.getStatus() != ProjectStatus.PLANNED) {
+            throw new RuntimeException(
+                    "Cannot assign employee to a COMPLETED project. Only ACTIVE or PLANNED projects allowed.");
         }
 
-        // 3. Prevent duplicate ACTIVE assignments for the same employee
-        assignmentRepository.findTopByEmployeeIdOrderByStartDateDesc(request.getEmployeeId())
+        // Auto-activate project if it is currently PLANNED
+        if (project.getStatus() == ProjectStatus.PLANNED) {
+            System.err.println("DEBUG: Auto-activating PLANNED project: " + project.getName());
+            project.setStatus(ProjectStatus.ACTIVE);
+            projectRepository.save(project);
+        }
+
+        // 3. Validate partial allocation - allow multiple assignments but check total
+        // doesn't exceed 100%
+        int requestedAllocation = request.getAllocationPercent() != null ? request.getAllocationPercent() : 100;
+
+        // Calculate current utilization from active assignments
+        int currentUtilization = assignmentRepository.findAll().stream()
+                .filter(a -> a.getEmployeeId().equals(request.getEmployeeId()))
                 .filter(a -> a.getAssignmentStatus() == AssignmentStatus.ACTIVE)
-                .ifPresent(a -> {
-                    throw new IllegalStateException("Employee already has an active project assignment");
-                });
+                .mapToInt(a -> a.getAllocationPercent() != null ? a.getAllocationPercent() : 100)
+                .sum();
+
+        System.err.println(
+                "DEBUG: Allocation Request - Emp: " + request.getEmployeeId() + ", Proj: " + request.getProjectId());
+        System.err.println("DEBUG: Current Util: " + currentUtilization + ", Requested: " + requestedAllocation);
+
+        int totalAfterAllocation = currentUtilization + requestedAllocation;
+        int availableCapacity = 100 - currentUtilization;
+
+        if (totalAfterAllocation > 100) {
+            System.err.println("DEBUG: Allocation REJECTED. Total: " + totalAfterAllocation);
+            throw new IllegalStateException(
+                    String.format(
+                            "Cannot allocate %d%%. Employee is already %d%% allocated. Only %d%% capacity available.",
+                            requestedAllocation,
+                            currentUtilization,
+                            availableCapacity));
+        }
 
         // 4. Validate dates
         if (request.getEndDate() != null && request.getStartDate().isAfter(request.getEndDate())) {
@@ -63,9 +92,15 @@ public class AssignmentService {
                 .projectId(request.getProjectId())
                 .assignmentStatus(AssignmentStatus.ACTIVE)
                 .billingType(request.getBillingType())
+                .projectRole(request.getProjectRole() != null && !request.getProjectRole().isEmpty()
+                        ? request.getProjectRole()
+                        : "Team Member")
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
+                .allocationPercent(request.getAllocationPercent() != null ? request.getAllocationPercent() : 100)
                 .build();
+
+        System.err.println("DEBUG: Assigning with Role: " + assignment.getProjectRole());
 
         ProjectAssignment savedAssignment = assignmentRepository.save(assignment);
         return mapToResponse(savedAssignment);
@@ -264,8 +299,108 @@ public class AssignmentService {
                 .startDate(assignment.getStartDate())
                 .endDate(assignment.getEndDate())
                 .requestedAt(assignment.getRequestedAt())
+                .projectRole(assignment.getProjectRole())
                 .employeeName(userRepository.findById(assignment.getEmployeeId())
                         .map(u -> u.getFirstName() + " " + u.getLastName()).orElse("Unknown"))
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public com.skillbridge.dto.EmployeeUtilizationResponse getEmployeeUtilization(UUID employeeId) {
+        // Get all ACTIVE assignments for the employee
+        java.util.List<ProjectAssignment> activeAssignments = assignmentRepository
+                .findAll().stream()
+                .filter(a -> a.getEmployeeId().equals(employeeId))
+                .filter(a -> a.getAssignmentStatus() == AssignmentStatus.ACTIVE)
+                .collect(java.util.stream.Collectors.toList());
+
+        // Calculate total utilization
+        int totalUtilization = 0;
+        java.util.List<com.skillbridge.dto.AllocationDetail> assignments = new java.util.ArrayList<>();
+
+        for (ProjectAssignment assignment : activeAssignments) {
+            Project project = projectRepository.findById(assignment.getProjectId()).orElse(null);
+            String projectName = project != null ? project.getName() : "Unknown Project";
+
+            // Use actual allocation percent from the assignment, default to 100% if not set
+            int allocationPercent = assignment.getAllocationPercent() != null ? assignment.getAllocationPercent() : 100;
+
+            totalUtilization += allocationPercent;
+
+            assignments.add(com.skillbridge.dto.AllocationDetail.builder()
+                    .assignmentId(assignment.getId())
+                    .projectId(assignment.getProjectId())
+                    .projectName(projectName)
+                    .allocationPercent(allocationPercent)
+                    .allocationPercent(allocationPercent)
+                    .billingType(assignment.getBillingType() != null ? assignment.getBillingType().name() : "NONE")
+                    .projectRole(assignment.getProjectRole())
+                    .startDate(assignment.getStartDate())
+                    .endDate(assignment.getEndDate())
+                    .build());
+        }
+
+        // Cap at 100% max
+        totalUtilization = Math.min(totalUtilization, 100);
+        int availableCapacity = Math.max(0, 100 - totalUtilization);
+
+        return com.skillbridge.dto.EmployeeUtilizationResponse.builder()
+                .employeeId(employeeId)
+                .totalUtilization(totalUtilization)
+                .availableCapacity(availableCapacity)
+                .allocationStatus(totalUtilization == 0 ? "BENCH"
+                        : assignments.stream().anyMatch(a -> "BILLABLE".equals(a.getBillingType())) ? "BILLABLE"
+                                : "INVESTMENT")
+                .projectName(assignments.isEmpty() ? null
+                        : assignments.stream()
+                                .map(com.skillbridge.dto.AllocationDetail::getProjectName)
+                                .collect(java.util.stream.Collectors.joining(", ")))
+                .assignments(assignments)
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public com.skillbridge.dto.EmployeeUtilizationResponse getMyUtilization() {
+        return getEmployeeUtilization(getAuthenticatedUser().getId());
+    }
+
+    @Transactional
+    public AssignmentResponse updateAssignment(UUID assignmentId, com.skillbridge.dto.UpdateAssignmentRequest request) {
+        ProjectAssignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new RuntimeException("Assignment not found with ID: " + assignmentId));
+
+        if (assignment.getAssignmentStatus() != AssignmentStatus.ACTIVE) {
+            throw new IllegalStateException("Can only update ACTIVE assignments.");
+        }
+
+        // Calculate utilization excluding current assignment
+        int currentUtilization = assignmentRepository.findAll().stream()
+                .filter(a -> a.getEmployeeId().equals(assignment.getEmployeeId()))
+                .filter(a -> a.getAssignmentStatus() == AssignmentStatus.ACTIVE)
+                .filter(a -> !a.getId().equals(assignmentId))
+                .mapToInt(a -> a.getAllocationPercent() != null ? a.getAllocationPercent() : 100)
+                .sum();
+
+        int requestedAlloc = request.getAllocationPercent() != null ? request.getAllocationPercent()
+                : (assignment.getAllocationPercent() != null ? assignment.getAllocationPercent() : 100);
+
+        if (currentUtilization + requestedAlloc > 100) {
+            throw new IllegalStateException(String.format(
+                    "Cannot allocate %d%%. Employee is already %d%% allocated (excluding this). Only %d%% total capacity available.",
+                    requestedAlloc, currentUtilization, (100 - currentUtilization)));
+        }
+
+        if (request.getAllocationPercent() != null)
+            assignment.setAllocationPercent(request.getAllocationPercent());
+        if (request.getBillingType() != null)
+            assignment.setBillingType(request.getBillingType());
+        if (request.getProjectRole() != null)
+            assignment.setProjectRole(request.getProjectRole());
+        if (request.getStartDate() != null)
+            assignment.setStartDate(request.getStartDate());
+        if (request.getEndDate() != null)
+            assignment.setEndDate(request.getEndDate());
+
+        return mapToResponse(assignmentRepository.save(assignment));
     }
 }

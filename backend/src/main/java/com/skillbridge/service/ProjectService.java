@@ -56,6 +56,17 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public ProjectResponse updateProjectStatus(java.util.UUID projectId, ProjectStatus newStatus) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found with id: " + projectId));
+
+        project.setStatus(newStatus);
+        Project updatedProject = projectRepository.save(project);
+
+        return mapToResponse(updatedProject);
+    }
+
     private ProjectResponse mapToResponse(Project project) {
         return ProjectResponse.builder()
                 .id(project.getId())
