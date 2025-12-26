@@ -214,7 +214,7 @@ const ManagerDashboard = () => {
         >
             <div className="card-body p-4 text-center">
                 <h6 className="text-muted text-uppercase mb-3 fw-bold" style={{ letterSpacing: '1.5px' }}>{title}</h6>
-                <h2 className="display-4 fw-bold mb-0" style={{ color: '#CF4B00' }}>{count}</h2>
+                <h2 className="display-4 fw-bold mb-0" style={{ color: 'var(--color-primary)' }}>{count}</h2>
                 <div className="mt-3">
                     <button className="btn btn-sm px-4 rounded-pill" style={{ backgroundColor: color, color: 'white' }}>
                         {activeSection === sectionId ? 'Hide Details' : 'View Details'}
@@ -241,41 +241,41 @@ const ManagerDashboard = () => {
                                 <i className={`bi ${isSidebarCollapsed ? 'bi-chevron-double-right' : 'bi-chevron-double-left'} fs-6`}></i>
                             </button>
                         </div>
-                        <ul className="nav flex-column w-100 gap-2" id="menu">
-                            <li className="nav-item w-100 mb-2">
+                        <ul className="nav flex-column w-100 gap-1" id="menu">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection(null)}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === null ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === null ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "Dashboard" : ""}
                                 >
                                     <i className="bi bi-speedometer2 icon-std fs-5"></i>
                                     {!isSidebarCollapsed && <span className="ms-2">Dashboard</span>}
                                 </button>
                             </li>
-                            <li className="nav-item w-100 mb-2">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection('team')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'team' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'team' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "My Team" : ""}
                                 >
                                     <i className="bi bi-people icon-std fs-5"></i>
                                     {!isSidebarCollapsed && <span className="ms-2">My Team</span>}
                                 </button>
                             </li>
-                            <li className="nav-item w-100 mb-2">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection('alloc_requests')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'alloc_requests' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'alloc_requests' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "Allocations" : ""}
                                 >
                                     <i className="bi bi-patch-check icon-std fs-5"></i>
                                     {!isSidebarCollapsed && <span className="ms-2">Allocations</span>}
                                 </button>
                             </li>
-                            <li className="nav-item w-100 mb-2">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection('pending_skills')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'pending_skills' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'pending_skills' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "Verifications" : ""}
                                 >
                                     <i className="bi bi-star icon-std fs-5"></i>

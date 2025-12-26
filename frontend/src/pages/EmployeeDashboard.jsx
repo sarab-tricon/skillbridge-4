@@ -710,51 +710,51 @@ const EmployeeDashboard = () => {
                                 <i className={`bi ${isSidebarCollapsed ? 'bi-chevron-double-right' : 'bi-chevron-double-left'} fs-6`}></i>
                             </button>
                         </div>
-                        <ul className="nav flex-column w-100 gap-2" id="menu">
-                            <li className="nav-item w-100 mb-2">
+                        <ul className="nav flex-column w-100 gap-1" id="menu">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection('overview')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'overview' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'overview' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "Dashboard" : ""}
                                 >
                                     <i className="bi bi-speedometer2 icon-std fs-5"></i>
                                     {!isSidebarCollapsed && <span className="ms-2">Dashboard</span>}
                                 </button>
                             </li>
-                            <li className="nav-item w-100 mb-2">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection('skills')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'skills' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'skills' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "My Skills" : ""}
                                 >
                                     <i className="bi bi-star icon-std fs-5"></i>
                                     {!isSidebarCollapsed && <span className="ms-2">My Skills</span>}
                                 </button>
                             </li>
-                            <li className="nav-item w-100 mb-2">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection('allocation')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'allocation' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'allocation' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "Allocation" : ""}
                                 >
                                     <i className="bi bi-diagram-3 icon-std fs-5"></i>
                                     {!isSidebarCollapsed && <span className="ms-2">Allocation</span>}
                                 </button>
                             </li>
-                            <li className="nav-item w-100 mb-2">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection('utilization')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'utilization' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'utilization' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "Utilization" : ""}
                                 >
                                     <i className="bi bi-graph-up icon-std fs-5"></i>
                                     {!isSidebarCollapsed && <span className="ms-2">Utilization</span>}
                                 </button>
                             </li>
-                            <li className="nav-item w-100 mb-2">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection('profile')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'profile' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'profile' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "My Profile" : ""}
                                 >
                                     <i className="bi bi-person-circle icon-std fs-5"></i>
@@ -862,14 +862,14 @@ const EmployeeDashboard = () => {
                     background: var(--color-accent);
                 }
                 .nav-link.active-accent {
-                    background-color: rgba(207, 75, 0, 0.12) !important;
+                    background-color: rgba(181, 64, 0, 0.12) !important;
                     color: var(--color-accent) !important;
                     border: 1px solid var(--color-accent) !important;
                 }
                 .bg-accent-header {
-                    background-color: rgba(207, 75, 0, 0.08) !important;
+                    background-color: rgba(181, 64, 0, 0.08) !important;
                     color: var(--color-accent) !important;
-                    border-bottom: 1px solid rgba(207, 75, 0, 0.15);
+                    border-bottom: 1px solid rgba(181, 64, 0, 0.15);
                 }
                 .bg-accent-header h5 {
                     color: var(--color-accent) !important;
