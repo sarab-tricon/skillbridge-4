@@ -665,10 +665,11 @@ const HRDashboard = () => {
                             <li className="nav-item w-100 mb-2">
                                 <button
                                     onClick={() => setActiveSection('approvals')}
-                                    className={`nav-link sidebar-link w-100 text-start ${activeSection === 'approvals' ? 'active' : ''}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'approvals' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    title={isSidebarCollapsed ? "Approvals" : ""}
                                 >
-                                    <i className="bi bi-check-circle icon-std"></i>
-                                    <span className="d-none d-sm-inline">Approvals</span>
+                                    <i className="bi bi-check-circle icon-std fs-5"></i>
+                                    {!isSidebarCollapsed && <span className="ms-2">Approvals</span>}
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
@@ -735,15 +736,6 @@ const HRDashboard = () => {
 
                     </div>
                 </div>
-            </div>
-        </div>
-    );
-    return (
-        <div className="container-fluid" style={{ backgroundColor: '#f8f9fa', minHeight: '100vh', padding: 0 }}>
-            <div className="row g-0">
-                {/* Sidebar handled above */}
-                {/* ... */}
-
                 <style>{`
                     .nav-link {
                         transition: all 0.2s ease;

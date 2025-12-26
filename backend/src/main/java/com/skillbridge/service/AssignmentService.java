@@ -239,6 +239,7 @@ public class AssignmentService {
                 .projectName("Bench")
                 .assignmentStatus(AssignmentStatus.ENDED)
                 .utilization("BENCH")
+                .employeeName(currentUser.getFirstName() + " " + currentUser.getLastName())
                 .build();
     }
 
@@ -331,7 +332,6 @@ public class AssignmentService {
                     .assignmentId(assignment.getId())
                     .projectId(assignment.getProjectId())
                     .projectName(projectName)
-                    .allocationPercent(allocationPercent)
                     .allocationPercent(allocationPercent)
                     .billingType(assignment.getBillingType() != null ? assignment.getBillingType().name() : "NONE")
                     .projectRole(assignment.getProjectRole())
