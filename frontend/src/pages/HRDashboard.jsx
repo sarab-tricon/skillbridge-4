@@ -619,14 +619,14 @@ const HRDashboard = () => {
                 <div className={`col-auto sidebar transition-width ${isSidebarCollapsed ? 'sidebar-collapsed' : 'col-md-3 col-lg-2'}`} style={{ backgroundColor: '#fff', borderRight: '1px solid #dee2e6', overflowY: 'auto' }}>
                     <div className="d-flex flex-column px-2 px-md-3 pt-4 h-100">
                         <div className="sidebar-header d-flex align-items-center justify-content-between mb-4 px-2">
-                            {!isSidebarCollapsed && <h4 className="sidebar-title m-0 fw-bold text-primary">HR Portal</h4>}
+                            {!isSidebarCollapsed && <h4 className="sidebar-title m-0 fw-bold text-accent">Menu</h4>}
                             <button
-                                className={`btn btn-sm ${isSidebarCollapsed ? 'btn-primary w-100' : 'btn-outline-primary border-0 ms-auto'} transition-all`}
+                                className={`btn btn-sm ${isSidebarCollapsed ? 'btn-accent w-100' : 'btn-outline-accent border-0 ms-auto'} transition-all`}
                                 onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
                                 title={isSidebarCollapsed ? "Expand" : "Collapse"}
                                 style={{ width: isSidebarCollapsed ? 'auto' : '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                             >
-                                <i className={`bi ${isSidebarCollapsed ? 'bi-chevron-double-right' : 'bi-chevron-double-left'} fs-6`}></i>
+                                <i className={`bi ${isSidebarCollapsed ? 'bi-chevron-double-right' : 'bi-chevron-double-left'} fs-6 text-accent`}></i>
                             </button>
                         </div>
                         <ul className="nav flex-column w-100 gap-2">
@@ -746,6 +746,32 @@ const HRDashboard = () => {
                     }
                     .sidebar-collapsed {
                         width: 70px !important;
+                    }
+                    .nav-link.active {
+                        background-color: #CF4B00 !important;
+                        color: white !important;
+                    }
+                    .nav-link:hover:not(.active) {
+                        background-color: rgba(207, 75, 0, 0.1);
+                        border: 1px solid #CF4B00;
+                        color: #CF4B00 !important;
+                    }
+                    .text-accent {
+                        color: #CF4B00 !important;
+                    }
+                    .btn-accent {
+                        background-color: #CF4B00;
+                        color: white;
+                        border: 1px solid #CF4B00;
+                    }
+                    .btn-outline-accent {
+                        color: #CF4B00;
+                        border: 1px solid #CF4B00;
+                        background: transparent;
+                    }
+                    .btn-outline-accent:hover {
+                        background-color: #CF4B00;
+                        color: white;
                     }
                 `}</style>
             </div>

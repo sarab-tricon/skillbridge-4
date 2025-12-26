@@ -14,20 +14,20 @@ const ProfileSection = ({ profile, utilization, onNavigateToSkills }) => {
         <div className="mx-auto" style={{ maxWidth: '800px' }}>
             <div className="card shadow-sm border-0 rounded-3 overflow-hidden">
                 {/* Header */}
-                <div className="card-header border-0 p-4" style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, #2a5298 100%)', minHeight: '140px' }}>
+                <div className="card-header border-0 p-4" style={{ background: 'linear-gradient(135deg, var(--profile-theme-color, var(--color-primary)) 0%, var(--profile-theme-dark, #2a5298) 100%)', minHeight: '140px' }}>
                     <div className="d-flex justify-content-between h-100">
                         <div className="d-flex align-items-center gap-4">
                             <div className="rounded-circle d-flex align-items-center justify-content-center shadow"
-                                style={{ width: '80px', height: '80px', backgroundColor: 'white', color: 'var(--color-primary)', fontSize: '2.5rem' }}>
+                                style={{ width: '80px', height: '80px', backgroundColor: 'white', color: 'var(--profile-theme-color, var(--color-primary))', fontSize: '2.5rem' }}>
                                 <i className="bi bi-person-fill"></i>
                             </div>
                             <div className="text-white">
                                 <h3 className="fw-bold mb-1">{profile.firstName} {profile.lastName}</h3>
                                 <div className="d-flex align-items-center gap-2 opacity-75">
                                     <i className="bi bi-envelope"></i>
-                                    <span>{profile.email}</span>
+                                    <span className="small">{profile.email}</span>
                                 </div>
-                                <div className="badge bg-white text-primary mt-2 px-3 py-1 rounded-pill">
+                                <div className="badge bg-white mt-2 px-3 py-1 rounded-pill" style={{ color: 'var(--profile-theme-color, var(--color-primary))' }}>
                                     {profile.role}
                                 </div>
                             </div>
@@ -52,12 +52,9 @@ const ProfileSection = ({ profile, utilization, onNavigateToSkills }) => {
                     {/* Assignments Column */}
                     <div className="col-lg-7">
                         <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h5 className="fw-bold mb-0 text-primary">
+                            <h5 className="fw-bold mb-0" style={{ color: 'var(--profile-theme-color, var(--color-primary))' }}>
                                 <i className="bi bi-briefcase-fill me-2"></i>Active Assignments
                             </h5>
-                            <span className="badge bg-light text-dark border">
-                                Total: {utilization?.totalUtilization || 0}%
-                            </span>
                         </div>
 
                         {assignments.length > 0 ? (
@@ -80,7 +77,7 @@ const ProfileSection = ({ profile, utilization, onNavigateToSkills }) => {
                                                     <i className="bi bi-person-gear me-1"></i>
                                                     {assign.projectRole || 'Developer'}
                                                 </div>
-                                                <div className="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">
+                                                <div className="badge bg-opacity-10 border" style={{ backgroundColor: 'rgba(var(--profile-theme-rgb, 156, 198, 219), 0.1)', color: 'var(--profile-theme-color, var(--color-primary))', borderColor: 'var(--profile-theme-color, var(--color-primary))' }}>
                                                     {assign.allocationPercent}%
                                                 </div>
                                             </div>
@@ -106,15 +103,16 @@ const ProfileSection = ({ profile, utilization, onNavigateToSkills }) => {
                     {/* Skills Column */}
                     <div className="col-lg-5">
                         <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h5 className="fw-bold mb-0 text-primary">
-                                <i className="bi bi-lightning-charge-fill me-2"></i>Skills
+                            <h5 className="fw-bold mb-0" style={{ color: 'var(--profile-theme-color, var(--color-primary))' }}>
+                                <i className="bi bi-lightning-charge-fill me-2"></i>Skills village
                             </h5>
                             {onNavigateToSkills && (
                                 <button
-                                    className="btn btn-sm btn-outline-primary rounded-pill px-3"
+                                    className="btn btn-sm btn-outline-primary rounded-circle shadow-sm p-0 d-flex align-items-center justify-content-center"
+                                    style={{ width: '32px', height: '32px', color: 'var(--profile-theme-color, var(--color-primary))', borderColor: 'var(--profile-theme-color, var(--color-primary))' }}
                                     onClick={onNavigateToSkills}
                                 >
-                                    Manage
+                                    <i className="bi bi-plus-lg"></i>
                                 </button>
                             )}
                         </div>
@@ -123,7 +121,7 @@ const ProfileSection = ({ profile, utilization, onNavigateToSkills }) => {
                             <div className="card-body p-0">
                                 {profile.skills && profile.skills.length > 0 ? (
                                     <div className="list-group list-group-flush rounded-3">
-                                        {profile.skills.map(skill => (
+                                        {profile.skills.filter(s => s.status === 'APPROVED').map(skill => (
                                             <div key={skill.id} className="list-group-item d-flex justify-content-between align-items-center px-3 py-2">
                                                 <span className="fw-medium">{skill.skillName}</span>
                                                 <span className={`badge rounded-pill ${skill.proficiencyLevel === 'ADVANCED' ? 'bg-success' :
