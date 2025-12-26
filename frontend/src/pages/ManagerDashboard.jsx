@@ -225,10 +225,10 @@ const ManagerDashboard = () => {
     );
 
     return (
-        <div className="container-fluid p-0" style={{ backgroundColor: 'var(--color-bg)', minHeight: '100vh' }}>
-            <div className="row g-0">
+        <div className="container-fluid p-0 overflow-hidden" style={{ height: 'calc(100vh - 65px)', backgroundColor: 'var(--color-bg)' }}>
+            <div className="row g-0 h-100">
                 {/* SIDEBAR */}
-                <div className={`col-auto sidebar transition-width ${isSidebarCollapsed ? 'sidebar-collapsed' : 'col-md-3 col-lg-2'}`} style={{ backgroundColor: '#fff', borderRight: '1px solid #dee2e6' }}>
+                <div className={`col-auto sidebar transition-width ${isSidebarCollapsed ? 'sidebar-collapsed' : 'col-md-3 col-lg-2'}`} style={{ backgroundColor: '#fff', borderRight: '1px solid #dee2e6', overflowY: 'auto' }}>
                     <div className="d-flex flex-column px-2 px-md-3 pt-4 h-100">
                         <div className="sidebar-header d-flex align-items-center justify-content-between mb-4 px-2">
                             {!isSidebarCollapsed && <h4 className="sidebar-title m-0 fw-bold text-primary">Manager Hub</h4>}
@@ -287,7 +287,8 @@ const ManagerDashboard = () => {
                 </div>
 
                 {/* MAIN CONTENT AREA */}
-                <div className="col p-4 p-md-5">
+                {/* MAIN CONTENT AREA */}
+                <div className="col h-100 p-4 p-md-5" style={{ overflowY: 'auto', scrollbarGutter: 'stable' }}>
                     <header className="page-header text-center">
                         <h1 className="page-title">
                             Manager Control Panel

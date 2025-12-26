@@ -613,12 +613,10 @@ const HRDashboard = () => {
     );
 
     return (
-        <div className="container-fluid" style={{ backgroundColor: 'var(--color-bg)', minHeight: '100vh', padding: 0 }}>
-            <div className="row g-0">
+        <div className="container-fluid p-0 overflow-hidden" style={{ height: 'calc(100vh - 65px)', backgroundColor: 'var(--color-bg)' }}>
+            <div className="row g-0 h-100">
                 {/* Sidebar */}
-                {/* Sidebar */}
-                {/* Sidebar */}
-                <div className={`col-auto sidebar transition-width ${isSidebarCollapsed ? 'sidebar-collapsed' : 'col-md-3 col-lg-2'}`} style={{ backgroundColor: '#fff', borderRight: '1px solid #dee2e6' }}>
+                <div className={`col-auto sidebar transition-width ${isSidebarCollapsed ? 'sidebar-collapsed' : 'col-md-3 col-lg-2'}`} style={{ backgroundColor: '#fff', borderRight: '1px solid #dee2e6', overflowY: 'auto' }}>
                     <div className="d-flex flex-column px-2 px-md-3 pt-4 h-100">
                         <div className="sidebar-header d-flex align-items-center justify-content-between mb-4 px-2">
                             {!isSidebarCollapsed && <h4 className="sidebar-title m-0 fw-bold text-primary">HR Portal</h4>}
@@ -686,10 +684,10 @@ const HRDashboard = () => {
                                 <button
                                     onClick={() => setActiveSection('catalog')}
                                     className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'catalog' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
-                                    title={isSidebarCollapsed ? "Catalog" : ""}
+                                    title={isSidebarCollapsed ? "Skills" : ""}
                                 >
                                     <i className="bi bi-list-check icon-std fs-5"></i>
-                                    {!isSidebarCollapsed && <span className="ms-2">Catalog</span>}
+                                    {!isSidebarCollapsed && <span className="ms-2">Skills</span>}
                                 </button>
                             </li>
                             <li className="nav-item w-100 mb-2">
@@ -707,7 +705,7 @@ const HRDashboard = () => {
                 </div>
 
                 {/* Main Content */}
-                <div className="col" style={{ padding: 0 }}>
+                <div className="col h-100" style={{ padding: 0, overflowY: 'auto', scrollbarGutter: 'stable' }}>
                     <header className="page-header px-5 pt-4">
                         <div className="d-flex justify-content-between align-items-center">
                             <div>
