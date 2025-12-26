@@ -221,13 +221,13 @@ const EmployeeDashboard = () => {
             <div className="col-md-4">
                 <div className="card h-100 shadow-sm border-0 border-top-primary">
                     <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
-                        <i className="bi bi-person-badge h1 text-primary mb-2"></i>
+                        <i className="bi bi-person-badge h1 text-accent mb-2"></i>
                         <h5 className="card-title fw-bold">My Skills</h5>
                         <div className="mb-3">
                             <p className="h2 fw-bold text-accent mb-0">{skills.filter(s => s.status === 'APPROVED').length}</p>
                         </div>
                         <div className="mt-auto">
-                            <button className="btn btn-outline-primary btn-sm px-4" onClick={() => setActiveSection('skills')}>Manage</button>
+                            <button className="btn btn-outline-accent btn-sm px-4" onClick={() => setActiveSection('skills')}>Manage</button>
                         </div>
                     </div>
                 </div>
@@ -235,23 +235,13 @@ const EmployeeDashboard = () => {
             <div className="col-md-4">
                 <div className="card h-100 shadow-sm border-0 border-top-primary">
                     <div className="card-body p-4 text-center d-flex flex-column">
-                        <i className="bi bi-briefcase display-4 text-primary mb-3"></i>
+                        <i className="bi bi-briefcase display-4 text-accent mb-3"></i>
                         <h5 className="card-title fw-bold">Assignments</h5>
-                        <div className="mt-3">
-                            {utilization?.assignments && utilization.assignments.length > 0 ? (
-                                <ul className="list-unstyled mb-0">
-                                    {utilization.assignments.map((assign, idx) => (
-                                        <li key={idx} className="h5 text-muted mb-1 text-truncate" title={assign.projectName}>
-                                            {assign.projectName}
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p className="h4 text-muted">Bench</p>
-                            )}
+                        <div className="mb-3">
+                            <p className="h2 fw-bold text-accent mb-0">{utilization?.assignments?.length || 0}</p>
                         </div>
                         <div className="mt-auto">
-                            <button className="btn btn-outline-primary btn-sm mt-3" onClick={() => setActiveSection('utilization')}>View Details</button>
+                            <button className="btn btn-outline-accent btn-sm mt-3" onClick={() => setActiveSection('utilization')}>View Details</button>
                         </div>
                     </div>
                 </div>
@@ -259,13 +249,13 @@ const EmployeeDashboard = () => {
             <div className="col-md-4">
                 <div className="card h-100 shadow-sm border-0 border-top-primary">
                     <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
-                        <i className="bi bi-graph-up h1 text-primary mb-2"></i>
+                        <i className="bi bi-graph-up h1 text-accent mb-2"></i>
                         <h5 className="card-title fw-bold">Utilization</h5>
-                        <p className="display-6 fw-bold text-accent">
+                        <p className="display-6 fw-bold text-accent mt-3 mb-3">
                             {utilization?.totalUtilization || 0}%
                         </p>
                         <div className="mt-auto">
-                            <button className="btn btn-outline-primary btn-sm mt-2" onClick={() => setActiveSection('utilization')}>Detailed Stats</button>
+                            <button className="btn btn-outline-accent btn-sm mt-2" onClick={() => setActiveSection('utilization')}>Detailed Stats</button>
                         </div>
                     </div>
                 </div>
@@ -401,7 +391,7 @@ const EmployeeDashboard = () => {
                                                                 </td>
                                                                 <td className="px-4 py-3 text-end">
                                                                     <button
-                                                                        className="btn btn-sm btn-primary rounded-pill px-4 shadow-sm"
+                                                                        className="btn btn-sm btn-outline-accent rounded-pill px-4 shadow-sm"
                                                                         onClick={() => {
                                                                             setEditingSkill(skill);
                                                                             setAddSkillError(null);
@@ -437,7 +427,7 @@ const EmployeeDashboard = () => {
         <div className="py-2">
             {loadingAlloc ? (
                 <div className="text-center py-4">
-                    <div className="spinner-border text-primary" role="status"></div>
+                    <div className="spinner-border text-accent" role="status"></div>
                 </div>
             ) : errorAlloc ? (
                 <div className="alert alert-danger">{errorAlloc}</div>
@@ -471,7 +461,7 @@ const EmployeeDashboard = () => {
                                                     You have requested allocation for{' '}
                                                     <strong>{req.projectName}</strong>.
                                                 </p>
-                                                <span className="badge bg-primary">
+                                                <span className="badge bg-accent">
                                                     {req.requestStatus === 'PENDING_MANAGER'
                                                         ? 'Waiting for Manager Review'
                                                         : req.requestStatus === 'PENDING_HR'
@@ -554,13 +544,13 @@ const EmployeeDashboard = () => {
                         <div
                             className={`card border-2 shadow-sm rounded-4 overflow-hidden ${allocation.assignmentStatus === 'PENDING'
                                 ? 'border-warning'
-                                : 'border-primary'
+                                : 'border-accent'
                                 }`}
                         >
                             <div
                                 className={`card-header text-white p-3 text-center border-0 ${allocation.assignmentStatus === 'PENDING'
                                     ? 'bg-warning text-dark'
-                                    : 'bg-primary'
+                                    : 'bg-accent'
                                     }`}
                             >
                                 <h4 className="mb-0">Project Details</h4>
@@ -590,6 +580,36 @@ const EmployeeDashboard = () => {
                                             : 'Awaiting Approval'}
                                     </p>
                                 </div>
+
+                                {allocation.assignmentStatus === 'ACTIVE' && (
+                                    <div className="mt-4 pt-3 border-top">
+                                        <h5 className="fw-bold text-accent mb-3">{allocation.projectName}</h5>
+                                        <div className="row g-2 justify-content-center">
+                                            <div className="col-6">
+                                                <div className="p-2 bg-light rounded-3">
+                                                    <small className="text-muted d-block text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>Billing</small>
+                                                    <span className="fw-bold text-dark">{allocation.billingType || 'Billable'}</span>
+                                                </div>
+                                            </div>
+                                            <div className="col-6">
+                                                <div className="p-2 bg-light rounded-3">
+                                                    <small className="text-muted d-block text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>Allocation</small>
+                                                    <span className="fw-bold text-dark">{allocation.allocationPercent || '100'}%</span>
+                                                </div>
+                                            </div>
+                                            {(allocation.startDate || allocation.endDate) && (
+                                                <div className="col-12 mt-2">
+                                                    <div className="small text-muted">
+                                                        <i className="bi bi-calendar-event me-1"></i>
+                                                        {allocation.startDate ? new Date(allocation.startDate).toLocaleDateString() : 'Start'}
+                                                        {' - '}
+                                                        {allocation.endDate ? new Date(allocation.endDate).toLocaleDateString() : 'Present'}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -612,15 +632,15 @@ const EmployeeDashboard = () => {
                     {/* Left Column: Chart & Summary */}
                     <div className="col-lg-4 text-center border-end">
                         <div className="py-3">
-                            <div className="utilization-disk mx-auto mb-4" style={{
-                                width: '180px',
-                                height: '180px',
+                            <div className="utilization-disk mx-auto mb-4 p-4" style={{
+                                width: '200px',
+                                height: '200px',
                                 borderRadius: '50%',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 backgroundColor: 'var(--color-bg)',
-                                border: '10px solid var(--color-primary)',
+                                border: '12px solid var(--color-accent)',
                                 boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
                             }}>
                                 <span className="display-4 fw-bold text-accent">
@@ -652,7 +672,7 @@ const EmployeeDashboard = () => {
                                         <tbody>
                                             {utilization.assignments.map((assign, idx) => (
                                                 <tr key={idx}>
-                                                    <td className="ps-3 fw-bold text-primary">{assign.projectName}</td>
+                                                    <td className="ps-3 fw-bold text-accent">{assign.projectName}</td>
                                                     <td>
                                                         <div className="d-flex align-items-center">
                                                             <div className="progress flex-grow-1" style={{ height: '6px', maxWidth: '80px' }}>
@@ -700,9 +720,9 @@ const EmployeeDashboard = () => {
                 <div className={`col-auto sidebar transition-width ${isSidebarCollapsed ? 'sidebar-collapsed' : 'col-md-3 col-xl-2'}`} style={{ backgroundColor: '#fff', borderRight: '1px solid #dee2e6', overflowY: 'auto' }}>
                     <div className="d-flex flex-column px-2 px-md-3 pt-4 h-100">
                         <div className="sidebar-header d-flex align-items-center justify-content-between mb-4 px-2">
-                            {!isSidebarCollapsed && <h4 className="sidebar-title m-0 fw-bold text-primary">Menu</h4>}
+                            {!isSidebarCollapsed && <h4 className="sidebar-title m-0 fw-bold text-accent">Menu</h4>}
                             <button
-                                className={`btn btn-sm ${isSidebarCollapsed ? 'btn-primary w-100' : 'btn-outline-primary border-0 ms-auto'} transition-all`}
+                                className={`btn btn-sm ${isSidebarCollapsed ? 'btn-accent w-100' : 'btn-outline-accent border-0 ms-auto'} transition-all`}
                                 onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
                                 title={isSidebarCollapsed ? "Expand" : "Collapse"}
                                 style={{ width: isSidebarCollapsed ? 'auto' : '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -787,11 +807,17 @@ const EmployeeDashboard = () => {
                             {activeSection === 'allocation' && renderAllocation()}
                             {activeSection === 'utilization' && renderUtilization()}
                             {activeSection === 'profile' && (
-                                <ProfileSection
-                                    profile={profile}
-                                    utilization={utilization}
-                                    onNavigateToSkills={() => setActiveSection('skills')}
-                                />
+                                <div style={{
+                                    '--profile-theme-color': 'var(--color-accent)',
+                                    '--profile-theme-dark': '#B54000',
+                                    '--profile-theme-rgb': '207, 75, 0'
+                                }}>
+                                    <ProfileSection
+                                        profile={profile}
+                                        utilization={utilization}
+                                        onNavigateToSkills={() => setActiveSection('skills')}
+                                    />
+                                </div>
                             )}
                         </div>
                     </div>
@@ -814,11 +840,37 @@ const EmployeeDashboard = () => {
                     width: 70px !important;
                 }
                 .nav-link:hover:not(.active) {
-                    background-color: #f0f7ff;
+                    background-color: rgba(207, 75, 0, 0.1);
+                    border: 1px solid var(--color-accent);
                     color: var(--color-accent) !important;
                 }
+                .bg-accent {
+                    background-color: var(--color-accent) !important;
+                    color: white;
+                }
+                .border-accent {
+                    border-color: var(--color-accent) !important;
+                }
                 .border-top-primary {
-                    border-top: 4px solid var(--color-primary) !important;
+                    border-top: 4px solid var(--color-accent) !important;
+                }
+                .text-accent {
+                    color: var(--color-accent) !important;
+                }
+                .btn-outline-accent {
+                    color: var(--color-accent);
+                    border-color: var(--color-accent);
+                }
+                .btn-outline-accent:hover {
+                    background-color: var(--color-accent);
+                    color: white;
+                }
+                .nav-link.sidebar-link.active {
+                    background-color: var(--color-accent) !important;
+                    color: #fff !important;
+                }
+                .spinner-border.text-primary {
+                    color: var(--color-accent) !important;
                 }
                 .text-accent {
                     color: var(--color-accent);
