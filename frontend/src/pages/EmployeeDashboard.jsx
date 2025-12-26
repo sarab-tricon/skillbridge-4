@@ -694,10 +694,10 @@ const EmployeeDashboard = () => {
     );
 
     return (
-        <div className="container-fluid p-0 overflow-hidden" style={{ height: 'calc(100vh - 70px)', position: 'fixed', width: '100%' }}>
+        <div className="container-fluid p-0 overflow-hidden" style={{ height: 'calc(100vh - 65px)', width: '100%' }}>
             <div className="row g-0 h-100">
                 {/* SIDEBAR */}
-                <div className={`col-auto sidebar transition-width ${isSidebarCollapsed ? 'sidebar-collapsed' : 'col-md-3 col-xl-2'}`} style={{ backgroundColor: '#fff', borderRight: '1px solid #dee2e6' }}>
+                <div className={`col-auto sidebar transition-width ${isSidebarCollapsed ? 'sidebar-collapsed' : 'col-md-3 col-xl-2'}`} style={{ backgroundColor: '#fff', borderRight: '1px solid #dee2e6', overflowY: 'auto' }}>
                     <div className="d-flex flex-column px-2 px-md-3 pt-4 h-100">
                         <div className="sidebar-header d-flex align-items-center justify-content-between mb-4 px-2">
                             {!isSidebarCollapsed && <h4 className="sidebar-title m-0 fw-bold text-primary">Menu</h4>}
@@ -766,7 +766,7 @@ const EmployeeDashboard = () => {
                 </div>
 
                 {/* MAIN CONTENT AREA */}
-                <div className="col h-100 main-content-area" style={{ backgroundColor: 'var(--color-bg)', overflowY: activeSection === 'profile' ? 'hidden' : 'auto', scrollbarGutter: 'stable' }}>
+                <div className="col h-100 main-content-area" style={{ backgroundColor: 'var(--color-bg)', overflowY: 'auto', scrollbarGutter: 'stable' }}>
                     <div className="max-width-xl mx-auto py-3 py-md-4 px-3 px-md-4">
                         <header className="page-header mb-4">
                             {activeSection === 'overview' && (

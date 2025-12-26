@@ -14,24 +14,36 @@ const ProfileSection = ({ profile, utilization, onNavigateToSkills }) => {
         <div className="mx-auto" style={{ maxWidth: '800px' }}>
             <div className="card shadow-sm border-0 rounded-3 overflow-hidden">
                 {/* Header */}
-                <div className="card-header border-0 p-4" style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, #2a5298 100%)' }}>
-                    <div className="d-flex align-items-center gap-4">
-                        <div className="rounded-circle d-flex align-items-center justify-content-center shadow"
-                            style={{ width: '80px', height: '80px', backgroundColor: 'white', color: 'var(--color-primary)', fontSize: '2.5rem' }}>
-                            <i className="bi bi-person-fill"></i>
-                        </div>
-                        <div className="flex-grow-1 text-white">
-                            <h3 className="fw-bold mb-1">{profile.firstName} {profile.lastName}</h3>
-                            <div className="d-flex align-items-center gap-2 opacity-75">
-                                <i className="bi bi-envelope"></i>
-                                <span>{profile.email}</span>
+                <div className="card-header border-0 p-4" style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, #2a5298 100%)', minHeight: '140px' }}>
+                    <div className="d-flex justify-content-between h-100">
+                        <div className="d-flex align-items-center gap-4">
+                            <div className="rounded-circle d-flex align-items-center justify-content-center shadow"
+                                style={{ width: '80px', height: '80px', backgroundColor: 'white', color: 'var(--color-primary)', fontSize: '2.5rem' }}>
+                                <i className="bi bi-person-fill"></i>
                             </div>
-                        </div>                                          </div>
-                    <div className="text-end text-white">
-                        <div className="badge bg-white text-primary mb-2 px-3 py-2 rounded-pill fs-6">
-                            {profile.role}
+                            <div className="text-white">
+                                <h3 className="fw-bold mb-1">{profile.firstName} {profile.lastName}</h3>
+                                <div className="d-flex align-items-center gap-2 opacity-75">
+                                    <i className="bi bi-envelope"></i>
+                                    <span>{profile.email}</span>
+                                </div>
+                                <div className="badge bg-white text-primary mt-2 px-3 py-1 rounded-pill">
+                                    {profile.role}
+                                </div>
+                            </div>
                         </div>
-                        <div className="small opacity-75 font-monospace">ID: {profile.id.substring(0, 8)}</div>
+                        <div className="d-flex flex-column align-items-end justify-content-between text-white">
+                            <div className="font-monospace opacity-75" style={{ fontSize: '1.1rem' }}>ID: {profile.id.substring(0, 8)}</div>
+                            {profile.managerName && (
+                                <div className="text-end mt-auto pt-3">
+                                    <div className="opacity-75 text-uppercase fw-bold mb-1" style={{ letterSpacing: '1px' }}>Reporting To</div>
+                                    <div className="fs-3 fw-bold d-flex align-items-center gap-2">
+                                        <i className="bi bi-person-workspace"></i>
+                                        {profile.managerName}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -88,17 +100,7 @@ const ProfileSection = ({ profile, utilization, onNavigateToSkills }) => {
                             </div>
                         )}
                         {/* Manager Info */}
-                        {profile.managerName && (
-                            <div className="mt-4 p-3 rounded border bg-white">
-                                <small className="text-muted text-uppercase fw-bold d-block mb-2">Reporting Manager</small>
-                                <div className="d-flex align-items-center gap-2">
-                                    <div className="rounded-circle bg-secondary bg-opacity-10 col-auto d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
-                                        <i className="bi bi-person-workspace text-secondary"></i>
-                                    </div>
-                                    <span className="fw-semibold">{profile.managerName}</span>
-                                </div>
-                            </div>
-                        )}
+
                     </div>
 
                     {/* Skills Column */}
