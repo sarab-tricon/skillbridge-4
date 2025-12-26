@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import TitleUpdater from './components/TitleUpdater';
 import ThemeWrapper from './components/ThemeWrapper';
 import ProtectedRoute from './components/ProtectedRoute';
 import LandingPage from './pages/LandingPage';
@@ -15,6 +16,7 @@ function App() {
       <Router>
         <ThemeWrapper>
           <Navbar />
+          <TitleUpdater />
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
