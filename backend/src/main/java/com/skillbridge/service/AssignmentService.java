@@ -199,48 +199,34 @@ public class AssignmentService {
     }
 
     @Transactional(readOnly = true)
-    public AssignmentResponse getMyAssignment() {
+    public java.util.List<AssignmentResponse> getMyAssignments() {
         User currentUser = getAuthenticatedUser();
+        java.util.List<AssignmentResponse> responses = new java.util.ArrayList<>();
 
-        // 1. Check for active project assignment
-        java.util.Optional<ProjectAssignment> opt = assignmentRepository
-                .findTopByEmployeeIdOrderByStartDateDesc(currentUser.getId());
+        // 1. Active Assignments
+        assignmentRepository.findByEmployeeId(currentUser.getId()).stream()
+                .filter(a -> a.getAssignmentStatus() == AssignmentStatus.ACTIVE)
+                .map(this::mapToResponse)
+                .forEach(responses::add);
 
-        if (opt.isPresent() && opt.get().getAssignmentStatus() == AssignmentStatus.ACTIVE) {
-            return mapToResponse(opt.get());
-        }
-
-        // 2. Check for pending allocation request in NEW table
-        java.util.List<AllocationRequest> pendingReqs = allocationRequestRepository
-                .findByEmployeeId(currentUser.getId()).stream()
+        // 2. Pending Requests
+        allocationRequestRepository.findByEmployeeId(currentUser.getId()).stream()
                 .filter(r -> "PENDING".equals(r.getStatus()))
-                .toList();
+                .map(req -> {
+                    Project project = projectRepository.findById(req.getProjectId()).orElse(null);
+                    return AssignmentResponse.builder()
+                            .assignmentId(req.getId())
+                            .employeeId(req.getEmployeeId())
+                            .projectId(req.getProjectId())
+                            .projectName(project != null ? project.getName() : "Requested Project")
+                            .assignmentStatus(AssignmentStatus.PENDING)
+                            .requestedAt(req.getCreatedAt())
+                            .utilization("PENDING")
+                            .build();
+                })
+                .forEach(responses::add);
 
-        if (!pendingReqs.isEmpty()) {
-            AllocationRequest req = pendingReqs.get(0);
-            Project project = projectRepository.findById(req.getProjectId()).orElse(null);
-            return AssignmentResponse.builder()
-                    .assignmentId(req.getId())
-                    .employeeId(req.getEmployeeId())
-                    .projectId(req.getProjectId())
-                    .projectName(project != null ? project.getName() : "Requested Project")
-                    .assignmentStatus(AssignmentStatus.PENDING)
-                    .requestedAt(req.getCreatedAt())
-                    .utilization("PENDING")
-                    .build();
-        }
-
-        // 3. Fallback to base assignment status or Bench
-        if (opt.isPresent()) {
-            return mapToResponse(opt.get());
-        }
-
-        return AssignmentResponse.builder()
-                .projectName("Bench")
-                .assignmentStatus(AssignmentStatus.ENDED)
-                .utilization("BENCH")
-                .employeeName(currentUser.getFirstName() + " " + currentUser.getLastName())
-                .build();
+        return responses;
     }
 
     @Transactional(readOnly = true)

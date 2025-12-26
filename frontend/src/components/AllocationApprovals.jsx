@@ -82,13 +82,13 @@ const AllocationApprovals = () => {
     if (loading) return <div className="text-center py-5"><div className="spinner-border text-primary"></div></div>;
 
     return (
-        <div className="card shadow-sm border-0 h-100" style={{ backgroundColor: '#fff', borderTop: '5px solid #28a745' }}>
+        <div className="card shadow-sm border-0 h-100" style={{ backgroundColor: '#fff', borderTop: '5px solid var(--color-primary)' }}>
             <div className="card-body p-4">
                 <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h3 className="card-title fw-bold m-0" style={{ color: '#198754' }}>
-                        <i className="bi bi-check-circle-fill me-2"></i>Allocation Approvals
+                    <h3 className="card-title fw-bold m-0 text-dark">
+                        <i className="bi bi-check-circle-fill me-2 text-primary"></i>
                     </h3>
-                    <span className="badge bg-success rounded-pill px-3">{requests.length} Pending</span>
+                    <span className="badge bg-primary rounded-pill px-3">{requests.length} Pending</span>
                 </div>
 
                 {error && <div className="alert alert-danger">{error}</div>}

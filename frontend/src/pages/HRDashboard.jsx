@@ -192,20 +192,24 @@ const HRDashboard = () => {
 
     // -- Sub-Components --
 
-    const StatCard = ({ title, value, icon, color, onClick }) => (
+    const StatCard = ({ title, value, icon, onClick }) => (
         <div className="col-md-3 mb-4">
             <div
                 className="card shadow-sm border-0 h-100 STAT-CARD"
-                style={{ cursor: 'pointer', borderLeft: `5px solid ${color}` }}
+                style={{ cursor: 'pointer', borderLeft: `5px solid var(--color-primary)` }}
                 onClick={onClick}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
             >
                 <div className="card-body d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 className="text-muted text-uppercase mb-2">{title}</h6>
-                        <h2 className="fw-bold mb-0" style={{ color: color }}>{value}</h2>
+                        <h6 className="text-muted text-uppercase mb-2" style={{ fontSize: '0.75rem', letterSpacing: '0.5px' }}>{title}</h6>
+                        <h2 className="fw-bold mb-0 text-dark">{value}</h2>
                     </div>
-                    <div className="rounded-circle p-3" style={{ backgroundColor: `${color}20` }}>
-                        <i className={`bi ${icon} fs-4`} style={{ color: color }}></i>
+                    <div className="rounded-circle p-3 d-flex align-items-center justify-content-center"
+                        style={{ backgroundColor: 'rgba(220, 53, 69, 0.1)', width: '50px', height: '50px' }}>
+                        <i className={`bi ${icon} fs-4`} style={{ color: 'var(--color-primary)' }}></i>
                     </div>
                 </div>
             </div>
@@ -214,44 +218,42 @@ const HRDashboard = () => {
 
     const renderOverview = () => (
         <div className="fade-in">
-            <h3 className="fw-bold mb-4" style={{ color: '#CF4B00' }}>Dashboard Overview</h3>
+            <h3 className="fw-bold mb-4 text-dark"></h3>
             <div className="row g-4">
                 <StatCard
                     title="Employee Management"
                     value={employees.length + managers.length + hrs.length}
                     icon="bi-people-fill"
-                    color="#0d6efd"
                     onClick={() => { setActiveSection('people'); setPeopleTab('EMPLOYEES'); }}
                 />
                 <StatCard
                     title="On Bench"
                     value={stats.benchCount}
                     icon="bi-hourglass-split"
-                    color="#ffc107"
                     onClick={() => setActiveSection('bench')}
                 />
                 <StatCard
                     title="Skill Catalog"
                     value={catalogSkills.length}
                     icon="bi-journal-code"
-                    color="#198754"
                     onClick={() => setActiveSection('catalog')}
+                />
+
+                {/* Force break to put Talent and Projects on next row */}
+                <div className="w-100"></div>
+
+                <StatCard
+                    title="Talent Search"
+                    value="Find"
+                    icon="bi-search"
+                    onClick={() => setActiveSection('talent')}
                 />
                 <StatCard
                     title="Projects"
                     value="Manage"
                     icon="bi-folder-fill"
-                    color="#6f42c1"
                     onClick={() => setActiveSection('projects')}
                 />
-                <StatCard
-                    title="Talent Search"
-                    value="Find"
-                    icon="bi-search"
-                    color="#0dcaf0"
-                    onClick={() => setActiveSection('talent')}
-                />
-
             </div>
         </div>
     );
@@ -284,11 +286,11 @@ const HRDashboard = () => {
         const title = peopleTab === 'MANAGERS' ? 'Managers' : peopleTab === 'HRS' ? 'HR Administrators' : 'Employee Directory';
 
         return (
-            <div className="card shadow-sm border-0" style={{ backgroundColor: '#fff', borderTop: '5px solid #0d6efd' }}>
+            <div className="card shadow-sm border-0" style={{ backgroundColor: '#fff', borderTop: '5px solid var(--color-primary)' }}>
                 <div className="card-body p-4">
                     <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-                        <h4 className="card-title fw-bold m-0" style={{ color: '#0d6efd' }}>
-                            <i className="bi bi-people-fill me-2"></i>{title}
+                        <h4 className="card-title fw-bold m-0 text-dark">
+                            <i className="bi bi-people-fill me-2 text-primary"></i>{title}
                         </h4>
                         <div className="d-flex gap-2">
                             <div className="btn-group btn-group-sm" role="group">
@@ -314,7 +316,7 @@ const HRDashboard = () => {
                                     HR Ops
                                 </button>
                             </div>
-                            <button className="btn btn-outline-secondary btn-sm" onClick={() => { fetchEmployees(); fetchManagers(); fetchHRs(); }}>
+                            <button className="btn btn-outline-secondary btn-sm" onClick={() => { fetchEmployees(); fetchManagers(); fetchHRs(); }} aria-label="Refresh Directory">
                                 <i className="bi bi-arrow-clockwise"></i>
                             </button>
                         </div>
@@ -364,10 +366,10 @@ const HRDashboard = () => {
     };
 
     const renderOnboarding = () => (
-        <div className="card shadow-sm border-0" style={{ backgroundColor: '#fff', borderTop: '5px solid #9CC6DB' }}>
+        <div className="card shadow-sm border-0" style={{ backgroundColor: '#fff', borderTop: '5px solid var(--color-primary)' }}>
             <div className="card-body p-4">
-                <h3 className="card-title fw-bold mb-4" style={{ color: '#CF4B00' }}>
-                    <i className="bi bi-person-plus-fill me-2"></i>Add New User
+                <h3 className="card-title fw-bold mb-4 text-dark">
+                    <i className="bi bi-person-plus-fill me-2 text-primary"></i>Add New User
                 </h3>
 
                 {onboardingSuccess && (
@@ -396,7 +398,6 @@ const HRDashboard = () => {
                                 required
                                 value={formData.firstName}
                                 onChange={handleInputChange}
-                                style={{ border: '1px solid #9CC6DB' }}
                             />
                         </div>
                         <div className="col-md-6 mb-2">
@@ -409,7 +410,6 @@ const HRDashboard = () => {
                                 required
                                 value={formData.lastName}
                                 onChange={handleInputChange}
-                                style={{ border: '1px solid #9CC6DB' }}
                             />
                         </div>
                     </div>
@@ -424,7 +424,6 @@ const HRDashboard = () => {
                             required
                             value={formData.email}
                             onChange={handleInputChange}
-                            style={{ border: '1px solid #9CC6DB' }}
                         />
                     </div>
 
@@ -438,7 +437,6 @@ const HRDashboard = () => {
                             required
                             value={formData.password}
                             onChange={handleInputChange}
-                            style={{ border: '1px solid #9CC6DB' }}
                         />
                     </div>
 
@@ -450,7 +448,6 @@ const HRDashboard = () => {
                                 className="form-select form-select-sm"
                                 value={formData.role}
                                 onChange={handleInputChange}
-                                style={{ border: '1px solid #9CC6DB' }}
                             >
                                 <option value="EMPLOYEE">EMPLOYEE</option>
                                 <option value="MANAGER">MANAGER</option>
@@ -467,7 +464,6 @@ const HRDashboard = () => {
                                     required
                                     value={formData.managerId}
                                     onChange={handleInputChange}
-                                    style={{ border: '1px solid #9CC6DB' }}
                                 >
                                     <option value="">Choose...</option>
                                     {managers.map(mgr => (
@@ -483,8 +479,7 @@ const HRDashboard = () => {
                     <div className="mt-3">
                         <button
                             type="submit"
-                            className="btn btn-sm w-100 text-white fw-bold"
-                            style={{ backgroundColor: '#CF4B00' }}
+                            className="btn btn-primary btn-sm w-100 fw-bold"
                             disabled={onboardingLoading}
                         >
                             {onboardingLoading ? 'Saving...' : 'Onboard User'}
@@ -496,11 +491,11 @@ const HRDashboard = () => {
     );
 
     const renderTalentDiscovery = () => (
-        <div className="card shadow-sm border-0 h-100" style={{ backgroundColor: '#fff', borderTop: '5px solid #9CC6DB' }}>
+        <div className="card shadow-sm border-0 h-100" style={{ backgroundColor: '#fff', borderTop: '5px solid var(--color-primary)' }}>
             <div className="card-body p-3">
                 <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h4 className="card-title fw-bold m-0" style={{ color: '#CF4B00' }}>
-                        <i className="bi bi-search me-2"></i>Talent Discovery
+                    <h4 className="card-title fw-bold m-0 text-dark">
+                        <i className="bi bi-search me-2 text-primary"></i>
                     </h4>
                     <div className="d-flex gap-2">
                         <span className="badge bg-success small">Advanced</span>
@@ -521,6 +516,7 @@ const HRDashboard = () => {
                                         type="button"
                                         className="btn-close btn-close-white"
                                         onClick={() => setSearchSkills(prev => prev.filter(s => s !== skill))}
+                                        aria-label={`Remove ${skill}`}
                                     ></button>
                                 </span>
                             ))
@@ -528,8 +524,7 @@ const HRDashboard = () => {
                     </div>
                     <div className="input-group input-group-sm">
                         <select
-                            className="form-select"
-                            style={{ border: '2px solid #9CC6DB' }}
+                            className="form-select border-primary"
                             onChange={(e) => {
                                 const selected = e.target.value;
                                 if (selected && !searchSkills.includes(selected)) {
@@ -537,6 +532,7 @@ const HRDashboard = () => {
                                 }
                                 e.target.value = '';
                             }}
+                            aria-label="Add skill to search"
                         >
                             <option value="">+ Add Skill</option>
                             {catalogSkills.map(skill => (
@@ -545,8 +541,7 @@ const HRDashboard = () => {
                         </select>
                         <button
                             type="submit"
-                            className="btn text-white fw-bold"
-                            style={{ backgroundColor: '#CF4B00' }}
+                            className="btn btn-primary fw-bold"
                             disabled={talentLoading || searchSkills.length === 0}
                         >
                             <i className="bi bi-search me-2"></i>Search
@@ -629,71 +624,71 @@ const HRDashboard = () => {
                                 <i className={`bi ${isSidebarCollapsed ? 'bi-chevron-double-right' : 'bi-chevron-double-left'} fs-6 text-accent`}></i>
                             </button>
                         </div>
-                        <ul className="nav flex-column w-100 gap-2">
-                            <li className="nav-item w-100 mb-2">
+                        <ul className="nav flex-column w-100 gap-1">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection('overview')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'overview' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'overview' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "Overview" : ""}
                                 >
                                     <i className="bi bi-speedometer2 icon-std fs-5"></i>
                                     {!isSidebarCollapsed && <span className="ms-2">Overview</span>}
                                 </button>
                             </li>
-                            <li className="nav-item w-100 mb-2">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection('people')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'people' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'people' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "People" : ""}
                                 >
                                     <i className="bi bi-people-fill icon-std fs-5"></i>
                                     {!isSidebarCollapsed && <span className="ms-2">People</span>}
                                 </button>
                             </li>
-                            <li className="nav-item w-100 mb-2">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection('projects')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'projects' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'projects' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "Projects" : ""}
                                 >
                                     <i className="bi bi-folder icon-std fs-5"></i>
                                     {!isSidebarCollapsed && <span className="ms-2">Projects</span>}
                                 </button>
                             </li>
-                            <li className="nav-item w-100 mb-2">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection('approvals')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'approvals' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'approvals' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "Approvals" : ""}
                                 >
                                     <i className="bi bi-check-circle icon-std fs-5"></i>
                                     {!isSidebarCollapsed && <span className="ms-2">Approvals</span>}
                                 </button>
                             </li>
-                            <li className="nav-item w-100 mb-2">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection('bench')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'bench' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'bench' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "Bench & Alloc" : ""}
                                 >
                                     <i className="bi bi-people icon-std fs-5"></i>
                                     {!isSidebarCollapsed && <span className="ms-2">Bench & Alloc</span>}
                                 </button>
                             </li>
-                            <li className="nav-item w-100 mb-2">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection('catalog')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'catalog' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'catalog' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "Skills" : ""}
                                 >
                                     <i className="bi bi-list-check icon-std fs-5"></i>
                                     {!isSidebarCollapsed && <span className="ms-2">Skills</span>}
                                 </button>
                             </li>
-                            <li className="nav-item w-100 mb-2">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection('talent')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'talent' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'talent' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "Talent" : ""}
                                 >
                                     <i className="bi bi-search icon-std fs-5"></i>

@@ -55,11 +55,9 @@ const SkillCatalog = () => {
     };
 
     return (
-        <div className="card shadow-sm border-0 h-100" style={{ backgroundColor: '#fff', borderTop: '5px solid #9CC6DB' }}>
+        <div className="card shadow-sm border-0 h-100" style={{ backgroundColor: '#fff', borderTop: '5px solid var(--color-primary)' }}>
             <div className="card-body p-4">
-                <h3 className="card-title fw-bold mb-4" style={{ color: '#CF4B00' }}>
-                    <i className="bi bi-list-check me-2"></i>Skill Catalog Management
-                </h3>
+
 
                 {message && (
                     <div className={`alert alert-${message.type} alert-dismissible fade show`} role="alert">
@@ -84,10 +82,10 @@ const SkillCatalog = () => {
                                 />
                             </div>
                             <div className="col-md-4">
-                                <select 
+                                <select
                                     className="form-select"
                                     value={newSkill.category}
-                                    onChange={(e) => setNewSkill({...newSkill, category: e.target.value})}
+                                    onChange={(e) => setNewSkill({ ...newSkill, category: e.target.value })}
                                 >
                                     <option value="General">General</option>
                                     <option value="Programming">Programming</option>
@@ -108,7 +106,7 @@ const SkillCatalog = () => {
                 {/* Skills List */}
                 {loading ? (
                     <div className="text-center py-4">
-                        <div className="spinner-border text-info" role="status"></div>
+                        <div className="spinner-border text-primary" role="status"></div>
                     </div>
                 ) : error ? (
                     <div className="alert alert-danger">{error}</div>
@@ -130,7 +128,7 @@ const SkillCatalog = () => {
                                         <td className="fw-bold">{skill.name}</td>
                                         <td><span className="badge bg-secondary">{skill.category}</span></td>
                                         <td className="text-end">
-                                            <button 
+                                            <button
                                                 className="btn btn-sm btn-outline-danger"
                                                 onClick={() => handleDeleteSkill(skill.id)}
                                             >

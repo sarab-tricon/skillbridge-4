@@ -91,12 +91,12 @@ const EmployeeDashboard = () => {
             setAllocation(response.data);
             setErrorAlloc(null);
         } catch (err) {
-            // Note: 404 is expected if on bench
+            console.error(err);
             if (err.response?.status === 404) {
-                setAllocation(null);
+                setAllocation([]);
             } else {
-                // Ignore error if it's just "not found" which means bench
-                setAllocation(null);
+                setErrorAlloc('Failed to load project details.');
+                setAllocation([]);
             }
         } finally {
             setLoadingAlloc(false);
@@ -216,52 +216,62 @@ const EmployeeDashboard = () => {
         }
     };
 
-    const renderOverview = () => (
-        <div className="row g-3 g-md-4">
-            <div className="col-md-4">
-                <div className="card h-100 shadow-sm border-0 border-top-primary">
-                    <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
-                        <i className="bi bi-person-badge h1 text-accent mb-2"></i>
-                        <h5 className="card-title fw-bold">My Skills</h5>
-                        <div className="mb-3">
-                            <p className="h2 fw-bold text-accent mb-0">{skills.filter(s => s.status === 'APPROVED').length}</p>
+    const renderOverview = () => {
+        // Calculate metrics directly from allocation state for consistency
+        const activeAssignments = Array.isArray(allocation)
+            ? allocation.filter(a => a.assignmentStatus === 'ACTIVE')
+            : [];
+
+        const projectCount = activeAssignments.length;
+        const totalUtilization = activeAssignments.reduce((sum, a) => sum + (a.allocationPercent || 0), 0);
+
+        return (
+            <div className="row g-3 g-md-4">
+                <div className="col-md-4">
+                    <div className="card h-100 shadow-sm border-0 border-top-primary">
+                        <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
+                            <i className="bi bi-person-badge h1 text-accent mb-2"></i>
+                            <h5 className="card-title fw-bold">My Skills</h5>
+                            <div className="mb-3">
+                                <p className="h2 fw-bold text-accent mb-0">{skills.filter(s => s.status === 'APPROVED').length}</p>
+                            </div>
+                            <div className="mt-auto">
+                                <button className="btn btn-outline-accent btn-sm px-4" onClick={() => setActiveSection('skills')}>Manage</button>
+                            </div>
                         </div>
-                        <div className="mt-auto">
-                            <button className="btn btn-outline-accent btn-sm px-4" onClick={() => setActiveSection('skills')}>Manage</button>
+                    </div>
+                </div>
+                <div className="col-md-4">
+                    <div className="card h-100 shadow-sm border-0 border-top-primary">
+                        <div className="card-body p-4 text-center d-flex flex-column">
+                            <i className="bi bi-briefcase display-4 text-accent mb-3"></i>
+                            <h5 className="card-title fw-bold">Assignments</h5>
+                            <div className="mb-3">
+                                <p className="h2 fw-bold text-accent mb-0">{projectCount}</p>
+                            </div>
+                            <div className="mt-auto">
+                                <button className="btn btn-outline-accent btn-sm mt-3" onClick={() => setActiveSection('utilization')}>View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-md-4">
+                    <div className="card h-100 shadow-sm border-0 border-top-primary">
+                        <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
+                            <i className="bi bi-graph-up h1 text-accent mb-2"></i>
+                            <h5 className="card-title fw-bold">Utilization</h5>
+                            <p className="display-6 fw-bold text-accent mt-3 mb-3">
+                                {totalUtilization}%
+                            </p>
+                            <div className="mt-auto">
+                                <button className="btn btn-outline-accent btn-sm mt-2" onClick={() => setActiveSection('utilization')}>Detailed Stats</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div className="col-md-4">
-                <div className="card h-100 shadow-sm border-0 border-top-primary">
-                    <div className="card-body p-4 text-center d-flex flex-column">
-                        <i className="bi bi-briefcase display-4 text-accent mb-3"></i>
-                        <h5 className="card-title fw-bold">Assignments</h5>
-                        <div className="mb-3">
-                            <p className="h2 fw-bold text-accent mb-0">{utilization?.assignments?.length || 0}</p>
-                        </div>
-                        <div className="mt-auto">
-                            <button className="btn btn-outline-accent btn-sm mt-3" onClick={() => setActiveSection('utilization')}>View Details</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div className="col-md-4">
-                <div className="card h-100 shadow-sm border-0 border-top-primary">
-                    <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
-                        <i className="bi bi-graph-up h1 text-accent mb-2"></i>
-                        <h5 className="card-title fw-bold">Utilization</h5>
-                        <p className="display-6 fw-bold text-accent mt-3 mb-3">
-                            {utilization?.totalUtilization || 0}%
-                        </p>
-                        <div className="mt-auto">
-                            <button className="btn btn-outline-accent btn-sm mt-2" onClick={() => setActiveSection('utilization')}>Detailed Stats</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+        );
+    };
 
     const renderSkills = () => {
         const levels = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'];
@@ -431,9 +441,7 @@ const EmployeeDashboard = () => {
                 </div>
             ) : errorAlloc ? (
                 <div className="alert alert-danger">{errorAlloc}</div>
-            ) : !allocation ||
-                allocation.assignmentStatus === 'ENDED' ||
-                allocation.assignmentStatus === 'REJECTED' ? (
+            ) : (!allocation || (Array.isArray(allocation) && allocation.length === 0)) ? (
                 <div className="row justify-content-center g-3">
                     <div className="col-md-6">
                         <div className="text-center mb-4">
@@ -539,80 +547,82 @@ const EmployeeDashboard = () => {
                     </div>
                 </div>
             ) : (
-                <div className="row justify-content-center">
-                    <div className="col-md-10 col-lg-8">
-                        <div
-                            className={`card border-2 shadow-sm rounded-4 overflow-hidden ${allocation.assignmentStatus === 'PENDING'
-                                ? 'border-warning'
-                                : 'border-accent'
-                                }`}
-                        >
+                <div className="row justify-content-center g-4">
+                    {(Array.isArray(allocation) ? allocation : [allocation]).map(alloc => (
+                        <div key={alloc.assignmentId || alloc.id || Math.random()} className="col-md-10 col-lg-8">
                             <div
-                                className={`card-header text-white p-3 text-center border-0 ${allocation.assignmentStatus === 'PENDING'
-                                    ? 'bg-warning text-dark'
-                                    : 'bg-accent'
+                                className={`card border-2 shadow-sm rounded-4 overflow-hidden ${alloc.assignmentStatus === 'PENDING'
+                                    ? 'border-warning'
+                                    : 'border-accent'
                                     }`}
                             >
-                                <h4 className="mb-0">Project Details</h4>
-                            </div>
-
-                            <div className="card-body p-3 p-md-4 text-center">
-                                <div className="mb-3">
-                                    <span
-                                        className={`badge rounded-pill px-4 py-2 fs-6 ${allocation.assignmentStatus === 'ACTIVE'
-                                            ? 'bg-success'
-                                            : allocation.assignmentStatus === 'PENDING'
-                                                ? 'bg-warning text-dark'
-                                                : 'bg-secondary'
-                                            }`}
-                                    >
-                                        {allocation.assignmentStatus}
-                                    </span>
+                                <div
+                                    className={`card-header text-white p-3 text-center border-0 ${alloc.assignmentStatus === 'PENDING'
+                                        ? 'bg-warning text-dark'
+                                        : 'bg-accent'
+                                        }`}
+                                >
+                                    <h4 className="mb-0">Project Details</h4>
                                 </div>
 
-                                <div className="border-top pt-3">
-                                    <p className="text-muted small text-uppercase fw-bold mb-1">
-                                        Current Status
-                                    </p>
-                                    <p className="h4 mb-0">
-                                        {allocation.assignmentStatus === 'ACTIVE'
-                                            ? 'Allocated to Project'
-                                            : 'Awaiting Approval'}
-                                    </p>
-                                </div>
+                                <div className="card-body p-3 p-md-4 text-center">
+                                    <div className="mb-3">
+                                        <span
+                                            className={`badge rounded-pill px-4 py-2 fs-6 ${alloc.assignmentStatus === 'ACTIVE'
+                                                ? 'bg-success'
+                                                : alloc.assignmentStatus === 'PENDING'
+                                                    ? 'bg-warning text-dark'
+                                                    : 'bg-secondary'
+                                                }`}
+                                        >
+                                            {alloc.assignmentStatus}
+                                        </span>
+                                    </div>
 
-                                {allocation.assignmentStatus === 'ACTIVE' && (
-                                    <div className="mt-4 pt-3 border-top">
-                                        <h5 className="fw-bold text-accent mb-3">{allocation.projectName}</h5>
-                                        <div className="row g-2 justify-content-center">
-                                            <div className="col-6">
-                                                <div className="p-2 bg-light rounded-3">
-                                                    <small className="text-muted d-block text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>Billing</small>
-                                                    <span className="fw-bold text-dark">{allocation.billingType || 'Billable'}</span>
-                                                </div>
-                                            </div>
-                                            <div className="col-6">
-                                                <div className="p-2 bg-light rounded-3">
-                                                    <small className="text-muted d-block text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>Allocation</small>
-                                                    <span className="fw-bold text-dark">{allocation.allocationPercent || '100'}%</span>
-                                                </div>
-                                            </div>
-                                            {(allocation.startDate || allocation.endDate) && (
-                                                <div className="col-12 mt-2">
-                                                    <div className="small text-muted">
-                                                        <i className="bi bi-calendar-event me-1"></i>
-                                                        {allocation.startDate ? new Date(allocation.startDate).toLocaleDateString() : 'Start'}
-                                                        {' - '}
-                                                        {allocation.endDate ? new Date(allocation.endDate).toLocaleDateString() : 'Present'}
+                                    <div className="border-top pt-3">
+                                        <p className="text-muted small text-uppercase fw-bold mb-1">
+                                            Current Status
+                                        </p>
+                                        <p className="h4 mb-0">
+                                            {alloc.assignmentStatus === 'ACTIVE'
+                                                ? 'Allocated to Project'
+                                                : 'Awaiting Approval'}
+                                        </p>
+                                    </div>
+
+                                    {alloc.assignmentStatus === 'ACTIVE' && (
+                                        <div className="mt-4 pt-3 border-top">
+                                            <h5 className="fw-bold text-accent mb-3">{alloc.projectName}</h5>
+                                            <div className="row g-2 justify-content-center">
+                                                <div className="col-6">
+                                                    <div className="p-2 bg-light rounded-3">
+                                                        <small className="text-muted d-block text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>Billing</small>
+                                                        <span className="fw-bold text-dark">{alloc.billingType || 'Billable'}</span>
                                                     </div>
                                                 </div>
-                                            )}
+                                                <div className="col-6">
+                                                    <div className="p-2 bg-light rounded-3">
+                                                        <small className="text-muted d-block text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>Allocation</small>
+                                                        <span className="fw-bold text-dark">{alloc.allocationPercent || '100'}%</span>
+                                                    </div>
+                                                </div>
+                                                {(alloc.startDate || alloc.endDate) && (
+                                                    <div className="col-12 mt-2">
+                                                        <div className="small text-muted">
+                                                            <i className="bi bi-calendar-event me-1"></i>
+                                                            {alloc.startDate ? new Date(alloc.startDate).toLocaleDateString() : 'Start'}
+                                                            {' - '}
+                                                            {alloc.endDate ? new Date(alloc.endDate).toLocaleDateString() : 'Present'}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    ))}
                 </div>
             )}
         </div>
@@ -730,51 +740,51 @@ const EmployeeDashboard = () => {
                                 <i className={`bi ${isSidebarCollapsed ? 'bi-chevron-double-right' : 'bi-chevron-double-left'} fs-6`}></i>
                             </button>
                         </div>
-                        <ul className="nav flex-column w-100 gap-2" id="menu">
-                            <li className="nav-item w-100 mb-2">
+                        <ul className="nav flex-column w-100 gap-1" id="menu">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection('overview')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'overview' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'overview' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "Dashboard" : ""}
                                 >
                                     <i className="bi bi-speedometer2 icon-std fs-5"></i>
                                     {!isSidebarCollapsed && <span className="ms-2">Dashboard</span>}
                                 </button>
                             </li>
-                            <li className="nav-item w-100 mb-2">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection('skills')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'skills' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'skills' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "My Skills" : ""}
                                 >
                                     <i className="bi bi-star icon-std fs-5"></i>
                                     {!isSidebarCollapsed && <span className="ms-2">My Skills</span>}
                                 </button>
                             </li>
-                            <li className="nav-item w-100 mb-2">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection('allocation')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'allocation' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'allocation' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "Allocation" : ""}
                                 >
                                     <i className="bi bi-diagram-3 icon-std fs-5"></i>
                                     {!isSidebarCollapsed && <span className="ms-2">Allocation</span>}
                                 </button>
                             </li>
-                            <li className="nav-item w-100 mb-2">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection('utilization')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'utilization' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'utilization' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "Utilization" : ""}
                                 >
                                     <i className="bi bi-graph-up icon-std fs-5"></i>
                                     {!isSidebarCollapsed && <span className="ms-2">Utilization</span>}
                                 </button>
                             </li>
-                            <li className="nav-item w-100 mb-2">
+                            <li className="nav-item w-100 mb-0">
                                 <button
                                     onClick={() => setActiveSection('profile')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'profile' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-3'}`}
+                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'profile' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
                                     title={isSidebarCollapsed ? "My Profile" : ""}
                                 >
                                     <i className="bi bi-person-circle icon-std fs-5"></i>
@@ -808,9 +818,9 @@ const EmployeeDashboard = () => {
                             {activeSection === 'utilization' && renderUtilization()}
                             {activeSection === 'profile' && (
                                 <div style={{
-                                    '--profile-theme-color': 'var(--color-accent)',
-                                    '--profile-theme-dark': '#B54000',
-                                    '--profile-theme-rgb': '207, 75, 0'
+                                    '--profile-theme-color': 'var(--color-primary)',
+                                    '--profile-theme-dark': '#802d00',
+                                    '--profile-theme-rgb': '181, 64, 0'
                                 }}>
                                     <ProfileSection
                                         profile={profile}
@@ -840,40 +850,40 @@ const EmployeeDashboard = () => {
                     width: 70px !important;
                 }
                 .nav-link:hover:not(.active) {
-                    background-color: rgba(207, 75, 0, 0.1);
-                    border: 1px solid var(--color-accent);
-                    color: var(--color-accent) !important;
+                    background-color: rgba(181, 64, 0, 0.1);
+                    border: 1px solid var(--color-primary);
+                    color: var(--color-primary) !important;
                 }
                 .bg-accent {
-                    background-color: var(--color-accent) !important;
+                    background-color: var(--color-primary) !important;
                     color: white;
                 }
                 .border-accent {
-                    border-color: var(--color-accent) !important;
+                    border-color: var(--color-primary) !important;
                 }
                 .border-top-primary {
-                    border-top: 4px solid var(--color-accent) !important;
+                    border-top: 4px solid var(--color-primary) !important;
                 }
                 .text-accent {
-                    color: var(--color-accent) !important;
+                    color: var(--color-primary) !important;
                 }
                 .btn-outline-accent {
-                    color: var(--color-accent);
-                    border-color: var(--color-accent);
+                    color: var(--color-primary);
+                    border-color: var(--color-primary);
                 }
                 .btn-outline-accent:hover {
-                    background-color: var(--color-accent);
+                    background-color: var(--color-primary);
                     color: white;
                 }
                 .nav-link.sidebar-link.active {
-                    background-color: var(--color-accent) !important;
+                    background-color: var(--color-primary) !important;
                     color: #fff !important;
                 }
                 .spinner-border.text-primary {
-                    color: var(--color-accent) !important;
+                    color: var(--color-primary) !important;
                 }
                 .text-accent {
-                    color: var(--color-accent);
+                    color: var(--color-primary);
                 }
                 .animate-fade-in {
                     animation: fadeIn 0.4s ease-out;
@@ -914,14 +924,14 @@ const EmployeeDashboard = () => {
                     background: var(--color-accent);
                 }
                 .nav-link.active-accent {
-                    background-color: rgba(207, 75, 0, 0.12) !important;
+                    background-color: rgba(181, 64, 0, 0.12) !important;
                     color: var(--color-accent) !important;
                     border: 1px solid var(--color-accent) !important;
                 }
                 .bg-accent-header {
-                    background-color: rgba(207, 75, 0, 0.08) !important;
+                    background-color: rgba(181, 64, 0, 0.08) !important;
                     color: var(--color-accent) !important;
-                    border-bottom: 1px solid rgba(207, 75, 0, 0.15);
+                    border-bottom: 1px solid rgba(181, 64, 0, 0.15);
                 }
                 .bg-accent-header h5 {
                     color: var(--color-accent) !important;
