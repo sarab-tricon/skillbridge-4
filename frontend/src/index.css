@@ -1,10 +1,15 @@
 :root {
   /* Colors */
   --color-bg: #f8fafc;
-  --color-primary: #9CC6DB;
-  --color-accent: #CF4B00;
-  --color-secondary: #DDBA7D;
-  --color-text: #333;
+  --color-primary: #b54000;
+  /* User requested Code */
+  --color-primary-hover: #802d00;
+  --color-accent: #343a40;
+  /* Dark Grey for high contrast accents */
+  --color-secondary: #6c757d;
+  --color-text: #212529;
+  --color-light: #f8f9fa;
+  --color-border: #dee2e6;
 
   /* Typography Scaling */
   --font-family-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -23,6 +28,7 @@
   --bs-body-font-family: var(--font-family-sans);
   --bs-body-color: var(--color-text);
   --bs-body-bg: var(--color-bg);
+  --bs-primary: var(--color-primary);
 }
 
 body {
@@ -131,15 +137,13 @@ small,
 /* Sidebar */
 .sidebar {
   background-color: #fff;
-  border-right: 1px solid #eee;
+  border-right: 1px solid var(--color-border);
   min-height: 100vh;
   position: sticky;
   top: 70px;
-  /* Aligns below navbar */
   height: calc(100vh - 70px);
   overflow-y: auto;
   padding: 1.5rem 1rem;
-  /* Compact consistent padding */
 }
 
 .sidebar-header {
@@ -150,30 +154,39 @@ small,
 .sidebar-title {
   font-size: var(--font-size-h4);
   font-weight: 700;
-  color: var(--color-accent);
+  color: var(--color-primary);
   margin: 0;
 }
 
 .nav-link.sidebar-link {
   border-radius: 6px;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 1rem;
   font-weight: 500;
   color: var(--color-text);
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0px;
+  border: 1px solid transparent;
+  /* Prepare for focus state */
 }
 
 .nav-link.sidebar-link:hover {
-  background-color: #f0f7ff;
-  color: var(--color-accent);
+  background-color: #ffe5e7;
+  /* Light red background */
+  color: var(--color-primary);
 }
 
 .nav-link.sidebar-link.active {
   background-color: var(--color-primary);
   color: #fff !important;
+  box-shadow: 0 4px 6px rgba(220, 53, 69, 0.25);
+}
+
+.nav-link.sidebar-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 /* Icons */
@@ -207,3 +220,75 @@ small,
   font-weight: 600;
   margin-bottom: 1rem;
 }
+
+/* === Bootstrap Component Overrides (Force Red Theme) === */
+
+/* Start: Form Controls (Input Focus Ring) */
+.form-control:focus,
+.form-select:focus {
+  border-color: #ff8ca3;
+  /* Lightened Primary */
+  box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+  /* Red Glow */
+}
+
+/* End: Form Controls */
+
+/* Start: Buttons */
+.btn-primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.btn-primary:hover,
+.btn-primary:active,
+.btn-primary:focus {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+.btn-outline-primary {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:active,
+.btn-outline-primary.active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+/* End: Buttons */
+
+/* Start: Text & Backgrounds */
+.text-primary {
+  color: var(--color-primary) !important;
+}
+
+.bg-primary {
+  background-color: var(--color-primary) !important;
+}
+
+.border-primary {
+  border-color: var(--color-primary) !important;
+}
+
+/* End: Text & Backgrounds */
+
+/* Start: Pagination & Links */
+.page-link {
+  color: var(--color-primary);
+}
+
+.page-link:hover {
+  color: var(--color-primary-hover);
+}
+
+.page-item.active .page-link {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* End: Pagination & Links */

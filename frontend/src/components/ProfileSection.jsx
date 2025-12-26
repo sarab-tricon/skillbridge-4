@@ -104,7 +104,7 @@ const ProfileSection = ({ profile, utilization, onNavigateToSkills }) => {
                     <div className="col-lg-5">
                         <div className="d-flex justify-content-between align-items-center mb-3">
                             <h5 className="fw-bold mb-0" style={{ color: 'var(--profile-theme-color, var(--color-primary))' }}>
-                                <i className="bi bi-lightning-charge-fill me-2"></i>Skills village
+                                <i className="bi bi-lightning-charge-fill me-2"></i>Skills
                             </h5>
                             {onNavigateToSkills && (
                                 <button

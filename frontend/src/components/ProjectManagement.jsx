@@ -140,8 +140,8 @@ const ProjectManagement = () => {
 
     // Tab configuration
     const tabs = [
-        { key: 'ACTIVE', label: 'Active Projects', icon: 'bi-play-circle-fill', color: '#28a745' },
-        { key: 'UPCOMING', label: 'Upcoming Projects', icon: 'bi-calendar-plus', color: '#ffc107' },
+        { key: 'ACTIVE', label: 'Active Projects', icon: 'bi-play-circle-fill', color: 'var(--color-primary)' },
+        { key: 'UPCOMING', label: 'Upcoming Projects', icon: 'bi-calendar-plus', color: 'var(--color-primary)' },
         { key: 'COMPLETED', label: 'Completed Projects', icon: 'bi-check-circle-fill', color: '#6c757d' }
     ];
 
@@ -184,7 +184,7 @@ const ProjectManagement = () => {
                                     borderColor: tab.color,
                                     color: '#fff',
                                     fontWeight: 'bold',
-                                    boxShadow: `0 4px 12px ${tab.color}40`
+                                    boxShadow: `0 4px 12px ${tab.color === 'var(--color-primary)' ? 'rgba(220, 53, 69, 0.4)' : tab.color + '40'}`
                                 } : { borderColor: tab.color, color: tab.color }}
                             >
                                 <i className={`bi ${tab.icon} me-2`}></i>
@@ -196,9 +196,9 @@ const ProjectManagement = () => {
                     {/* Add Upcoming Project Button */}
                     {activeTab === 'UPCOMING' && (
                         <button
-                            className="btn btn-warning btn-lg text-white fw-bold"
+                            className="btn btn-primary btn-lg text-white fw-bold"
                             onClick={() => setShowAddModal(true)}
-                            style={{ boxShadow: '0 4px 12px rgba(255, 193, 7, 0.3)' }}
+                            style={{ boxShadow: '0 4px 12px rgba(220, 53, 69, 0.3)' }}
                         >
                             <i className="bi bi-plus-circle-fill me-2"></i>
                             Add Upcoming Project
@@ -234,7 +234,7 @@ const ProjectManagement = () => {
                                         allocatedCount={getAllocatedCount(project.id)}
                                         onEndProject={handleEndProject}
                                         onClick={() => handleProjectClick(project)}
-                                        tabColor={tabs.find(t => t.key === activeTab)?.color}
+                                    // tabColor prop removed/ignored in favor of internal logic
                                     />
                                 </div>
                             ))}
@@ -263,6 +263,11 @@ const ProjectManagement = () => {
                     employees={allEmployees}
                     onClose={() => setSelectedProject(null)}
                     onEndProject={handleEndProject}
+                    // Pass specific color based on project status, not just active tab
+                    tabColor={
+                        selectedProject.status === 'ACTIVE' ? '#28a745' :
+                            selectedProject.status === 'PLANNED' ? '#ffc107' : '#6c757d'
+                    }
                 />
             )}
         </div>
@@ -270,7 +275,17 @@ const ProjectManagement = () => {
 };
 
 // ProjectCard Component
-const ProjectCard = ({ project, allocatedCount = 0, onEndProject, onClick, tabColor }) => {
+const ProjectCard = ({ project, allocatedCount = 0, onEndProject, onClick }) => {
+    // Define Semantic Colors Locally
+    const statusColors = {
+        ACTIVE: '#28a745',    // Green
+        PLANNED: '#ffc107',   // Yellow
+        COMPLETED: '#6c757d'  // Grey
+    };
+
+    // Determine color based on project status
+    const cardColor = statusColors[project.status] || '#6c757d';
+
     const getStatusBadge = (status) => {
         const badges = {
             ACTIVE: { bg: 'success', text: 'Active' },
@@ -287,7 +302,7 @@ const ProjectCard = ({ project, allocatedCount = 0, onEndProject, onClick, tabCo
         <div
             className="card h-100 shadow-sm hover-card"
             style={{
-                border: `2px solid ${tabColor}20`,
+                border: `2px solid ${cardColor}20`,
                 borderRadius: '12px',
                 transition: 'all 0.3s ease',
                 cursor: 'pointer'
@@ -298,7 +313,7 @@ const ProjectCard = ({ project, allocatedCount = 0, onEndProject, onClick, tabCo
                 {/* Header */}
                 <div className="d-flex justify-content-between align-items-start mb-3">
                     <div className="flex-grow-1" style={{ minWidth: 0, marginRight: '8px' }}>
-                        <h5 className="card-title fw-bold mb-1" style={{ color: tabColor, wordWrap: 'break-word', overflowWrap: 'break-word' }} title={project.name}>
+                        <h5 className="card-title fw-bold mb-1 text-dark" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }} title={project.name}>
                             {project.name}
                         </h5>
                         <p className="text-muted small mb-0" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }} title={project.companyName}>
@@ -326,9 +341,13 @@ const ProjectCard = ({ project, allocatedCount = 0, onEndProject, onClick, tabCo
                     </div>
                     <div className="progress" style={{ height: '8px', borderRadius: '4px', backgroundColor: '#e9ecef' }}>
                         <div
-                            className={`progress-bar ${progressPercent >= 100 ? 'bg-success' : 'bg-info'}`}
+                            className="progress-bar"
                             role="progressbar"
-                            style={{ width: `${progressPercent}%`, transition: 'width 0.5s ease' }}
+                            style={{
+                                width: `${progressPercent}%`,
+                                transition: 'width 0.5s ease',
+                                backgroundColor: 'var(--color-primary)'
+                            }}
                             aria-valuenow={progressPercent}
                             aria-valuemin="0"
                             aria-valuemax="100"
@@ -341,7 +360,11 @@ const ProjectCard = ({ project, allocatedCount = 0, onEndProject, onClick, tabCo
                     <div className="mb-3">
                         <div className="d-flex flex-wrap gap-1">
                             {project.techStack.slice(0, 4).map((tech, idx) => (
-                                <span key={idx} className="badge bg-info text-dark" style={{ fontSize: '0.7rem' }}>
+                                <span
+                                    key={idx}
+                                    className="badge bg-light text-dark border"
+                                    style={{ fontSize: '0.7rem' }}
+                                >
                                     {tech}
                                 </span>
                             ))}
@@ -359,18 +382,13 @@ const ProjectCard = ({ project, allocatedCount = 0, onEndProject, onClick, tabCo
                 </p>
             </div>
 
-            <style jsx>{`
-                .hover-card:hover {
-                    transform: translateY(-5px);
-                    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
-                }
-            `}</style>
+
         </div>
     );
 };
 
 // Project Details Modal
-const ProjectDetailsModal = ({ project, employees, onClose, onEndProject }) => {
+const ProjectDetailsModal = ({ project, employees, onClose, onEndProject, tabColor }) => {
     // Find team members
     // Find team members
     const teamMembers = employees.filter(emp =>
@@ -418,7 +436,18 @@ const ProjectDetailsModal = ({ project, employees, onClose, onEndProject }) => {
                                     <small className="text-muted d-block">Tech Stack</small>
                                     <div className="d-flex flex-wrap gap-1 mt-1">
                                         {project.techStack?.map((t, i) => (
-                                            <span key={i} className="badge bg-info text-dark">{t}</span>
+                                            <span
+                                                key={i}
+                                                className="badge"
+                                                style={{
+                                                    fontSize: '0.7rem',
+                                                    backgroundColor: `${tabColor}15`,
+                                                    color: tabColor,
+                                                    border: `1px solid ${tabColor}40`
+                                                }}
+                                            >
+                                                {t}
+                                            </span>
                                         ))}
                                     </div>
                                 </div>
@@ -491,9 +520,9 @@ const AddProjectModal = ({ formData, setFormData, catalogSkills, onSubmit, onClo
         <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
             <div className="modal-dialog modal-lg modal-dialog-centered">
                 <div className="modal-content" style={{ borderRadius: '15px' }}>
-                    <div className="modal-header" style={{ borderBottom: '3px solid #ffc107' }}>
-                        <h5 className="modal-title fw-bold">
-                            <i className="bi bi-plus-circle-fill me-2 text-warning"></i>
+                    <div className="modal-header" style={{ borderBottom: '3px solid var(--color-primary)' }}>
+                        <h5 className="modal-title fw-bold text-dark">
+                            <i className="bi bi-plus-circle-fill me-2 text-primary"></i>
                             Add Upcoming Project
                         </h5>
                         <button type="button" className="btn-close" onClick={onClose}></button>
@@ -607,7 +636,7 @@ const AddProjectModal = ({ formData, setFormData, catalogSkills, onSubmit, onClo
                             <div className="mt-4 d-flex gap-2">
                                 <button
                                     type="submit"
-                                    className="btn btn-warning btn-lg text-white fw-bold flex-grow-1"
+                                    className="btn btn-primary btn-lg text-white fw-bold flex-grow-1"
                                     disabled={loading}
                                 >
                                     {loading ? 'Creating...' : 'Create Project'}

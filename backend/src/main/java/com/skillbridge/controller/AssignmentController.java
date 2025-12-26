@@ -42,8 +42,8 @@ public class AssignmentController {
 
     @GetMapping("/my")
     @PreAuthorize("hasRole('EMPLOYEE')")
-    public ResponseEntity<AssignmentResponse> getMyAssignment() {
-        return ResponseEntity.ok(assignmentService.getMyAssignment());
+    public ResponseEntity<java.util.List<AssignmentResponse>> getMyAssignments() {
+        return ResponseEntity.ok(assignmentService.getMyAssignments());
     }
 
     @GetMapping("/employee/{employeeId}/utilization")
