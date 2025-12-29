@@ -749,52 +749,57 @@ const EmployeeDashboard = () => {
     );
 
     return (
-        <div className="container-fluid p-0 overflow-hidden" style={{ height: 'calc(100vh - 65px)', width: '100%' }}>
-            <div className="row g-0 h-100">
-                {/* SIDEBAR */}
-                <Sidebar
-                    title="Menu"
-                    menuItems={employeeMenuItems}
-                    activeSection={activeSection}
-                    onSectionChange={setActiveSection}
-                />
+        <>
+            <a href="#main-content" className="skip-link">
+                Skip to main content
+            </a>
+            <div className="container-fluid p-0 overflow-hidden" style={{ height: 'calc(100vh - 65px)', width: '100%' }}>
+                <div className="row g-0 h-100">
+                    {/* SIDEBAR */}
+                    <Sidebar
+                        title="Menu"
+                        menuItems={employeeMenuItems}
+                        activeSection={activeSection}
+                        onSectionChange={setActiveSection}
+                    />
 
-                {/* MAIN CONTENT AREA */}
-                <div className="col h-100 p-4 p-md-5" style={{ backgroundColor: 'var(--color-bg)', overflowY: 'auto', scrollbarGutter: 'stable' }}>
-                    <div className="max-width-xl mx-auto">
-                        <header className="page-header mb-4">
-                            {activeSection === 'overview' && (
-                                <h4 className="text-muted mb-1">Welcome back, {user?.sub?.split('@')[0]}</h4>
-                            )}
-                            <h1 className="page-title fw-bold text-accent">
-                                {activeSection === 'overview' && 'Dashboard Overview'}
-                                {activeSection === 'skills' && 'Skill Management'}
-                                {activeSection === 'allocation' && 'My Projects'}
-                                {activeSection === 'utilization' && 'Personal Utilization'}
-                                {activeSection === 'profile' && 'My Profile'}
-                            </h1>
-                        </header>
+                    {/* MAIN CONTENT AREA */}
+                    <main role="main" id="main-content" className="col h-100 p-4 p-md-5" style={{ backgroundColor: 'var(--color-bg)', overflowY: 'auto', scrollbarGutter: 'stable' }}>
+                        <div className="max-width-xl mx-auto">
+                            <div className="page-header mb-4">
+                                {activeSection === 'overview' && (
+                                    <h4 className="text-muted mb-1">Welcome back, {user?.sub?.split('@')[0]}</h4>
+                                )}
+                                <h1 className="page-title fw-bold text-accent">
+                                    {activeSection === 'overview' && 'Dashboard Overview'}
+                                    {activeSection === 'skills' && 'Skill Management'}
+                                    {activeSection === 'allocation' && 'My Projects'}
+                                    {activeSection === 'utilization' && 'Personal Utilization'}
+                                    {activeSection === 'profile' && 'My Profile'}
+                                </h1>
+                            </div>
 
-                        <div className="animate-fade-in">
-                            {activeSection === 'overview' && renderOverview()}
-                            {activeSection === 'skills' && renderSkills()}
-                            {activeSection === 'allocation' && renderAllocation()}
-                            {activeSection === 'utilization' && renderUtilization()}
-                            {activeSection === 'profile' && (
-                                <div style={{
-                                    '--profile-theme-color': 'var(--color-primary)',
-                                    '--profile-theme-dark': '#802d00',
-                                    '--profile-theme-rgb': '181, 64, 0'
-                                }}>
-                                    <ProfileSection
-                                        profile={profile}
-                                        utilization={utilization}
-                                        onNavigateToSkills={() => setActiveSection('skills')}
-                                    />
-                                </div>
-                            )}
+                            <div className="animate-fade-in">
+                                {activeSection === 'overview' && renderOverview()}
+                                {activeSection === 'skills' && renderSkills()}
+                                {activeSection === 'allocation' && renderAllocation()}
+                                {activeSection === 'utilization' && renderUtilization()}
+                                {activeSection === 'profile' && (
+                                    <div style={{
+                                        '--profile-theme-color': 'var(--color-primary)',
+                                        '--profile-theme-dark': '#802d00',
+                                        '--profile-theme-rgb': '181, 64, 0'
+                                    }}>
+                                        <ProfileSection
+                                            profile={profile}
+                                            utilization={utilization}
+                                            onNavigateToSkills={() => setActiveSection('skills')}
+                                        />
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    </main>
                 </div>
             </div>
 
@@ -904,7 +909,7 @@ const EmployeeDashboard = () => {
                     font-size: 1.25rem;
                 }
             `}</style>
-        </div>
+        </>
     );
 };
 
