@@ -49,13 +49,13 @@ const LoginPage = () => {
                                 <h3 className="text-center mb-4">Login</h3>
                                 {error && <div className="alert alert-danger">{error}</div>}
                                 <form onSubmit={handleSubmit}>
-                                    <div className="mb-4">
-                                        <label htmlFor="email" className="form-label">Email Address</label>
+                                    <div className="mb-4 position-relative">
+                                        <i className="bi bi-envelope position-absolute start-0 top-50 translate-middle-y ms-3 text-muted"></i>
                                         <input
                                             id="email"
                                             type="email"
-                                            className="form-control form-control-lg"
-                                            placeholder="name@company.com"
+                                            className="form-control form-control-lg ps-5"
+                                            placeholder="email"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             required
@@ -63,14 +63,14 @@ const LoginPage = () => {
                                         />
                                     </div>
                                     <div className="mb-5">
-                                        <label htmlFor="password" className="form-label">Password</label>
                                         <div className="position-relative">
+                                            <i className="bi bi-lock position-absolute start-0 top-50 translate-middle-y ms-3 text-muted"></i>
                                             <input
                                                 id="password"
                                                 type={showPassword ? "text" : "password"}
-                                                className="form-control form-control-lg"
+                                                className="form-control form-control-lg ps-5"
                                                 style={{ paddingRight: '45px' }}
-                                                placeholder="******"
+                                                placeholder="password"
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
                                                 required
@@ -83,7 +83,7 @@ const LoginPage = () => {
                                                 onClick={() => setShowPassword(!showPassword)}
                                                 aria-label={showPassword ? "Hide password" : "Show password"}
                                             >
-                                                <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'} text-muted`}></i>
+                                                <i className={`bi ${showPassword ? 'bi-eye' : 'bi-eye-slash'} text-muted`}></i>
                                             </button>
                                         </div>
                                     </div>
