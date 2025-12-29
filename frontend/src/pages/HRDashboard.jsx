@@ -623,7 +623,7 @@ const HRDashboard = () => {
             <div className="row g-0 h-100">
                 {/* Sidebar */}
                 <Sidebar
-                    title="HR Portal"
+                    title="Menu"
                     menuItems={hrMenuItems}
                     activeSection={activeSection}
                     onSectionChange={setActiveSection}

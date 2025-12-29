@@ -12,10 +12,10 @@ const LandingPage = () => {
                     className="mb-4"
                     style={{ height: '180px', width: 'auto', mixBlendMode: 'multiply', filter: 'brightness(1.1)' }}
                 />
-                <h1 className="display-1 fw-bold mb-3" style={{ color: '#333' }}>
+                <h1 className="display-1 fw-bold mb-3" style={{ color: 'var(--color-primary)' }}>
                     SkillBridge
                 </h1>
-                <h2 className="display-5 mb-4 text-muted">
+                <h2 className="display-5 mb-4" style={{ color: 'black' }}>
                     Trust is rare and expensive
                 </h2>
                 <p className="lead mb-5">
@@ -28,7 +28,7 @@ const LandingPage = () => {
                     Login to Dashboard
                 </button>
             </div>
-        </div>
+        </div >
     );
 };
 

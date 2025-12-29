@@ -4,7 +4,7 @@
   --color-primary: #b54000;
   /* User requested Code */
   --color-primary-hover: #802d00;
-  --color-accent: #343a40;
+  --color-accent: var(--color-primary);
   /* Dark Grey for high contrast accents */
   --color-secondary: #6c757d;
   --color-text: #212529;
