@@ -3,17 +3,94 @@
 
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Preconnect to external resources -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
+  <!-- Fonts with font-display swap for better performance -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Bootstrap Icons - defer loading -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    media="print" onload="this.media='all'">
 
   <link rel="icon" type="image/jpeg" href="/skillbridgeLOGO.jpeg" />
   <title>SkillBridge</title>
+
+  <!-- Critical CSS for initial render -->
+  <style>
+    :root {
+      --color-bg: #f8fafc;
+      --color-primary: #b54000;
+      --color-text: #212529;
+      --font-family-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      font-family: var(--font-family-sans);
+      background-color: var(--color-bg);
+      font-size: 14px;
+      color: var(--color-text);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    #root {
+      width: 100%;
+      min-height: 100%;
+    }
+
+    /* Prevent layout shift */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      z-index: 9999;
+    }
+
+    /* Spinner animation */
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <!-- Loading skeleton for better perceived performance -->
+    <div id="initial-loader"
+      style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background-color: #f8fafc;">
+      <div style="text-align: center;">
+        <div
+          style="width: 50px; height: 50px; border: 4px solid #f3f3f3; border-top: 4px solid #b54000; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;">
+        </div>
+        <p style="color: #6c757d; font-family: system-ui, -apple-system, sans-serif; font-size: 14px;">Loading
+          SkillBridge...</p>
+      </div>
+    </div>
+  </div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 

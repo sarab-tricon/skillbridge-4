@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const { login } = useAuth();
     const navigate = useNavigate();
@@ -63,16 +64,26 @@ const LoginPage = () => {
                                     </div>
                                     <div className="mb-5">
                                         <label htmlFor="password" className="form-label">Password</label>
-                                        <input
-                                            id="password"
-                                            type="password"
-                                            className="form-control form-control-lg"
-                                            placeholder="******"
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                            required
-                                            autoComplete="current-password"
-                                        />
+                                        <div className="input-group">
+                                            <input
+                                                id="password"
+                                                type={showPassword ? "text" : "password"}
+                                                className="form-control form-control-lg"
+                                                placeholder="******"
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                required
+                                                autoComplete="current-password"
+                                            />
+                                            <button
+                                                type="button"
+                                                className="btn btn-outline-secondary"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                aria-label={showPassword ? "Hide password" : "Show password"}
+                                            >
+                                                <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                                            </button>
+                                        </div>
                                     </div>
                                     <div className="d-grid">
                                         <button type="submit" className="btn btn-accent btn-lg">
