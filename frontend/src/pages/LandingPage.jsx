@@ -23,6 +23,7 @@ const LandingPage = () => {
                 </p>
                 <button
                     className="btn btn-accent btn-lg px-5 py-3 shadow-sm"
+                    style={{ backgroundColor: '#CF4B00', borderColor: '#CF4B00', color: 'white' }}
                     onClick={() => navigate('/login')}
                 >
                     Login to Dashboard

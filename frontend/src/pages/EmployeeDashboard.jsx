@@ -322,7 +322,7 @@ const EmployeeDashboard = () => {
                                 {addSkillError && <div className="alert alert-danger p-2 small mb-3">{addSkillError}</div>}
                                 {successMessage && <div className="alert alert-success p-2 small mb-3">{successMessage}</div>}
                                 <div className="d-flex gap-2">
-                                    <button type="submit" className={`btn btn-accent w-100 fw-bold py-2 ${editingSkill ? 'btn-info text-white' : ''}`} disabled={addingSkill}>
+                                    <button type="submit" className={`btn btn-accent w-100 fw-bold py-2`} style={{ backgroundColor: '#CF4B00', borderColor: '#CF4B00', color: 'white' }} disabled={addingSkill}>
                                         {addingSkill ? 'Processing...' : editingSkill ? 'Update Skill' : 'Add Skill'}
                                     </button>
                                     {editingSkill && (
@@ -558,11 +558,11 @@ const EmployeeDashboard = () => {
                             >
                                 <div
                                     className={`card-header text-white p-3 text-center border-0 ${alloc.assignmentStatus === 'PENDING'
-                                        ? 'bg-warning text-dark'
+                                        ? 'bg-warning'
                                         : 'bg-accent'
                                         }`}
                                 >
-                                    <h4 className="mb-0">Project Details</h4>
+                                    <h4 className="mb-0 text-white">Project Details</h4>
                                 </div>
 
                                 <div className="card-body p-3 p-md-4 text-center">
@@ -818,9 +818,9 @@ const EmployeeDashboard = () => {
                             {activeSection === 'utilization' && renderUtilization()}
                             {activeSection === 'profile' && (
                                 <div style={{
-                                    '--profile-theme-color': 'var(--color-primary)',
-                                    '--profile-theme-dark': '#802d00',
-                                    '--profile-theme-rgb': '181, 64, 0'
+                                    '--profile-theme-color': 'var(--color-accent)',
+                                    '--profile-theme-dark': '#B54000',
+                                    '--profile-theme-rgb': '207, 75, 0'
                                 }}>
                                     <ProfileSection
                                         profile={profile}

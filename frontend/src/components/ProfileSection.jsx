@@ -14,7 +14,7 @@ const ProfileSection = ({ profile, utilization, onNavigateToSkills }) => {
         <div className="mx-auto" style={{ maxWidth: '800px' }}>
             <div className="card shadow-sm border-0 rounded-3 overflow-hidden">
                 {/* Header */}
-                <div className="card-header border-0 p-4" style={{ background: 'linear-gradient(135deg, var(--profile-theme-color, var(--color-primary)) 0%, var(--profile-theme-dark, #2a5298) 100%)', minHeight: '140px' }}>
+                <div className="card-header border-0 p-4" style={{ backgroundColor: '#CF4B00', minHeight: '140px' }}>
                     <div className="d-flex justify-content-between h-100">
                         <div className="d-flex align-items-center gap-4">
                             <div className="rounded-circle d-flex align-items-center justify-content-center shadow"
@@ -25,7 +25,7 @@ const ProfileSection = ({ profile, utilization, onNavigateToSkills }) => {
                                 <h3 className="fw-bold mb-1">{profile.firstName} {profile.lastName}</h3>
                                 <div className="d-flex align-items-center gap-2 opacity-75">
                                     <i className="bi bi-envelope"></i>
-                                    <span className="small">{profile.email}</span>
+                                    <span style={{ fontSize: '0.8rem' }}>{profile.email}</span>
                                 </div>
                                 <div className="badge bg-white mt-2 px-3 py-1 rounded-pill" style={{ color: 'var(--profile-theme-color, var(--color-primary))' }}>
                                     {profile.role}
@@ -36,8 +36,8 @@ const ProfileSection = ({ profile, utilization, onNavigateToSkills }) => {
                             <div className="font-monospace opacity-75" style={{ fontSize: '1.1rem' }}>ID: {profile.id.substring(0, 8)}</div>
                             {profile.managerName && (
                                 <div className="text-end mt-auto pt-3">
-                                    <div className="opacity-75 text-uppercase fw-bold mb-1" style={{ letterSpacing: '1px' }}>Reporting To</div>
-                                    <div className="fs-3 fw-bold d-flex align-items-center gap-2">
+                                    <div className="opacity-75 text-uppercase fw-bold mb-1" style={{ letterSpacing: '1px', fontSize: '0.7rem' }}>Reporting To</div>
+                                    <div className="fs-6 fw-bold d-flex align-items-center gap-2">
                                         <i className="bi bi-person-workspace"></i>
                                         {profile.managerName}
                                     </div>
@@ -52,7 +52,7 @@ const ProfileSection = ({ profile, utilization, onNavigateToSkills }) => {
                     {/* Assignments Column */}
                     <div className="col-lg-7">
                         <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h5 className="fw-bold mb-0" style={{ color: 'var(--profile-theme-color, var(--color-primary))' }}>
+                            <h5 className="fw-bold mb-0" style={{ color: '#CF4B00' }}>
                                 <i className="bi bi-briefcase-fill me-2"></i>Active Assignments
                             </h5>
                         </div>
@@ -103,7 +103,7 @@ const ProfileSection = ({ profile, utilization, onNavigateToSkills }) => {
                     {/* Skills Column */}
                     <div className="col-lg-5">
                         <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h5 className="fw-bold mb-0" style={{ color: 'var(--profile-theme-color, var(--color-primary))' }}>
+                            <h5 className="fw-bold mb-0" style={{ color: '#CF4B00' }}>
                                 <i className="bi bi-lightning-charge-fill me-2"></i>Skills
                             </h5>
                             {onNavigateToSkills && (

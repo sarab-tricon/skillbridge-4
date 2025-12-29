@@ -216,7 +216,7 @@ const ManagerDashboard = () => {
                 <h6 className="text-muted text-uppercase mb-3 fw-bold" style={{ letterSpacing: '1.5px' }}>{title}</h6>
                 <h2 className="display-4 fw-bold mb-0" style={{ color: 'var(--color-primary)' }}>{count}</h2>
                 <div className="mt-3">
-                    <button className="btn btn-sm px-4 rounded-pill" style={{ backgroundColor: color, color: 'white' }}>
+                    <button className="btn btn-sm px-4 rounded-pill" style={{ backgroundColor: '#CF4B00', color: 'white' }}>
                         {activeSection === sectionId ? 'Hide Details' : 'View Details'}
                     </button>
                 </div>
