@@ -24,36 +24,33 @@ const Sidebar = ({ title = 'Menu', menuItems = [], activeSection, onSectionChang
                     top: 0,
                     height: '100%',
                     minWidth: isCollapsed ? '70px' : '220px',
-                    maxWidth: isCollapsed ? '70px' : '220px'
+                    maxWidth: isCollapsed ? '70px' : '220px',
+                    display: 'flex',
+                    flexDirection: 'column'
                 }}
             >
-                {/* Toggle Button at the top right border */}
+                {/* Toggle Button */}
                 <button
-                    className="btn btn-sm btn-outline-accent border-0 position-absolute rounded-circle sidebar-toggle-btn"
+                    className="btn btn-sm btn-outline-accent border-0 rounded-circle sidebar-toggle-btn"
                     onClick={() => setIsCollapsed(!isCollapsed)}
                     title={isCollapsed ? 'Expand' : 'Collapse'}
                     style={{
-                        top: '12px',
-                        right: '5px',
-                        zIndex: 100,
-                        width: '32px',
-                        height: '32px',
+                        marginTop: '8px',
+                        marginLeft: isCollapsed ? 'auto' : undefined,
+                        marginRight: isCollapsed ? 'auto' : '8px',
+                        marginBottom: '4px',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        width: '40px',
+                        height: '40px',
+                        alignSelf: isCollapsed ? 'center' : 'flex-end'
                     }}
                 >
-                    <i className={`bi ${isCollapsed ? 'bi-chevron-double-right' : 'bi-chevron-double-left'} fs-6`}></i>
+                    <i className="bi bi-list fs-5"></i>
                 </button>
 
-                <div className="d-flex flex-column pt-4 h-100">
-                    {/* Header with centered title */}
-                    <div className="sidebar-header d-flex align-items-center justify-content-center mb-4 px-2" style={{ minHeight: '32px' }}>
-                        {!isCollapsed && (
-                            <h4 className="sidebar-title m-0 fw-bold text-accent text-center">{title}</h4>
-                        )}
-                    </div>
-
+                <div className="d-flex flex-column pt-2 h-100">
                     {/* Navigation Menu */}
                     <ul className="nav flex-column w-100 gap-1" id="sidebar-menu">
                         {menuItems.map((item) => (
