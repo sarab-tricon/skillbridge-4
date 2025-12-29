@@ -2,13 +2,53 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
-    const { isAuthenticated, logout, user } = useAuth();
+    const { isAuthenticated, logout, user, role } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
     const handleLogout = () => {
         logout();
         navigate('/');
+    };
+
+    const handleBrandClick = () => {
+        if (!isAuthenticated) {
+            navigate('/');
+            return;
+        }
+
+        // Determine target path and storage key based on role
+        let path = '/';
+        let storageKey = '';
+        let defaultValue = 'overview';
+
+        if (role === 'EMPLOYEE') {
+            path = '/employee';
+            storageKey = 'employeeActiveSection';
+        } else if (role === 'MANAGER') {
+            path = '/manager';
+            storageKey = 'managerActiveSection';
+            defaultValue = null; // Manager dashboard uses null for overview
+        } else if (role === 'HR') {
+            path = '/hr';
+            storageKey = 'hrActiveSection';
+        }
+
+        // Reset the active section to overview/null in localStorage
+        if (storageKey) {
+            if (defaultValue === null) {
+                localStorage.removeItem(storageKey);
+            } else {
+                localStorage.setItem(storageKey, defaultValue);
+            }
+        }
+
+        // Navigate or internal reload if already on the dashboard page
+        if (location.pathname === path) {
+            window.location.reload();
+        } else {
+            navigate(path);
+        }
     };
 
     return (
@@ -39,8 +79,9 @@ const Navbar = () => {
                         fontSize: '1.25rem',
                         color: 'var(--color-accent)',
                         margin: 0,
-                        cursor: 'default'
+                        cursor: 'pointer'
                     }}
+                    onClick={handleBrandClick}
                 >
                     <img
                         src="/skillbridgeLOGO.jpeg"
