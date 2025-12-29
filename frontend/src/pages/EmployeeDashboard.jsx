@@ -898,14 +898,6 @@ const EmployeeDashboard = () => {
                 .text-accent {
                     color: var(--color-primary) !important;
                 }
-                .btn-outline-accent {
-                    color: var(--color-primary);
-                    border-color: var(--color-primary);
-                }
-                .btn-outline-accent:hover {
-                    background-color: var(--color-primary);
-                    color: white;
-                }
                 .nav-link.sidebar-link.active {
                     background-color: var(--color-primary) !important;
                     color: #fff !important;

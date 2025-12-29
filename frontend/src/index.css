@@ -293,6 +293,37 @@ small,
 
 /* End: Pagination & Links */
 
+/* End: Pagination & Links */
+
+/* Custom Shared Components */
+.btn-outline-accent {
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  background-color: transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-outline-accent:hover {
+  background-color: var(--color-primary);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.assignment-badge {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  font-weight: 600;
+  padding: 0.35rem 0.8rem;
+  border-radius: 50rem;
+}
+
+.assignment-badge-active {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
 /* === Accessibility === */
 
 /* Skip to Main Content Link */

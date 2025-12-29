@@ -234,15 +234,7 @@ const ManagerDashboard = () => {
                 <p className="display-4 fw-bold mb-0" style={{ color: 'var(--color-primary)' }}>{count}</p>
                 <div className="mt-3">
                     <button
-                        className="btn px-4 py-2 rounded-pill fw-bold summary-btn"
-                        style={{
-                            '--btn-theme-color': color,
-                            backgroundColor: `${color.slice(0, 7)}1F`,
-                            color: color,
-                            border: `1px solid ${color}`,
-                            fontSize: '0.875rem',
-                            transition: 'all 0.2s ease-in-out'
-                        }}
+                        className="btn btn-outline-accent btn-sm rounded-pill px-4 fw-bold"
                         aria-label={`${activeSection === sectionId ? 'Hide' : 'View'} details for ${title}`}
                         aria-expanded={activeSection === sectionId}
                         onClick={(e) => {
@@ -342,9 +334,8 @@ const ManagerDashboard = () => {
 
                                 {activeSection === 'team' && (
                                     <div className="card shadow border-0 rounded-4 overflow-hidden mb-5">
-                                        <div className="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
-                                            <h2 className="fw-bold mb-0 h3">Team Directory</h2>
-                                            <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={() => setActiveSection(null)} title="Close"><i className="bi bi-x-lg"></i></button>
+                                        <div className="card-header bg-white p-4 border-0">
+                                            <h2 className="fw-bold mb-0 h3 text-dark">Team Directory</h2>
                                         </div>
                                         <div className="card-body p-0">
                                             {loading.data ? renderLoading() :
@@ -368,11 +359,11 @@ const ManagerDashboard = () => {
                                                                             </td>
                                                                             <td>
                                                                                 {member.projectName ? (
-                                                                                    <span className="badge bg-info-subtle text-dark border border-info rounded-pill px-3">
+                                                                                    <span className="assignment-badge assignment-badge-active">
                                                                                         {member.projectName}
                                                                                     </span>
                                                                                 ) : (
-                                                                                    <span className="text-muted italic small">On Bench</span>
+                                                                                    <span className="assignment-badge">On Bench</span>
                                                                                 )}
                                                                             </td>
                                                                             <td className="px-4 text-end">
@@ -392,9 +383,8 @@ const ManagerDashboard = () => {
 
                                 {activeSection === 'alloc_requests' && (
                                     <div className="card shadow border-0 rounded-4 overflow-hidden mb-5">
-                                        <div className="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
-                                            <h2 className="fw-bold mb-0 h3">Pending Allocation Requests</h2>
-                                            <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={() => setActiveSection(null)} title="Close"><i className="bi bi-x-lg"></i></button>
+                                        <div className="card-header bg-white p-4 border-0">
+                                            <h2 className="fw-bold mb-0 h3 text-dark">Pending Allocation Requests</h2>
                                         </div>
                                         <div className="card-body p-0">
                                             {loading.data ? renderLoading() :
@@ -466,8 +456,7 @@ const ManagerDashboard = () => {
                                 {activeSection === 'allocations' && (
                                     <div className="animate-fade-in">
                                         <div className="d-flex justify-content-between align-items-center mb-4">
-                                            <h2 className="fw-bold mb-0 h3">Active Projects & Assignments</h2>
-                                            <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={() => setActiveSection(null)} title="Close"><i className="bi bi-x-lg"></i></button>
+                                            <h2 className="fw-bold mb-0 h3 text-dark">Active Projects & Assignments</h2>
                                         </div>
                                         <div className="row g-4">
                                             {/* Organization Projects */}
@@ -550,9 +539,8 @@ const ManagerDashboard = () => {
 
                                 {activeSection === 'pending_skills' && (
                                     <div className="card shadow border-0 rounded-4 overflow-hidden mb-5">
-                                        <div className="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
-                                            <h2 className="fw-bold mb-0 h3">Pending Skill Verifications</h2>
-                                            <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={() => setActiveSection(null)} title="Close"><i className="bi bi-x-lg"></i></button>
+                                        <div className="card-header bg-white p-4 border-0">
+                                            <h2 className="fw-bold mb-0 h3 text-dark">Pending Skill Verifications</h2>
                                         </div>
                                         <div className="card-body p-0">
                                             {loading.skills ? renderLoading() :

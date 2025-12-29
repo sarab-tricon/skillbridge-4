@@ -221,14 +221,27 @@ const HRDashboard = () => {
                 tabIndex={0}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
             >
-                <div className="card-body d-flex align-items-center justify-content-between">
-                    <div>
-                        <h6 className="text-muted text-uppercase mb-2" style={{ fontSize: '0.75rem', letterSpacing: '0.5px' }}>{title}</h6>
-                        <h2 className="fw-bold mb-0 text-dark">{value}</h2>
+                <div className="card-body d-flex flex-column">
+                    <div className="d-flex align-items-center justify-content-between mb-3">
+                        <div>
+                            <h6 className="text-muted text-uppercase mb-2" style={{ fontSize: '0.75rem', letterSpacing: '1px', fontWeight: '700' }}>{title}</h6>
+                            <h2 className="fw-bold mb-0 text-dark">{value}</h2>
+                        </div>
+                        <div className="rounded-circle p-3 d-flex align-items-center justify-content-center"
+                            style={{ backgroundColor: 'rgba(181, 64, 0, 0.1)', width: '50px', height: '50px' }}>
+                            <i className={`bi ${icon} fs-4`} style={{ color: 'var(--color-primary)' }}></i>
+                        </div>
                     </div>
-                    <div className="rounded-circle p-3 d-flex align-items-center justify-content-center"
-                        style={{ backgroundColor: 'rgba(220, 53, 69, 0.1)', width: '50px', height: '50px' }}>
-                        <i className={`bi ${icon} fs-4`} style={{ color: 'var(--color-primary)' }}></i>
+                    <div className="mt-auto">
+                        <button
+                            className="btn btn-outline-accent btn-sm rounded-pill px-4 fw-bold w-100"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onClick();
+                            }}
+                        >
+                            View Details
+                        </button>
                     </div>
                 </div>
             </div>
@@ -334,9 +347,6 @@ const HRDashboard = () => {
                                     HR Ops
                                 </button>
                             </div>
-                            <button className="btn btn-outline-secondary btn-sm" onClick={() => { fetchEmployees(); fetchManagers(); fetchHRs(); }} aria-label="Refresh Directory">
-                                <i className="bi bi-arrow-clockwise"></i>
-                            </button>
                         </div>
                     </div>
 
