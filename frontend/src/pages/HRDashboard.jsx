@@ -229,7 +229,6 @@ const HRDashboard = () => {
 
     const renderOverview = () => (
         <div className="fade-in">
-            <h3 className="fw-bold mb-4 text-dark"></h3>
             <div className="row g-4">
                 <StatCard
                     title="Employee Management"
@@ -619,47 +618,52 @@ const HRDashboard = () => {
     );
 
     return (
-        <div className="container-fluid p-0 overflow-hidden" style={{ height: 'calc(100vh - 65px)', backgroundColor: 'var(--color-bg)' }}>
-            <div className="row g-0 h-100">
-                {/* Sidebar */}
-                <Sidebar
-                    title="Menu"
-                    menuItems={hrMenuItems}
-                    activeSection={activeSection}
-                    onSectionChange={setActiveSection}
-                />
+        <>
+            <a href="#main-content" className="skip-link">
+                Skip to main content
+            </a>
+            <div className="container-fluid p-0 overflow-hidden" style={{ height: 'calc(100vh - 65px)', backgroundColor: 'var(--color-bg)' }}>
+                <div className="row g-0 h-100">
+                    {/* Sidebar */}
+                    <Sidebar
+                        title="Menu"
+                        menuItems={hrMenuItems}
+                        activeSection={activeSection}
+                        onSectionChange={setActiveSection}
+                    />
 
-                {/* Main Content */}
-                <div className="col h-100" style={{ overflowY: 'auto', scrollbarGutter: 'stable' }}>
-                    <div className="p-4 p-md-5">
-                        <header className="page-header mb-4">
-                            <div>
-                                <h1 className="page-title fw-bold text-accent">
-                                    {activeSection === 'overview' && 'Dashboard Overview'}
-                                    {activeSection === 'people' && 'People Management'}
-                                    {activeSection === 'projects' && 'Project Management'}
-                                    {activeSection === 'approvals' && 'Allocation Approvals'}
-                                    {activeSection === 'bench' && 'Bench Management'}
-                                    {activeSection === 'catalog' && 'Skill Catalog'}
-                                    {activeSection === 'talent' && 'Talent Discovery'}
-                                </h1>
-                                <p className="lead text-muted m-0 small">Manage your organization's workforce and projects from one place.</p>
+                    {/* Main Content */}
+                    <main role="main" id="main-content" className="col h-100" style={{ overflowY: 'auto', scrollbarGutter: 'stable' }}>
+                        <div className="p-4 p-md-5">
+                            <div className="page-header mb-4">
+                                <div>
+                                    <h1 className="page-title fw-bold text-accent">
+                                        {activeSection === 'overview' && 'Dashboard Overview'}
+                                        {activeSection === 'people' && 'People Management'}
+                                        {activeSection === 'projects' && 'Project Management'}
+                                        {activeSection === 'approvals' && 'Allocation Approvals'}
+                                        {activeSection === 'bench' && 'Bench Management'}
+                                        {activeSection === 'catalog' && 'Skill Catalog'}
+                                        {activeSection === 'talent' && 'Talent Discovery'}
+                                    </h1>
+                                    <p className="lead text-muted m-0 small">Manage your organization's workforce and projects from one place.</p>
+                                </div>
                             </div>
-                        </header>
 
-                        <div className="fade-in">
-                            {activeSection === 'overview' && renderOverview()}
-                            {activeSection === 'people' && renderPeopleManagement()}
-                            {activeSection === 'projects' && <ProjectManagement />}
-                            {activeSection === 'approvals' && <AllocationApprovals />}
-                            {activeSection === 'bench' && <BenchAllocation />}
-                            {activeSection === 'catalog' && <SkillCatalog />}
-                            {activeSection === 'talent' && renderTalentDiscovery()}
+                            <div className="fade-in">
+                                {activeSection === 'overview' && renderOverview()}
+                                {activeSection === 'people' && renderPeopleManagement()}
+                                {activeSection === 'projects' && <ProjectManagement />}
+                                {activeSection === 'approvals' && <AllocationApprovals />}
+                                {activeSection === 'bench' && <BenchAllocation />}
+                                {activeSection === 'catalog' && <SkillCatalog />}
+                                {activeSection === 'talent' && renderTalentDiscovery()}
+                            </div>
                         </div>
-                    </div>
+                    </main>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 

@@ -36,45 +36,56 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
-            <div className="col-md-6 col-lg-4">
-                <div className="card border-0 shadow-sm" style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}>
-                    <div className="card-body p-5">
-                        <h3 className="text-center mb-4">Login</h3>
-                        {error && <div className="alert alert-danger">{error}</div>}
-                        <form onSubmit={handleSubmit}>
-                            <div className="mb-4">
-                                <label className="form-label">Email Address</label>
-                                <input
-                                    type="email"
-                                    className="form-control form-control-lg"
-                                    placeholder="name@company.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                />
+        <>
+            <a href="#main-content" className="skip-link">
+                Skip to main content
+            </a>
+            <main role="main" id="main-content">
+                <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
+                    <div className="col-md-6 col-lg-4">
+                        <div className="card border-0 shadow-sm" style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}>
+                            <div className="card-body p-5">
+                                <h3 className="text-center mb-4">Login</h3>
+                                {error && <div className="alert alert-danger">{error}</div>}
+                                <form onSubmit={handleSubmit}>
+                                    <div className="mb-4">
+                                        <label htmlFor="email" className="form-label">Email Address</label>
+                                        <input
+                                            id="email"
+                                            type="email"
+                                            className="form-control form-control-lg"
+                                            placeholder="name@company.com"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            required
+                                            autoComplete="email"
+                                        />
+                                    </div>
+                                    <div className="mb-5">
+                                        <label htmlFor="password" className="form-label">Password</label>
+                                        <input
+                                            id="password"
+                                            type="password"
+                                            className="form-control form-control-lg"
+                                            placeholder="******"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            required
+                                            autoComplete="current-password"
+                                        />
+                                    </div>
+                                    <div className="d-grid">
+                                        <button type="submit" className="btn btn-accent btn-lg">
+                                            Login
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
-                            <div className="mb-5">
-                                <label className="form-label">Password</label>
-                                <input
-                                    type="password"
-                                    className="form-control form-control-lg"
-                                    placeholder="******"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
-                            </div>
-                            <div className="d-grid">
-                                <button type="submit" className="btn btn-accent btn-lg">
-                                    Login
-                                </button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </main>
+        </>
     );
 };
 
