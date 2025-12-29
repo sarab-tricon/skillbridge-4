@@ -10,7 +10,14 @@ import Sidebar from '../components/Sidebar';
 
 const HRDashboard = () => {
     const { user, role } = useAuth();
-    const [activeSection, setActiveSection] = useState('overview');
+    const [activeSection, setActiveSection] = useState(() => {
+        return localStorage.getItem('hrActiveSection') || 'overview';
+    });
+
+    // Persist active section to localStorage
+    useEffect(() => {
+        localStorage.setItem('hrActiveSection', activeSection);
+    }, [activeSection]);
 
     // HR menu items for sidebar
     const hrMenuItems = [

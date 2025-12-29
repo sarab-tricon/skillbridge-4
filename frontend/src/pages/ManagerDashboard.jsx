@@ -9,7 +9,15 @@ const ManagerDashboard = () => {
     const { user } = useAuth();
     const [mergedTeam, setMergedTeam] = useState([]);
     const [pendingSkills, setPendingSkills] = useState([]);
-    const [activeSection, setActiveSection] = useState(null);
+    const [activeSection, setActiveSection] = useState(() => {
+        const saved = localStorage.getItem('managerActiveSection');
+        return (saved === 'null' || saved === null) ? null : saved;
+    });
+
+    // Persist active section to localStorage
+    useEffect(() => {
+        localStorage.setItem('managerActiveSection', activeSection);
+    }, [activeSection]);
     const [loading, setLoading] = useState({
         data: true,
         skills: true
