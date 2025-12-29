@@ -177,15 +177,21 @@ const ProjectManagement = () => {
                             <button
                                 key={tab.key}
                                 type="button"
-                                className={`btn btn-lg ${activeTab === tab.key ? 'btn-primary' : 'btn-outline-primary'}`}
+                                className={`btn ${activeTab === tab.key ? 'btn-primary' : 'btn-outline-primary'}`}
                                 onClick={() => setActiveTab(tab.key)}
                                 style={activeTab === tab.key ? {
                                     backgroundColor: tab.color,
                                     borderColor: tab.color,
                                     color: '#fff',
                                     fontWeight: 'bold',
+                                    fontSize: '0.875rem',
                                     boxShadow: `0 4px 12px ${tab.color === 'var(--color-primary)' ? 'rgba(220, 53, 69, 0.4)' : tab.color + '40'}`
-                                } : { borderColor: tab.color, color: tab.color }}
+                                } : {
+                                    borderColor: tab.color,
+                                    color: tab.color,
+                                    backgroundColor: 'transparent',
+                                    fontSize: '0.875rem'
+                                }}
                             >
                                 <i className={`bi ${tab.icon} me-2`}></i>
                                 {tab.label}
