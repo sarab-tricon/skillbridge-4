@@ -54,6 +54,7 @@ const HRDashboard = () => {
     const [onboardingLoading, setOnboardingLoading] = useState(false);
     const [onboardingSuccess, setOnboardingSuccess] = useState(null);
     const [onboardingError, setOnboardingError] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
 
     // Talent/Skill State
     const [searchSkills, setSearchSkills] = useState([]);
@@ -353,9 +354,7 @@ const HRDashboard = () => {
                                 <tr>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th>Role</th>
                                     {peopleTab === 'EMPLOYEES' && <th>Manager Name</th>}
-                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -364,14 +363,12 @@ const HRDashboard = () => {
                                         <tr key={user.id}>
                                             <td className="fw-bold">{user.firstName} {user.lastName}</td>
                                             <td>{user.email}</td>
-                                            <td><span className="badge bg-secondary">{user.role}</span></td>
                                             {peopleTab === 'EMPLOYEES' && <td><small className="text-muted">{user.managerName || 'N/A'}</small></td>}
-                                            <td><span className="badge bg-success">Active</span></td>
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="5" className="text-center py-4 text-muted">No users found.</td>
+                                        <td colSpan={peopleTab === 'EMPLOYEES' ? '3' : '2'} className="text-center py-4 text-muted">No users found.</td>
                                     </tr>
                                 )}
                             </tbody>
@@ -386,7 +383,7 @@ const HRDashboard = () => {
         <div className="card shadow-sm border-0" style={{ backgroundColor: '#fff', borderTop: '5px solid var(--color-primary)' }}>
             <div className="card-body p-4">
                 <h3 className="card-title fw-bold mb-4 text-dark">
-                    <i className="bi bi-person-plus-fill me-2 text-primary"></i>Add New User
+                    <i className="bi bi-person-plus-fill me-2 text-primary"></i>New User
                 </h3>
 
                 {onboardingSuccess && (
@@ -446,15 +443,25 @@ const HRDashboard = () => {
 
                     <div className="mb-2">
                         <label className="form-label fw-bold small">Initial Password</label>
-                        <input
-                            type="password"
-                            name="password"
-                            className="form-control form-control-sm"
-                            placeholder="••••••••"
-                            required
-                            value={formData.password}
-                            onChange={handleInputChange}
-                        />
+                        <div className="input-group input-group-sm">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                name="password"
+                                className="form-control form-control-sm"
+                                placeholder="••••••••"
+                                required
+                                value={formData.password}
+                                onChange={handleInputChange}
+                            />
+                            <button
+                                type="button"
+                                className="btn btn-outline-secondary"
+                                onClick={() => setShowPassword(!showPassword)}
+                                aria-label={showPassword ? "Hide password" : "Show password"}
+                            >
+                                <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div className="row g-2">

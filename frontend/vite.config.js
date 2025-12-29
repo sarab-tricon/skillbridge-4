@@ -8,4 +8,28 @@ export default defineConfig({
     port: 5173,
     strictPort: true, // This will fail if 5173 is busy, instead of auto-incrementing
   },
+  build: {
+    // Optimize chunk splitting for better caching
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+        },
+      },
+    },
+    // Use esbuild for faster, less blocking minification
+    minify: 'esbuild',
+    // Target modern browsers for smaller bundles
+    target: 'es2015',
+    // Chunk size warnings
+    chunkSizeWarningLimit: 600,
+  },
+  // Optimize CSS
+  css: {
+    devSourcemap: false,
+  },
+  // Performance hints
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom'],
+  },
 })
