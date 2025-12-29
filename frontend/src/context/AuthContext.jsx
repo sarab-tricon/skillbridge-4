@@ -7,24 +7,41 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [token, setToken] = useState(localStorage.getItem('token'));
-    const [role, setRole] = useState(null);
-    const [loading, setLoading] = useState(true); // Add loading state
+    // Synchronously initialize state from localStorage to prevent redirect flickers
+    const initialToken = localStorage.getItem('token');
+
+    let initialUser = null;
+    let initialRole = null;
+
+    if (initialToken) {
+        try {
+            const decoded = jwtDecode(initialToken);
+            initialUser = decoded;
+            initialRole = decoded.role;
+        } catch (error) {
+            console.error("Invalid initial token", error);
+            localStorage.removeItem('token');
+        }
+    }
+
+    const [user, setUser] = useState(initialUser);
+    const [token, setToken] = useState(initialToken);
+    const [role, setRole] = useState(initialRole);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (token) {
+        // Sync state if token changes elsewhere
+        if (token && !user) {
             try {
                 const decoded = jwtDecode(token);
                 setUser(decoded);
                 setRole(decoded.role);
             } catch (error) {
-                console.error("Invalid token", error);
+                console.error("Invalid token refresh", error);
                 logout();
             }
         }
-        setLoading(false); // Done loading
-    }, [token]);
+    }, [token, user]);
 
     const login = async (email, password) => {
         try {
@@ -48,6 +65,9 @@ export const AuthProvider = ({ children }) => {
 
     const logout = () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('managerActiveSection');
+        localStorage.removeItem('hrActiveSection');
+        localStorage.removeItem('employeeActiveSection');
         setToken(null);
         setUser(null);
         setRole(null);

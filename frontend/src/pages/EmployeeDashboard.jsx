@@ -7,7 +7,14 @@ import Sidebar from '../components/Sidebar';
 
 const EmployeeDashboard = () => {
     const { user } = useAuth();
-    const [activeSection, setActiveSection] = useState('overview');
+    const [activeSection, setActiveSection] = useState(() => {
+        return localStorage.getItem('employeeActiveSection') || 'overview';
+    });
+
+    // Persist active section to localStorage
+    useEffect(() => {
+        localStorage.setItem('employeeActiveSection', activeSection);
+    }, [activeSection]);
 
     // Section States
     // Section States
@@ -224,54 +231,65 @@ const EmployeeDashboard = () => {
     };
 
     const renderOverview = () => {
-        // Calculate metrics directly from allocation state for consistency
         const activeAssignments = Array.isArray(allocation)
             ? allocation.filter(a => a.assignmentStatus === 'ACTIVE')
             : [];
 
         const projectCount = activeAssignments.length;
-        const totalUtilization = activeAssignments.reduce((sum, a) => sum + (a.allocationPercent || 0), 0);
+        // Accurate utilization from backend state
+        const displayUtilization = loadingUtil ? '...' : (utilization?.totalUtilization ?? 0);
 
         return (
             <div className="row g-3 g-md-4">
+                {/* My Skills Card */}
                 <div className="col-md-4">
                     <div className="card h-100 shadow-sm border-0 border-top-primary">
                         <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
                             <i className="bi bi-person-badge h1 text-accent mb-2"></i>
                             <h5 className="card-title fw-bold">My Skills</h5>
                             <div className="mb-3">
-                                <p className="h2 fw-bold text-accent mb-0">{skills.filter(s => s.status === 'APPROVED').length}</p>
+                                <p className="h2 fw-bold text-accent mb-0">
+                                    {loadingSkills ? '...' : skills.filter(s => s.status === 'APPROVED').length}
+                                </p>
                             </div>
                             <div className="mt-auto">
-                                <button className="btn btn-outline-accent btn-sm px-4" onClick={() => setActiveSection('skills')}>Manage</button>
+                                <button className="btn btn-outline-accent btn-sm mt-2 px-4 rounded-pill" onClick={() => setActiveSection('skills')}>Manage</button>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                {/* Assignments Card */}
                 <div className="col-md-4">
                     <div className="card h-100 shadow-sm border-0 border-top-primary">
-                        <div className="card-body p-4 text-center d-flex flex-column">
-                            <i className="bi bi-briefcase display-4 text-accent mb-3"></i>
+                        <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
+                            <i className="bi bi-briefcase h1 text-accent mb-2"></i>
                             <h5 className="card-title fw-bold">Assignments</h5>
                             <div className="mb-3">
-                                <p className="h2 fw-bold text-accent mb-0">{projectCount}</p>
+                                <p className="h2 fw-bold text-accent mb-0">
+                                    {loadingAlloc ? '...' : projectCount}
+                                </p>
                             </div>
                             <div className="mt-auto">
-                                <button className="btn btn-outline-accent btn-sm mt-3" onClick={() => setActiveSection('utilization')}>View Details</button>
+                                <button className="btn btn-outline-accent btn-sm mt-2 px-4 rounded-pill" onClick={() => setActiveSection('utilization')}>View Details</button>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                {/* Utilization Card */}
                 <div className="col-md-4">
                     <div className="card h-100 shadow-sm border-0 border-top-primary">
                         <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
                             <i className="bi bi-graph-up h1 text-accent mb-2"></i>
                             <h5 className="card-title fw-bold">Utilization</h5>
-                            <p className="display-6 fw-bold text-accent mt-3 mb-3">
-                                {totalUtilization}%
-                            </p>
+                            <div className="mb-3">
+                                <p className="h2 fw-bold text-accent mb-0">
+                                    {displayUtilization}%
+                                </p>
+                            </div>
                             <div className="mt-auto">
-                                <button className="btn btn-outline-accent btn-sm mt-2" onClick={() => setActiveSection('utilization')}>Detailed Stats</button>
+                                <button className="btn btn-outline-accent btn-sm mt-2 px-4 rounded-pill" onClick={() => setActiveSection('utilization')}>Detailed Stats</button>
                             </div>
                         </div>
                     </div>
