@@ -44,8 +44,9 @@ const LoginPage = () => {
                         {error && <div className="alert alert-danger">{error}</div>}
                         <form onSubmit={handleSubmit}>
                             <div className="mb-4">
-                                <label className="form-label">Email Address</label>
+                                <label htmlFor="email" className="form-label">Email Address</label>
                                 <input
+                                    id="email"
                                     type="email"
                                     className="form-control form-control-lg"
                                     placeholder="name@company.com"
@@ -55,8 +56,9 @@ const LoginPage = () => {
                                 />
                             </div>
                             <div className="mb-5">
-                                <label className="form-label">Password</label>
+                                <label htmlFor="password" className="form-label">Password</label>
                                 <input
+                                    id="password"
                                     type="password"
                                     className="form-control form-control-lg"
                                     placeholder="******"
