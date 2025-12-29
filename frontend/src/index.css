@@ -292,3 +292,28 @@ small,
 }
 
 /* End: Pagination & Links */
+
+/* === Accessibility === */
+
+/* Skip to Main Content Link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background-color: var(--color-primary);
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 0 0 4px 0;
+  z-index: 9999;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 2px solid white;
+  outline-offset: 2px;
+  color: white;
+}
