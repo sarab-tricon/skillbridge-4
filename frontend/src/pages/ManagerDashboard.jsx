@@ -222,10 +222,23 @@ const ManagerDashboard = () => {
             }}
         >
             <div className="card-body p-4 text-center">
-                <h6 className="text-muted text-uppercase mb-3 fw-bold" style={{ letterSpacing: '1.5px' }}>{title}</h6>
-                <h2 className="display-4 fw-bold mb-0" style={{ color: 'var(--color-primary)' }}>{count}</h2>
+                <h2 className="text-muted text-uppercase mb-3 fw-bold h6" style={{ letterSpacing: '1.5px' }}>{title}</h2>
+                <p className="display-4 fw-bold mb-0" style={{ color: 'var(--color-primary)' }}>{count}</p>
                 <div className="mt-3">
-                    <button className="btn btn-sm px-4 rounded-pill" style={{ backgroundColor: color, color: 'white' }}>
+                    <button
+                        className="btn btn-sm px-4 rounded-pill"
+                        style={{
+                            backgroundColor: color,
+                            color: color === '#CF4B00' ? 'white' : '#212529',
+                            border: '1px solid rgba(0,0,0,0.1)'
+                        }}
+                        aria-label={`${activeSection === sectionId ? 'Hide' : 'View'} details for ${title}`}
+                        aria-expanded={activeSection === sectionId}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveSection(activeSection === sectionId ? null : sectionId);
+                        }}
+                    >
                         {activeSection === sectionId ? 'Hide Details' : 'View Details'}
                     </button>
                 </div>
@@ -235,6 +248,7 @@ const ManagerDashboard = () => {
 
     return (
         <div className="container-fluid p-0 overflow-hidden" style={{ height: 'calc(100vh - 65px)', backgroundColor: 'var(--color-bg)' }}>
+            <a href="#main-content" className="skip-link">Skip to main content</a>
             <div className="row g-0 h-100">
                 {/* SIDEBAR */}
                 <Sidebar
@@ -244,7 +258,7 @@ const ManagerDashboard = () => {
                     onSectionChange={setActiveSection}
                 />
 
-                <div className="col h-100 p-4 p-md-5" style={{ overflowY: 'auto', scrollbarGutter: 'stable' }}>
+                <main id="main-content" className="col h-100 p-4 p-md-5" style={{ overflowY: 'auto', scrollbarGutter: 'stable' }} tabIndex="-1">
                     <header className="page-header mb-4">
                         <h1 className="page-title fw-bold text-accent">
                             {activeSection === null && 'Manager Control Panel'}
@@ -304,7 +318,7 @@ const ManagerDashboard = () => {
                                         <div className="col-md-8 text-center">
                                             <div className="p-5 border-2 border-dashed rounded-4 bg-white shadow-sm">
                                                 <i className="bi bi-arrow-up-circle display-1 text-muted opacity-25 mb-4"></i>
-                                                <h3 className="text-muted fw-bold">Select a metric above to view detailed insights</h3>
+                                                <h2 className="text-muted fw-bold h3">Select a metric above to view detailed insights</h2>
                                                 <p className="text-muted">You can manage team allocations, verify skill requests, and track project deployments from this panel.</p>
                                             </div>
                                         </div>
@@ -318,14 +332,14 @@ const ManagerDashboard = () => {
                                 {activeSection === 'team' && (
                                     <div className="card shadow border-0 rounded-4 overflow-hidden mb-5">
                                         <div className="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
-                                            <h3 className="fw-bold mb-0">Team Directory</h3>
+                                            <h2 className="fw-bold mb-0 h3">Team Directory</h2>
                                             <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={() => setActiveSection(null)} title="Close"><i className="bi bi-x-lg"></i></button>
                                         </div>
                                         <div className="card-body p-0">
                                             {loading.data ? renderLoading() :
                                                 error.data ? renderError(error.data) :
                                                     mergedTeam.length === 0 ? renderEmpty('No team members found.') : (
-                                                        <div className="table-responsive">
+                                                        <div className="table-responsive" tabIndex="0" role="region" aria-label="Team Directory table">
                                                             <table className="table table-hover align-middle mb-0">
                                                                 <thead className="table-light">
                                                                     <tr>
@@ -343,7 +357,7 @@ const ManagerDashboard = () => {
                                                                             </td>
                                                                             <td>
                                                                                 {member.projectName ? (
-                                                                                    <span className="badge bg-info-subtle text-info border border-info rounded-pill px-3">
+                                                                                    <span className="badge bg-info-subtle text-dark border border-info rounded-pill px-3">
                                                                                         {member.projectName}
                                                                                     </span>
                                                                                 ) : (
@@ -368,14 +382,14 @@ const ManagerDashboard = () => {
                                 {activeSection === 'alloc_requests' && (
                                     <div className="card shadow border-0 rounded-4 overflow-hidden mb-5">
                                         <div className="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
-                                            <h3 className="fw-bold mb-0">Pending Allocation Requests</h3>
+                                            <h2 className="fw-bold mb-0 h3">Pending Allocation Requests</h2>
                                             <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={() => setActiveSection(null)} title="Close"><i className="bi bi-x-lg"></i></button>
                                         </div>
                                         <div className="card-body p-0">
                                             {loading.data ? renderLoading() :
                                                 error.data ? renderError(error.data) :
                                                     pendingAllocations.length === 0 ? renderEmpty('No pending allocation requests.') : (
-                                                        <div className="table-responsive">
+                                                        <div className="table-responsive" tabIndex="0" role="region" aria-label="Pending Allocation Requests table">
                                                             <table className="table table-hover align-middle mb-0">
                                                                 <thead className="table-light">
                                                                     <tr>
@@ -441,7 +455,7 @@ const ManagerDashboard = () => {
                                 {activeSection === 'allocations' && (
                                     <div className="animate-fade-in">
                                         <div className="d-flex justify-content-between align-items-center mb-4">
-                                            <h3 className="fw-bold mb-0">Active Projects & Assignments</h3>
+                                            <h2 className="fw-bold mb-0 h3">Active Projects & Assignments</h2>
                                             <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={() => setActiveSection(null)} title="Close"><i className="bi bi-x-lg"></i></button>
                                         </div>
                                         <div className="row g-4">
@@ -449,13 +463,13 @@ const ManagerDashboard = () => {
                                             <div className="col-lg-6">
                                                 <div className="card shadow border-0 rounded-4 h-100 overflow-hidden">
                                                     <div className="card-header bg-white p-4 border-0">
-                                                        <h4 className="fw-bold mb-0 text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Organization Projects</h4>
+                                                        <h3 className="fw-bold mb-0 text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Organization Projects</h3>
                                                     </div>
                                                     <div className="card-body p-0">
                                                         {loading.data ? renderLoading() :
                                                             error.data ? renderError(error.data) :
                                                                 allActiveProjects.length === 0 ? renderEmpty('No active organization projects found.') : (
-                                                                    <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'scroll', overflowX: 'hidden' }}>
+                                                                    <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'scroll', overflowX: 'hidden' }} tabIndex="0" role="region" aria-label="Organization Projects table">
                                                                         <table className="table table-hover align-middle mb-0">
                                                                             <thead className="table-light sticky-top" style={{ zIndex: 1 }}>
                                                                                 <tr>
@@ -470,7 +484,7 @@ const ManagerDashboard = () => {
                                                                                         <td className="px-4 py-3 fw-bold text-primary">{proj.name}</td>
                                                                                         <td>{proj.companyName}</td>
                                                                                         <td className="px-4 text-end">
-                                                                                            <span className="badge bg-success-subtle text-success border border-success rounded-pill px-3">
+                                                                                            <span className="badge bg-success-subtle text-success-emphasis border border-success rounded-pill px-3">
                                                                                                 {proj.status}
                                                                                             </span>
                                                                                         </td>
@@ -488,13 +502,13 @@ const ManagerDashboard = () => {
                                             <div className="col-lg-6">
                                                 <div className="card shadow border-0 rounded-4 h-100 overflow-hidden">
                                                     <div className="card-header bg-white p-4 border-0">
-                                                        <h4 className="fw-bold mb-0 text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Active Team Assignments</h4>
+                                                        <h3 className="fw-bold mb-0 text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Active Team Assignments</h3>
                                                     </div>
                                                     <div className="card-body p-0">
                                                         {loading.data ? renderLoading() :
                                                             error.data ? renderError(error.data) :
                                                                 mergedTeam.filter(m => m.projectName).length === 0 ? renderEmpty('No active team assignments.') : (
-                                                                    <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'scroll', overflowX: 'hidden' }}>
+                                                                    <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'scroll', overflowX: 'hidden' }} tabIndex="0" role="region" aria-label="Active Team Assignments table">
                                                                         <table className="table table-hover align-middle mb-0">
                                                                             <thead className="table-light sticky-top" style={{ zIndex: 1 }}>
                                                                                 <tr>
@@ -526,14 +540,14 @@ const ManagerDashboard = () => {
                                 {activeSection === 'pending_skills' && (
                                     <div className="card shadow border-0 rounded-4 overflow-hidden mb-5">
                                         <div className="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
-                                            <h3 className="fw-bold mb-0">Pending Skill Verifications</h3>
+                                            <h2 className="fw-bold mb-0 h3">Pending Skill Verifications</h2>
                                             <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={() => setActiveSection(null)} title="Close"><i className="bi bi-x-lg"></i></button>
                                         </div>
                                         <div className="card-body p-0">
                                             {loading.skills ? renderLoading() :
                                                 error.skills ? renderError(error.skills) :
                                                     pendingSkills.length === 0 ? renderEmpty('All skill requests have been processed.') : (
-                                                        <div className="table-responsive">
+                                                        <div className="table-responsive" tabIndex="0" role="region" aria-label="Pending Skill Verifications table">
                                                             <table className="table table-hover align-middle mb-0">
                                                                 <thead className="table-light">
                                                                     <tr>
@@ -582,7 +596,7 @@ const ManagerDashboard = () => {
                             </div>
                         </>
                     </div>
-                </div>
+                </main>
             </div>
 
             {/* Forward Modal */}
@@ -597,11 +611,13 @@ const ManagerDashboard = () => {
                             <div className="modal-body">
                                 <p className="text-muted mb-3">Add comments for HR (optional):</p>
                                 <textarea
+                                    id="forward-comment"
                                     className="form-control mb-3"
                                     rows="3"
                                     value={modalComment}
                                     onChange={(e) => setModalComment(e.target.value)}
                                     placeholder="e.g., Recommend approval based on skills..."
+                                    aria-label="Comments for HR"
                                 ></textarea>
 
                                 <div className="alert alert-light border small">
@@ -633,11 +649,14 @@ const ManagerDashboard = () => {
                             <div className="modal-body">
                                 <p className="text-muted mb-3">Please provide a reason for rejection (mandatory):</p>
                                 <textarea
+                                    id="reject-reason"
                                     className="form-control"
                                     rows="3"
                                     value={modalReason}
                                     onChange={(e) => setModalReason(e.target.value)}
                                     placeholder="e.g., Skills do not match project requirements..."
+                                    aria-label="Rejection reason"
+                                    required
                                 ></textarea>
                             </div>
                             <div className="modal-footer border-0 pt-0">
@@ -663,6 +682,19 @@ const ManagerDashboard = () => {
                     to { opacity: 1; transform: translateY(0); }
                 }
                 .card { transition: transform 0.2s ease-in-out; }
+                .skip-link {
+                    position: absolute;
+                    top: -40px;
+                    left: 0;
+                    background: #212529;
+                    color: white;
+                    padding: 8px;
+                    z-index: 100;
+                    transition: top 0.3s;
+                }
+                .skip-link:focus {
+                    top: 0;
+                }
             `}</style>
         </div>
     );
