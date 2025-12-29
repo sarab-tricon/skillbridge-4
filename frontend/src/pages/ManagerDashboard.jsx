@@ -218,7 +218,7 @@ const ManagerDashboard = () => {
 
     const SectionCard = ({ title, count, sectionId, color }) => (
         <div
-            className={`card h-100 shadow-sm border-0 cursor-pointer transition-all ${activeSection === sectionId ? 'ring-2' : ''}`}
+            className={`card h-100 shadow-sm border-0 cursor-pointer summary-card ${activeSection === sectionId ? 'ring-2' : ''}`}
             onClick={() => setActiveSection(activeSection === sectionId ? null : sectionId)}
             style={{
                 backgroundColor: 'white',
@@ -234,11 +234,14 @@ const ManagerDashboard = () => {
                 <p className="display-4 fw-bold mb-0" style={{ color: 'var(--color-primary)' }}>{count}</p>
                 <div className="mt-3">
                     <button
-                        className="btn btn-sm px-4 rounded-pill"
+                        className="btn px-4 py-2 rounded-pill fw-bold summary-btn"
                         style={{
-                            backgroundColor: color,
-                            color: color === '#CF4B00' ? 'white' : '#212529',
-                            border: '1px solid rgba(0,0,0,0.1)'
+                            '--btn-theme-color': color,
+                            backgroundColor: `${color.slice(0, 7)}1F`,
+                            color: color,
+                            border: `1px solid ${color}`,
+                            fontSize: '0.875rem',
+                            transition: 'all 0.2s ease-in-out'
                         }}
                         aria-label={`${activeSection === sectionId ? 'Hide' : 'View'} details for ${title}`}
                         aria-expanded={activeSection === sectionId}
@@ -293,7 +296,7 @@ const ManagerDashboard = () => {
                                                 title="Team Size"
                                                 count={loading.data ? '...' : mergedTeam.length}
                                                 sectionId="team"
-                                                color="#9CC6DB"
+                                                color="#CF4B00"
                                             />
                                         </div>
                                         <div className="col-md-3">
@@ -301,7 +304,7 @@ const ManagerDashboard = () => {
                                                 title="Allocations"
                                                 count={loading.data ? '...' : pendingAllocations.length}
                                                 sectionId="alloc_requests"
-                                                color="#DDBA7D"
+                                                color="#CF4B00"
                                             />
                                         </div>
                                         <div className="col-md-3">
@@ -309,7 +312,7 @@ const ManagerDashboard = () => {
                                                 title="Active Projects"
                                                 count={loading.data ? '...' : allActiveProjects.length}
                                                 sectionId="allocations"
-                                                color="#9CC6DB"
+                                                color="#CF4B00"
                                             />
                                         </div>
                                         <div className="col-md-3">
@@ -690,6 +693,15 @@ const ManagerDashboard = () => {
                     to { opacity: 1; transform: translateY(0); }
                 }
                 .card { transition: transform 0.2s ease-in-out; }
+                .summary-card:hover {
+                    transform: translateY(-8px) !important;
+                    box-shadow: 0 15px 30px rgba(0,0,0,0.12) !important;
+                }
+                .summary-btn:hover {
+                    background-color: var(--btn-theme-color) !important;
+                    color: white !important;
+                    transform: scale(1.05);
+                }
                 .skip-link {
                     position: absolute;
                     top: -40px;
