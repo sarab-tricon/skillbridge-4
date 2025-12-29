@@ -282,7 +282,8 @@ public class AssignmentService {
                 .projectName(projectName)
                 .billingType(assignment.getBillingType())
                 .assignmentStatus(assignment.getAssignmentStatus())
-                .utilization(billingStr) // String as requested
+                .utilization(String
+                        .valueOf(assignment.getAllocationPercent() != null ? assignment.getAllocationPercent() : 100))
                 .startDate(assignment.getStartDate())
                 .endDate(assignment.getEndDate())
                 .requestedAt(assignment.getRequestedAt())
