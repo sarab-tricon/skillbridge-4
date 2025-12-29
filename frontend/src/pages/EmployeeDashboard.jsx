@@ -5,6 +5,106 @@ import { allocationsApi } from '../api/allocations';
 import ProfileSection from '../components/ProfileSection';
 import Sidebar from '../components/Sidebar';
 
+const AllocationCard = ({ alloc, companyName, allocationValue }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    return (
+        <div className="col">
+            <div className={`card h-100 shadow-sm border-0 transition-all ${isExpanded ? '' : 'hover-shadow'}`}>
+                {!isExpanded ? (
+                    <div className="card-body p-4 d-flex flex-column text-center">
+                        <div className="mb-3">
+                            <h6 className="text-muted text-uppercase small fw-bold mb-2">
+                                {companyName || 'Company'}
+                            </h6>
+                            <h5 className="fw-bold text-accent mb-0">
+                                {alloc.projectName}
+                            </h5>
+                        </div>
+                        <div className="mt-auto">
+                            <button
+                                className="btn btn-outline-accent btn-sm rounded-pill px-4"
+                                onClick={() => setIsExpanded(true)}
+                            >
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="card border-0 overflow-hidden rounded-4">
+                        <div
+                            className={`card-header p-3 text-center border-0 ${alloc.assignmentStatus === 'PENDING'
+                                ? 'bg-warning text-dark'
+                                : 'bg-accent text-white'
+                                }`}
+                        >
+                            <h5 className="mb-0 fw-bold text-white">Project Details</h5>
+                        </div>
+
+                        <div className="card-body p-3 text-center">
+                            <div className="mb-3">
+                                <span
+                                    className={`badge rounded-pill px-3 py-2 ${alloc.assignmentStatus === 'ACTIVE'
+                                        ? 'bg-success'
+                                        : alloc.assignmentStatus === 'PENDING'
+                                            ? 'bg-warning text-dark'
+                                            : 'bg-secondary'
+                                        }`}
+                                >
+                                    {alloc.assignmentStatus}
+                                </span>
+                            </div>
+
+                            <div className="border-top pt-3 mb-3">
+                                <p className="text-muted small text-uppercase fw-bold mb-1">
+                                    Current Status
+                                </p>
+                                <p className="h5 mb-0">
+                                    {alloc.assignmentStatus === 'ACTIVE'
+                                        ? 'Allocated to Project'
+                                        : 'Awaiting Approval'}
+                                </p>
+                            </div>
+
+                            {alloc.assignmentStatus === 'ACTIVE' && (
+                                <div className="bg-light rounded-3 p-3 text-start">
+                                    <div className="mb-2">
+                                        <small className="text-muted d-block fw-bold text-uppercase" style={{ fontSize: '0.7rem' }}>Project Name</small>
+                                        <span className="fw-bold text-dark">{alloc.projectName}</span>
+                                    </div>
+                                    <div className="row g-2 mb-2">
+                                        <div className="col-6">
+                                            <small className="text-muted d-block fw-bold text-uppercase" style={{ fontSize: '0.7rem' }}>Billing</small>
+                                            <span className="fw-bold text-dark">{alloc.billingType || 'Billable'}</span>
+                                        </div>
+                                        <div className="col-6">
+                                            <small className="text-muted d-block fw-bold text-uppercase" style={{ fontSize: '0.7rem' }}>Billable</small>
+                                            <span className="fw-bold text-dark">{allocationValue}%</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <small className="text-muted d-block fw-bold text-uppercase" style={{ fontSize: '0.7rem' }}>Duration</small>
+                                        <span className="fw-bold text-dark small">
+                                            {alloc.startDate ? new Date(alloc.startDate).toLocaleDateString() : 'Start'} – {alloc.endDate ? new Date(alloc.endDate).toLocaleDateString() : 'Present'}
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+
+                            <button
+                                className="btn btn-link text-muted btn-sm mt-3 text-decoration-none"
+                                onClick={() => setIsExpanded(false)}
+                            >
+                                <i className="bi bi-chevron-up me-1"></i> Close
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
 const EmployeeDashboard = () => {
     const { user } = useAuth();
     const [activeSection, setActiveSection] = useState(() => {
@@ -572,82 +672,25 @@ const EmployeeDashboard = () => {
                     </div>
                 </div>
             ) : (
-                <div className="row justify-content-center g-4">
-                    {(Array.isArray(allocation) ? allocation : [allocation]).map(alloc => (
-                        <div key={alloc.assignmentId || alloc.id || Math.random()} className="col-md-10 col-lg-8">
-                            <div
-                                className={`card border-2 shadow-sm rounded-4 overflow-hidden ${alloc.assignmentStatus === 'PENDING'
-                                    ? 'border-warning'
-                                    : 'border-accent'
-                                    }`}
-                            >
-                                <div
-                                    className={`card-header text-white p-3 text-center border-0 ${alloc.assignmentStatus === 'PENDING'
-                                        ? 'bg-warning text-dark'
-                                        : 'bg-accent'
-                                        }`}
-                                >
-                                    <h4 className="mb-0">Project Details</h4>
-                                </div>
+                <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    {(Array.isArray(allocation) ? allocation : [allocation]).map(alloc => {
+                        // Lookup project to retrieve companyName
+                        const project = availableProjects.find(p => p.id === alloc.projectId || p.name === alloc.projectName);
+                        const companyName = project?.companyName;
 
-                                <div className="card-body p-3 p-md-4 text-center">
-                                    <div className="mb-3">
-                                        <span
-                                            className={`badge rounded-pill px-4 py-2 fs-6 ${alloc.assignmentStatus === 'ACTIVE'
-                                                ? 'bg-success'
-                                                : alloc.assignmentStatus === 'PENDING'
-                                                    ? 'bg-warning text-dark'
-                                                    : 'bg-secondary'
-                                                }`}
-                                        >
-                                            {alloc.assignmentStatus}
-                                        </span>
-                                    </div>
+                        // Lookup percentage from utilization data matches
+                        const utilAssignment = utilization?.assignments?.find(a => a.assignmentId === alloc.assignmentId);
+                        const percent = utilAssignment?.allocationPercent || 0;
 
-                                    <div className="border-top pt-3">
-                                        <p className="text-muted small text-uppercase fw-bold mb-1">
-                                            Current Status
-                                        </p>
-                                        <p className="h4 mb-0">
-                                            {alloc.assignmentStatus === 'ACTIVE'
-                                                ? 'Allocated to Project'
-                                                : 'Awaiting Approval'}
-                                        </p>
-                                    </div>
-
-                                    {alloc.assignmentStatus === 'ACTIVE' && (
-                                        <div className="mt-4 pt-3 border-top">
-                                            <h5 className="fw-bold text-accent mb-3">{alloc.projectName}</h5>
-                                            <div className="row g-2 justify-content-center">
-                                                <div className="col-6">
-                                                    <div className="p-2 bg-light rounded-3">
-                                                        <small className="text-muted d-block text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>Billing</small>
-                                                        <span className="fw-bold text-dark">{alloc.billingType || 'Billable'}</span>
-                                                    </div>
-                                                </div>
-                                                <div className="col-6">
-                                                    <div className="p-2 bg-light rounded-3">
-                                                        <small className="text-muted d-block text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>Allocation</small>
-                                                        <span className="fw-bold text-dark">{alloc.allocationPercent || '100'}%</span>
-                                                    </div>
-                                                </div>
-                                                {(alloc.startDate || alloc.endDate) && (
-                                                    <div className="col-12 mt-2">
-                                                        <div className="small text-muted">
-                                                            <i className="bi bi-calendar-event me-1"></i>
-                                                            {alloc.startDate ? new Date(alloc.startDate).toLocaleDateString() : 'Start'}
-                                                            {' - '}
-                                                            {alloc.endDate ? new Date(alloc.endDate).toLocaleDateString() : 'Present'}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    ))}
+                        return (
+                            <AllocationCard
+                                key={alloc.assignmentId || alloc.id || Math.random()}
+                                alloc={alloc}
+                                companyName={companyName}
+                                allocationValue={percent}
+                            />
+                        );
+                    })}
                 </div>
             )}
         </div>
@@ -655,7 +698,7 @@ const EmployeeDashboard = () => {
 
     const renderUtilization = () => (
         <div className="card shadow-sm border-0 p-4">
-            <h2 className="fw-bold mb-4">Utilization Overview</h2>
+            {/* Utilization Overview Title Removed */}
             {loadingUtil ? (
                 <div className="text-center py-5">
                     <div className="spinner-border text-primary" role="status"></div>
