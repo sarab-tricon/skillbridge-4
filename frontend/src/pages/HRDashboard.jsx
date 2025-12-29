@@ -5,12 +5,23 @@ import BenchAllocation from '../components/BenchAllocation';
 import ProjectManagement from '../components/ProjectManagement';
 import SkillCatalog from '../components/SkillCatalog';
 import AllocationApprovals from '../components/AllocationApprovals';
+import Sidebar from '../components/Sidebar';
 
 
 const HRDashboard = () => {
     const { user, role } = useAuth();
     const [activeSection, setActiveSection] = useState('overview');
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+    // HR menu items for sidebar
+    const hrMenuItems = [
+        { id: 'overview', label: 'Overview', icon: 'bi-speedometer2' },
+        { id: 'people', label: 'People', icon: 'bi-people-fill' },
+        { id: 'projects', label: 'Projects', icon: 'bi-folder' },
+        { id: 'approvals', label: 'Approvals', icon: 'bi-check-circle' },
+        { id: 'bench', label: 'Bench & Alloc', icon: 'bi-people' },
+        { id: 'catalog', label: 'Skills', icon: 'bi-list-check' },
+        { id: 'talent', label: 'Talent', icon: 'bi-search' }
+    ];
 
     // -- State Management --
     const [stats, setStats] = useState({
@@ -611,100 +622,19 @@ const HRDashboard = () => {
         <div className="container-fluid p-0 overflow-hidden" style={{ height: 'calc(100vh - 65px)', backgroundColor: 'var(--color-bg)' }}>
             <div className="row g-0 h-100">
                 {/* Sidebar */}
-                <div className={`col-auto sidebar transition-width ${isSidebarCollapsed ? 'sidebar-collapsed' : 'col-md-3 col-lg-2'}`} style={{ backgroundColor: '#fff', borderRight: '1px solid #dee2e6', overflowY: 'auto' }}>
-                    <div className="d-flex flex-column px-2 px-md-3 pt-4 h-100">
-                        <div className="sidebar-header d-flex align-items-center justify-content-between mb-4 px-2">
-                            {!isSidebarCollapsed && <h4 className="sidebar-title m-0 fw-bold text-accent">Menu</h4>}
-                            <button
-                                className={`btn btn-sm ${isSidebarCollapsed ? 'btn-accent w-100' : 'btn-outline-accent border-0 ms-auto'} transition-all`}
-                                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                                title={isSidebarCollapsed ? "Expand" : "Collapse"}
-                                style={{ width: isSidebarCollapsed ? 'auto' : '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                            >
-                                <i className={`bi ${isSidebarCollapsed ? 'bi-chevron-double-right' : 'bi-chevron-double-left'} fs-6 text-accent`}></i>
-                            </button>
-                        </div>
-                        <ul className="nav flex-column w-100 gap-1">
-                            <li className="nav-item w-100 mb-0">
-                                <button
-                                    onClick={() => setActiveSection('overview')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'overview' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
-                                    title={isSidebarCollapsed ? "Overview" : ""}
-                                >
-                                    <i className="bi bi-speedometer2 icon-std fs-5"></i>
-                                    {!isSidebarCollapsed && <span className="ms-2">Overview</span>}
-                                </button>
-                            </li>
-                            <li className="nav-item w-100 mb-0">
-                                <button
-                                    onClick={() => setActiveSection('people')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'people' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
-                                    title={isSidebarCollapsed ? "People" : ""}
-                                >
-                                    <i className="bi bi-people-fill icon-std fs-5"></i>
-                                    {!isSidebarCollapsed && <span className="ms-2">People</span>}
-                                </button>
-                            </li>
-                            <li className="nav-item w-100 mb-0">
-                                <button
-                                    onClick={() => setActiveSection('projects')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'projects' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
-                                    title={isSidebarCollapsed ? "Projects" : ""}
-                                >
-                                    <i className="bi bi-folder icon-std fs-5"></i>
-                                    {!isSidebarCollapsed && <span className="ms-2">Projects</span>}
-                                </button>
-                            </li>
-                            <li className="nav-item w-100 mb-0">
-                                <button
-                                    onClick={() => setActiveSection('approvals')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'approvals' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
-                                    title={isSidebarCollapsed ? "Approvals" : ""}
-                                >
-                                    <i className="bi bi-check-circle icon-std fs-5"></i>
-                                    {!isSidebarCollapsed && <span className="ms-2">Approvals</span>}
-                                </button>
-                            </li>
-                            <li className="nav-item w-100 mb-0">
-                                <button
-                                    onClick={() => setActiveSection('bench')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'bench' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
-                                    title={isSidebarCollapsed ? "Bench & Alloc" : ""}
-                                >
-                                    <i className="bi bi-people icon-std fs-5"></i>
-                                    {!isSidebarCollapsed && <span className="ms-2">Bench & Alloc</span>}
-                                </button>
-                            </li>
-                            <li className="nav-item w-100 mb-0">
-                                <button
-                                    onClick={() => setActiveSection('catalog')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'catalog' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
-                                    title={isSidebarCollapsed ? "Skills" : ""}
-                                >
-                                    <i className="bi bi-list-check icon-std fs-5"></i>
-                                    {!isSidebarCollapsed && <span className="ms-2">Skills</span>}
-                                </button>
-                            </li>
-                            <li className="nav-item w-100 mb-0">
-                                <button
-                                    onClick={() => setActiveSection('talent')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'talent' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
-                                    title={isSidebarCollapsed ? "Talent" : ""}
-                                >
-                                    <i className="bi bi-search icon-std fs-5"></i>
-                                    {!isSidebarCollapsed && <span className="ms-2">Talent</span>}
-                                </button>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+                <Sidebar
+                    title="HR Portal"
+                    menuItems={hrMenuItems}
+                    activeSection={activeSection}
+                    onSectionChange={setActiveSection}
+                />
 
                 {/* Main Content */}
-                <div className="col h-100" style={{ padding: 0, overflowY: 'auto', scrollbarGutter: 'stable' }}>
-                    <header className="page-header px-5 pt-4">
-                        <div className="d-flex justify-content-between align-items-center">
+                <div className="col h-100" style={{ overflowY: 'auto', scrollbarGutter: 'stable' }}>
+                    <div className="p-4 p-md-5">
+                        <header className="page-header mb-4">
                             <div>
-                                <h1 className="page-title text-dark">
+                                <h1 className="page-title fw-bold text-accent">
                                     {activeSection === 'overview' && 'Dashboard Overview'}
                                     {activeSection === 'people' && 'People Management'}
                                     {activeSection === 'projects' && 'Project Management'}
@@ -715,60 +645,19 @@ const HRDashboard = () => {
                                 </h1>
                                 <p className="lead text-muted m-0 small">Manage your organization's workforce and projects from one place.</p>
                             </div>
+                        </header>
+
+                        <div className="fade-in">
+                            {activeSection === 'overview' && renderOverview()}
+                            {activeSection === 'people' && renderPeopleManagement()}
+                            {activeSection === 'projects' && <ProjectManagement />}
+                            {activeSection === 'approvals' && <AllocationApprovals />}
+                            {activeSection === 'bench' && <BenchAllocation />}
+                            {activeSection === 'catalog' && <SkillCatalog />}
+                            {activeSection === 'talent' && renderTalentDiscovery()}
                         </div>
-                    </header>
-
-                    <div className="px-5 pb-5 fade-in">
-                        {activeSection === 'overview' && renderOverview()}
-                        {activeSection === 'people' && renderPeopleManagement()}
-                        {activeSection === 'projects' && <ProjectManagement />}
-                        {activeSection === 'approvals' && <AllocationApprovals />}
-                        {activeSection === 'bench' && <BenchAllocation />}
-                        {activeSection === 'catalog' && <SkillCatalog />}
-                        {activeSection === 'talent' && renderTalentDiscovery()}
-
                     </div>
                 </div>
-                <style>{`
-                    .nav-link {
-                        transition: all 0.2s ease;
-                        border-radius: 8px !important;
-                        font-weight: 500;
-                        height: 48px;
-                    }
-                    .sidebar.transition-width {
-                        transition: width 0.3s ease, flex-basis 0.3s ease;
-                    }
-                    .sidebar-collapsed {
-                        width: 70px !important;
-                    }
-                    .nav-link.active {
-                        background-color: #CF4B00 !important;
-                        color: white !important;
-                    }
-                    .nav-link:hover:not(.active) {
-                        background-color: rgba(207, 75, 0, 0.1);
-                        border: 1px solid #CF4B00;
-                        color: #CF4B00 !important;
-                    }
-                    .text-accent {
-                        color: #CF4B00 !important;
-                    }
-                    .btn-accent {
-                        background-color: #CF4B00;
-                        color: white;
-                        border: 1px solid #CF4B00;
-                    }
-                    .btn-outline-accent {
-                        color: #CF4B00;
-                        border: 1px solid #CF4B00;
-                        background: transparent;
-                    }
-                    .btn-outline-accent:hover {
-                        background-color: #CF4B00;
-                        color: white;
-                    }
-                `}</style>
             </div>
         </div>
     );

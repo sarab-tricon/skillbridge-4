@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import { allocationsApi } from '../api/allocations';
+import Sidebar from '../components/Sidebar';
 
 
 const ManagerDashboard = () => {
@@ -20,7 +21,15 @@ const ManagerDashboard = () => {
     const [pendingAllocations, setPendingAllocations] = useState([]);
     const [allActiveProjects, setAllActiveProjects] = useState([]);
     const [actionLoading, setActionLoading] = useState(false);
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+    // Manager menu items for sidebar
+    const managerMenuItems = [
+        { id: null, label: 'Dashboard', icon: 'bi-speedometer2' },
+        { id: 'team', label: 'My Team', icon: 'bi-people' },
+        { id: 'allocations', label: 'Active Projects', icon: 'bi-journal-code' },
+        { id: 'alloc_requests', label: 'Allocations', icon: 'bi-patch-check' },
+        { id: 'pending_skills', label: 'Verifications', icon: 'bi-star' }
+    ];
 
     // Modal State
     const [selectedRequest, setSelectedRequest] = useState(null);
@@ -228,115 +237,69 @@ const ManagerDashboard = () => {
         <div className="container-fluid p-0 overflow-hidden" style={{ height: 'calc(100vh - 65px)', backgroundColor: 'var(--color-bg)' }}>
             <div className="row g-0 h-100">
                 {/* SIDEBAR */}
-                <div className={`col-auto sidebar transition-width ${isSidebarCollapsed ? 'sidebar-collapsed' : 'col-md-3 col-lg-2'}`} style={{ backgroundColor: '#fff', borderRight: '1px solid #dee2e6', overflowY: 'auto' }}>
-                    <div className="d-flex flex-column px-2 px-md-3 pt-4 h-100">
-                        <div className="sidebar-header d-flex align-items-center justify-content-between mb-4 px-2">
-                            {!isSidebarCollapsed && <h4 className="sidebar-title m-0 fw-bold text-accent">Menu</h4>}
-                            <button
-                                className={`btn btn-sm ${isSidebarCollapsed ? 'btn-accent w-100' : 'btn-outline-accent border-0 ms-auto'} transition-all`}
-                                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                                title={isSidebarCollapsed ? "Expand" : "Collapse"}
-                                style={{ width: isSidebarCollapsed ? 'auto' : '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                            >
-                                <i className={`bi ${isSidebarCollapsed ? 'bi-chevron-double-right' : 'bi-chevron-double-left'} fs-6 text-accent`}></i>
-                            </button>
-                        </div>
-                        <ul className="nav flex-column w-100 gap-1" id="menu">
-                            <li className="nav-item w-100 mb-0">
-                                <button
-                                    onClick={() => setActiveSection(null)}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === null ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
-                                    title={isSidebarCollapsed ? "Dashboard" : ""}
-                                >
-                                    <i className="bi bi-speedometer2 icon-std fs-5"></i>
-                                    {!isSidebarCollapsed && <span className="ms-2">Dashboard</span>}
-                                </button>
-                            </li>
-                            <li className="nav-item w-100 mb-0">
-                                <button
-                                    onClick={() => setActiveSection('team')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'team' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
-                                    title={isSidebarCollapsed ? "My Team" : ""}
-                                >
-                                    <i className="bi bi-people icon-std fs-5"></i>
-                                    {!isSidebarCollapsed && <span className="ms-2">My Team</span>}
-                                </button>
-                            </li>
-                            <li className="nav-item w-100 mb-0">
-                                <button
-                                    onClick={() => setActiveSection('alloc_requests')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'alloc_requests' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
-                                    title={isSidebarCollapsed ? "Allocations" : ""}
-                                >
-                                    <i className="bi bi-patch-check icon-std fs-5"></i>
-                                    {!isSidebarCollapsed && <span className="ms-2">Allocations</span>}
-                                </button>
-                            </li>
-                            <li className="nav-item w-100 mb-0">
-                                <button
-                                    onClick={() => setActiveSection('pending_skills')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'pending_skills' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
-                                    title={isSidebarCollapsed ? "Verifications" : ""}
-                                >
-                                    <i className="bi bi-star icon-std fs-5"></i>
-                                    {!isSidebarCollapsed && <span className="ms-2">Verifications</span>}
-                                </button>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+                <Sidebar
+                    title="Menu"
+                    menuItems={managerMenuItems}
+                    activeSection={activeSection}
+                    onSectionChange={setActiveSection}
+                />
 
-                {/* MAIN CONTENT AREA */}
-                {/* MAIN CONTENT AREA */}
                 <div className="col h-100 p-4 p-md-5" style={{ overflowY: 'auto', scrollbarGutter: 'stable' }}>
-                    <header className="page-header text-center">
-                        <h1 className="page-title">
-                            Manager Control Panel
+                    <header className="page-header mb-4">
+                        <h1 className="page-title fw-bold text-accent">
+                            {activeSection === null && 'Manager Control Panel'}
+                            {activeSection === 'team' && 'Team Management'}
+                            {activeSection === 'allocations' && 'Active Projects'}
+                            {activeSection === 'alloc_requests' && 'Allocation Requests'}
+                            {activeSection === 'pending_skills' && 'Skill Verifications'}
                         </h1>
-                        <p className="lead text-muted">Welcome back, {user?.sub?.split('@')[0] || 'Manager'}</p>
+                        <p className="lead text-muted">
+                            {activeSection === null
+                                ? `Welcome back, ${user?.sub?.split('@')[0] || 'Manager'}`
+                                : 'Manage your organization\'s workforce and projects from one place.'}
+                        </p>
                     </header>
 
                     <div className="animate-fade-in">
                         <>
-                            {/* Summary Cards Grid */}
-                            <div className="row g-4 mb-5">
-                                <div className="col-md-3">
-                                    <SectionCard
-                                        title="Team Size"
-                                        count={loading.data ? '...' : mergedTeam.length}
-                                        sectionId="team"
-                                        color="#9CC6DB"
-                                    />
-                                </div>
-                                <div className="col-md-3">
-                                    <SectionCard
-                                        title="Allocations"
-                                        count={loading.data ? '...' : pendingAllocations.length}
-                                        sectionId="alloc_requests"
-                                        color="#DDBA7D"
-                                    />
-                                </div>
-                                <div className="col-md-3">
-                                    <SectionCard
-                                        title="Active Projects"
-                                        count={loading.data ? '...' : allActiveProjects.length}
-                                        sectionId="allocations"
-                                        color="#9CC6DB"
-                                    />
-                                </div>
-                                <div className="col-md-3">
-                                    <SectionCard
-                                        title="Verifications"
-                                        count={loading.skills ? '...' : pendingSkills.length}
-                                        sectionId="pending_skills"
-                                        color="#CF4B00"
-                                    />
-                                </div>
-                            </div>
+                            {/* Dashboard Overview - Summary Cards + Hint */}
+                            {activeSection === null && (
+                                <>
+                                    <div className="row g-4 mb-5">
+                                        <div className="col-md-3">
+                                            <SectionCard
+                                                title="Team Size"
+                                                count={loading.data ? '...' : mergedTeam.length}
+                                                sectionId="team"
+                                                color="#9CC6DB"
+                                            />
+                                        </div>
+                                        <div className="col-md-3">
+                                            <SectionCard
+                                                title="Allocations"
+                                                count={loading.data ? '...' : pendingAllocations.length}
+                                                sectionId="alloc_requests"
+                                                color="#DDBA7D"
+                                            />
+                                        </div>
+                                        <div className="col-md-3">
+                                            <SectionCard
+                                                title="Active Projects"
+                                                count={loading.data ? '...' : allActiveProjects.length}
+                                                sectionId="allocations"
+                                                color="#9CC6DB"
+                                            />
+                                        </div>
+                                        <div className="col-md-3">
+                                            <SectionCard
+                                                title="Verifications"
+                                                count={loading.skills ? '...' : pendingSkills.length}
+                                                sectionId="pending_skills"
+                                                color="#CF4B00"
+                                            />
+                                        </div>
+                                    </div>
 
-                            {/* Active Section Content */}
-                            <div>
-                                {!activeSection && (
                                     <div className="row justify-content-center mt-5">
                                         <div className="col-md-8 text-center">
                                             <div className="p-5 border-2 border-dashed rounded-4 bg-white shadow-sm">
@@ -346,13 +309,17 @@ const ManagerDashboard = () => {
                                             </div>
                                         </div>
                                     </div>
-                                )}
+                                </>
+                            )}
+
+                            {/* Active Section Content */}
+                            <div>
 
                                 {activeSection === 'team' && (
                                     <div className="card shadow border-0 rounded-4 overflow-hidden mb-5">
                                         <div className="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
                                             <h3 className="fw-bold mb-0">Team Directory</h3>
-                                            <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={() => setActiveSection(null)}>Close</button>
+                                            <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={() => setActiveSection(null)} title="Close"><i className="bi bi-x-lg"></i></button>
                                         </div>
                                         <div className="card-body p-0">
                                             {loading.data ? renderLoading() :
@@ -402,7 +369,7 @@ const ManagerDashboard = () => {
                                     <div className="card shadow border-0 rounded-4 overflow-hidden mb-5">
                                         <div className="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
                                             <h3 className="fw-bold mb-0">Pending Allocation Requests</h3>
-                                            <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={() => setActiveSection(null)}>Close</button>
+                                            <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={() => setActiveSection(null)} title="Close"><i className="bi bi-x-lg"></i></button>
                                         </div>
                                         <div className="card-body p-0">
                                             {loading.data ? renderLoading() :
@@ -473,12 +440,16 @@ const ManagerDashboard = () => {
 
                                 {activeSection === 'allocations' && (
                                     <div className="animate-fade-in">
+                                        <div className="d-flex justify-content-between align-items-center mb-4">
+                                            <h3 className="fw-bold mb-0">Active Projects & Assignments</h3>
+                                            <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={() => setActiveSection(null)} title="Close"><i className="bi bi-x-lg"></i></button>
+                                        </div>
                                         <div className="row g-4">
                                             {/* Organization Projects */}
                                             <div className="col-lg-6">
                                                 <div className="card shadow border-0 rounded-4 h-100 overflow-hidden">
-                                                    <div className="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
-                                                        <h4 className="fw-bold mb-0">Organization Projects</h4>
+                                                    <div className="card-header bg-white p-4 border-0">
+                                                        <h4 className="fw-bold mb-0 text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Organization Projects</h4>
                                                     </div>
                                                     <div className="card-body p-0">
                                                         {loading.data ? renderLoading() :
@@ -517,7 +488,7 @@ const ManagerDashboard = () => {
                                             <div className="col-lg-6">
                                                 <div className="card shadow border-0 rounded-4 h-100 overflow-hidden">
                                                     <div className="card-header bg-white p-4 border-0">
-                                                        <h4 className="fw-bold mb-0">Active Team Assignments</h4>
+                                                        <h4 className="fw-bold mb-0 text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Active Team Assignments</h4>
                                                     </div>
                                                     <div className="card-body p-0">
                                                         {loading.data ? renderLoading() :
@@ -549,9 +520,6 @@ const ManagerDashboard = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="text-center mt-4">
-                                            <button className="btn btn-outline-secondary btn-sm rounded-pill px-4" onClick={() => setActiveSection(null)}>Close Projects View</button>
-                                        </div>
                                     </div>
                                 )}
 
@@ -559,7 +527,7 @@ const ManagerDashboard = () => {
                                     <div className="card shadow border-0 rounded-4 overflow-hidden mb-5">
                                         <div className="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
                                             <h3 className="fw-bold mb-0">Pending Skill Verifications</h3>
-                                            <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={() => setActiveSection(null)}>Close</button>
+                                            <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={() => setActiveSection(null)} title="Close"><i className="bi bi-x-lg"></i></button>
                                         </div>
                                         <div className="card-body p-0">
                                             {loading.skills ? renderLoading() :
@@ -684,46 +652,6 @@ const ManagerDashboard = () => {
             )}
 
             <style>{`
-                .nav-link {
-                    transition: all 0.2s ease;
-                    border-radius: 8px !important;
-                    font-weight: 500;
-                    border: none;
-                    background: none;
-                    height: 48px;
-                }
-                .sidebar.transition-width {
-                    transition: width 0.3s ease, flex-basis 0.3s ease;
-                }
-                .sidebar-collapsed {
-                    width: 70px !important;
-                }
-                .nav-link.active {
-                    background-color: #CF4B00 !important;
-                    color: white !important;
-                }
-                .nav-link:hover:not(.active) {
-                    background-color: rgba(207, 75, 0, 0.1);
-                    border: 1px solid #CF4B00;
-                    color: #CF4B00 !important;
-                }
-                .text-accent {
-                    color: #CF4B00 !important;
-                }
-                .btn-accent {
-                    background-color: #CF4B00;
-                    color: white;
-                    border: 1px solid #CF4B00;
-                }
-                .btn-outline-accent {
-                    color: #CF4B00;
-                    border: 1px solid #CF4B00;
-                    background: transparent;
-                }
-                .btn-outline-accent:hover {
-                    background-color: #CF4B00;
-                    color: white;
-                }
                 .cursor-pointer { cursor: pointer; }
                 .transition-all { transition: all 0.3s ease; }
                 .ring-2 { box-shadow: 0 0 0 3px rgba(207, 75, 0, 0.2); }

@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import { allocationsApi } from '../api/allocations';
 import ProfileSection from '../components/ProfileSection';
+import Sidebar from '../components/Sidebar';
 
 const EmployeeDashboard = () => {
     const { user } = useAuth();
@@ -38,8 +39,14 @@ const EmployeeDashboard = () => {
     const [errorAlloc, setErrorAlloc] = useState(null);
     const [errorUtil, setErrorUtil] = useState(null);
 
-    // Sidebar State
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    // Employee menu items for sidebar
+    const employeeMenuItems = [
+        { id: 'overview', label: 'Dashboard', icon: 'bi-speedometer2' },
+        { id: 'skills', label: 'My Skills', icon: 'bi-star' },
+        { id: 'allocation', label: 'Allocation', icon: 'bi-diagram-3' },
+        { id: 'utilization', label: 'Utilization', icon: 'bi-graph-up' },
+        { id: 'profile', label: 'My Profile', icon: 'bi-person-circle' }
+    ];
 
     useEffect(() => {
         fetchSkills();
@@ -727,82 +734,21 @@ const EmployeeDashboard = () => {
         <div className="container-fluid p-0 overflow-hidden" style={{ height: 'calc(100vh - 65px)', width: '100%' }}>
             <div className="row g-0 h-100">
                 {/* SIDEBAR */}
-                <div className={`col-auto sidebar transition-width ${isSidebarCollapsed ? 'sidebar-collapsed' : 'col-md-3 col-xl-2'}`} style={{ backgroundColor: '#fff', borderRight: '1px solid #dee2e6', overflowY: 'auto' }}>
-                    <div className="d-flex flex-column px-2 px-md-3 pt-4 h-100">
-                        <div className="sidebar-header d-flex align-items-center justify-content-between mb-4 px-2">
-                            {!isSidebarCollapsed && <h4 className="sidebar-title m-0 fw-bold text-accent">Menu</h4>}
-                            <button
-                                className={`btn btn-sm ${isSidebarCollapsed ? 'btn-accent w-100' : 'btn-outline-accent border-0 ms-auto'} transition-all`}
-                                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                                title={isSidebarCollapsed ? "Expand" : "Collapse"}
-                                style={{ width: isSidebarCollapsed ? 'auto' : '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                            >
-                                <i className={`bi ${isSidebarCollapsed ? 'bi-chevron-double-right' : 'bi-chevron-double-left'} fs-6`}></i>
-                            </button>
-                        </div>
-                        <ul className="nav flex-column w-100 gap-1" id="menu">
-                            <li className="nav-item w-100 mb-0">
-                                <button
-                                    onClick={() => setActiveSection('overview')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'overview' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
-                                    title={isSidebarCollapsed ? "Dashboard" : ""}
-                                >
-                                    <i className="bi bi-speedometer2 icon-std fs-5"></i>
-                                    {!isSidebarCollapsed && <span className="ms-2">Dashboard</span>}
-                                </button>
-                            </li>
-                            <li className="nav-item w-100 mb-0">
-                                <button
-                                    onClick={() => setActiveSection('skills')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'skills' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
-                                    title={isSidebarCollapsed ? "My Skills" : ""}
-                                >
-                                    <i className="bi bi-star icon-std fs-5"></i>
-                                    {!isSidebarCollapsed && <span className="ms-2">My Skills</span>}
-                                </button>
-                            </li>
-                            <li className="nav-item w-100 mb-0">
-                                <button
-                                    onClick={() => setActiveSection('allocation')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'allocation' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
-                                    title={isSidebarCollapsed ? "Allocation" : ""}
-                                >
-                                    <i className="bi bi-diagram-3 icon-std fs-5"></i>
-                                    {!isSidebarCollapsed && <span className="ms-2">Allocation</span>}
-                                </button>
-                            </li>
-                            <li className="nav-item w-100 mb-0">
-                                <button
-                                    onClick={() => setActiveSection('utilization')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'utilization' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
-                                    title={isSidebarCollapsed ? "Utilization" : ""}
-                                >
-                                    <i className="bi bi-graph-up icon-std fs-5"></i>
-                                    {!isSidebarCollapsed && <span className="ms-2">Utilization</span>}
-                                </button>
-                            </li>
-                            <li className="nav-item w-100 mb-0">
-                                <button
-                                    onClick={() => setActiveSection('profile')}
-                                    className={`nav-link sidebar-link w-100 text-start d-flex align-items-center ${activeSection === 'profile' ? 'active' : ''} ${isSidebarCollapsed ? 'justify-content-center px-0' : 'px-2'}`}
-                                    title={isSidebarCollapsed ? "My Profile" : ""}
-                                >
-                                    <i className="bi bi-person-circle icon-std fs-5"></i>
-                                    {!isSidebarCollapsed && <span className="ms-2">My Profile</span>}
-                                </button>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+                <Sidebar
+                    title="Menu"
+                    menuItems={employeeMenuItems}
+                    activeSection={activeSection}
+                    onSectionChange={setActiveSection}
+                />
 
                 {/* MAIN CONTENT AREA */}
-                <div className="col h-100 main-content-area" style={{ backgroundColor: 'var(--color-bg)', overflowY: 'auto', scrollbarGutter: 'stable' }}>
-                    <div className="max-width-xl mx-auto py-3 py-md-4 px-3 px-md-4">
+                <div className="col h-100 p-4 p-md-5" style={{ backgroundColor: 'var(--color-bg)', overflowY: 'auto', scrollbarGutter: 'stable' }}>
+                    <div className="max-width-xl mx-auto">
                         <header className="page-header mb-4">
                             {activeSection === 'overview' && (
                                 <h4 className="text-muted mb-1">Welcome back, {user?.sub?.split('@')[0]}</h4>
                             )}
-                            <h1 className="page-title">
+                            <h1 className="page-title fw-bold text-accent">
                                 {activeSection === 'overview' && 'Dashboard Overview'}
                                 {activeSection === 'skills' && 'Skill Management'}
                                 {activeSection === 'allocation' && 'My Projects'}
