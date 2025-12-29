@@ -64,11 +64,12 @@ const LoginPage = () => {
                                     </div>
                                     <div className="mb-5">
                                         <label htmlFor="password" className="form-label">Password</label>
-                                        <div className="input-group">
+                                        <div className="position-relative">
                                             <input
                                                 id="password"
                                                 type={showPassword ? "text" : "password"}
                                                 className="form-control form-control-lg"
+                                                style={{ paddingRight: '45px' }}
                                                 placeholder="******"
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
@@ -77,11 +78,12 @@ const LoginPage = () => {
                                             />
                                             <button
                                                 type="button"
-                                                className="btn btn-outline-secondary"
+                                                className="btn position-absolute end-0 top-50 translate-middle-y border-0"
+                                                style={{ zIndex: 10 }}
                                                 onClick={() => setShowPassword(!showPassword)}
                                                 aria-label={showPassword ? "Hide password" : "Show password"}
                                             >
-                                                <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                                                <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'} text-muted`}></i>
                                             </button>
                                         </div>
                                     </div>

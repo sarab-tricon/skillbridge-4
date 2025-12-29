@@ -443,11 +443,12 @@ const HRDashboard = () => {
 
                     <div className="mb-2">
                         <label className="form-label fw-bold small">Initial Password</label>
-                        <div className="input-group input-group-sm">
+                        <div className="position-relative">
                             <input
                                 type={showPassword ? "text" : "password"}
                                 name="password"
                                 className="form-control form-control-sm"
+                                style={{ paddingRight: '30px' }}
                                 placeholder="••••••••"
                                 required
                                 value={formData.password}
@@ -455,11 +456,12 @@ const HRDashboard = () => {
                             />
                             <button
                                 type="button"
-                                className="btn btn-outline-secondary"
+                                className="btn position-absolute end-0 top-50 translate-middle-y border-0 bg-transparent py-0 px-2"
+                                style={{ zIndex: 10 }}
                                 onClick={() => setShowPassword(!showPassword)}
                                 aria-label={showPassword ? "Hide password" : "Show password"}
                             >
-                                <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                                <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'} text-muted small`}></i>
                             </button>
                         </div>
                     </div>
@@ -565,7 +567,7 @@ const HRDashboard = () => {
                         </select>
                         <button
                             type="submit"
-                            className="btn btn-primary fw-bold"
+                            className="btn btn-accent btn-sm fw-bold static-btn"
                             disabled={talentLoading || searchSkills.length === 0}
                         >
                             <i className="bi bi-search me-2"></i>Search
@@ -677,6 +679,12 @@ const HRDashboard = () => {
                     </main>
                 </div>
             </div>
+            <style>{`
+                .static-btn:hover, .static-btn:active, .static-btn:focus {
+                    transform: none !important;
+                    transition: none !important;
+                }
+            `}</style>
         </>
     );
 };
