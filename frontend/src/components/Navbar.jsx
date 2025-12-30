@@ -84,7 +84,8 @@ const Navbar = () => {
                     onClick={handleBrandClick}
                 >
                     <img
-                        src="/skillbridgeLOGO.jpeg"
+                        src="/Bridge.png"
+                        // src="/new_logo.png"
                         alt="Logo"
                         height="32"
                         className="me-2"
