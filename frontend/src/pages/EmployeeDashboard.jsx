@@ -710,9 +710,6 @@ const EmployeeDashboard = () => {
                     <main role="main" id="main-content" className="col h-100 p-4 p-md-5" style={{ backgroundColor: 'var(--color-bg)', overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                         <div className="max-width-xl mx-auto">
                             <div className="page-header mb-4">
-                                {activeSection === 'overview' && (
-                                    <h4 className="text-muted mb-1">Welcome back, {user?.sub?.split('@')[0]}</h4>
-                                )}
                                 <h1 className="page-title fw-bold text-accent">
                                     {activeSection === 'overview' && 'Dashboard Overview'}
                                     {activeSection === 'skills' && 'Skill Management'}
