@@ -552,9 +552,6 @@ const ManagerDashboard = () => {
 
                                 {activeSection === 'alloc_requests' && (
                                     <div className="card shadow border-0 rounded-4 overflow-hidden mb-5">
-                                        <div className="card-header bg-white p-4 border-0">
-                                            <h2 className="fw-bold mb-0 h3 text-dark">Pending Project Requests</h2>
-                                        </div>
                                         <div className="card-body p-0">
                                             {loading.data ? renderLoading() :
                                                 error.data ? renderError(error.data) :
@@ -705,9 +702,6 @@ const ManagerDashboard = () => {
 
                                 {activeSection === 'pending_skills' && (
                                     <div className="card shadow border-0 rounded-4 overflow-hidden mb-5">
-                                        <div className="card-header bg-white p-4 border-0">
-                                            <h2 className="fw-bold mb-0 h3 text-dark">Pending Skill Verifications</h2>
-                                        </div>
                                         <div className="card-body p-0">
                                             {loading.skills ? renderLoading() :
                                                 error.skills ? renderError(error.skills) :

@@ -902,12 +902,14 @@ const HRDashboard = () => {
                         {actionError && <div className="alert alert-danger small py-2 mt-3">{actionError}</div>}
                         {actionSuccess && <div className="alert alert-success small py-2 mt-3">{actionSuccess}</div>}
                     </div>
-                    <div className="modal-footer border-0 p-4 pt-0 justify-content-center">
-                        <button type="button" className="btn btn-sm btn-light px-4" onClick={() => setIsDeleting(false)}>Cancel</button>
-                        <button type="button" className="btn btn-sm btn-danger px-4" onClick={confirmDelete} disabled={actionLoading}>
-                            {actionLoading ? 'Deleting...' : 'Confirm Deletion'}
-                        </button>
-                    </div>
+                    {!actionSuccess && (
+                        <div className="modal-footer border-0 p-4 pt-0 justify-content-center">
+                            <button type="button" className="btn btn-sm btn-light px-4" onClick={() => setIsDeleting(false)}>Cancel</button>
+                            <button type="button" className="btn btn-sm btn-danger px-4" onClick={confirmDelete} disabled={actionLoading}>
+                                {actionLoading ? 'Deleting...' : 'Confirm Deletion'}
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
