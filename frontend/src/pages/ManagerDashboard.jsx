@@ -192,6 +192,12 @@ const ManagerDashboard = () => {
     // Skill handlers for manager's own skills
     const handleAddSkill = async (e) => {
         e.preventDefault();
+
+        if (!newSkill.skillName) {
+            setErrors({ skillName: 'Please select a skill' });
+            return;
+        }
+
         const isDuplicate = mySkills.some(s => s.skillName.toLowerCase() === newSkill.skillName.toLowerCase());
         if (isDuplicate) {
             setSkillError(`You already have "${newSkill.skillName}" in your list.`);
@@ -215,6 +221,12 @@ const ManagerDashboard = () => {
 
     const handleUpdateSkill = async (e) => {
         e.preventDefault();
+
+        if (!editingSkill.skillName) {
+            setErrors({ skillName: 'Please select a skill' });
+            return;
+        }
+
         setAddingSkill(true);
         setSkillError(null);
         setSkillSuccess(null);
@@ -759,19 +771,21 @@ const ManagerDashboard = () => {
                                                     <div className="mb-3">
                                                         <label className="form-label small text-muted text-uppercase fw-bold">Skill Name</label>
                                                         <select
-                                                            className="form-select border-2 shadow-none"
+                                                            className={`form-select border-2 shadow-none ${errors.skillName ? 'is-invalid' : ''}`}
                                                             value={editingSkill ? editingSkill.skillName : newSkill.skillName}
-                                                            onChange={(e) => editingSkill
-                                                                ? setEditingSkill({ ...editingSkill, skillName: e.target.value })
-                                                                : setNewSkill({ ...newSkill, skillName: e.target.value })
-                                                            }
-                                                            required
+                                                            onChange={(e) => {
+                                                                if (editingSkill) setEditingSkill({ ...editingSkill, skillName: e.target.value });
+                                                                else setNewSkill({ ...newSkill, skillName: e.target.value });
+
+                                                                if (errors.skillName) setErrors({ ...errors, skillName: null });
+                                                            }}
                                                         >
                                                             <option value="">Select a skill...</option>
                                                             {catalogSkills.map(s => (
                                                                 <option key={s.id} value={s.name}>{s.name}</option>
                                                             ))}
                                                         </select>
+                                                        {errors.skillName && <div className="invalid-feedback">{errors.skillName}</div>}
                                                     </div>
                                                     <div className="mb-4">
                                                         <label className="form-label small text-muted text-uppercase fw-bold">Proficiency Level</label>
