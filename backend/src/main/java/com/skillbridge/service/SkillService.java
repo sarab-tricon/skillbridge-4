@@ -36,15 +36,21 @@ public class SkillService {
         User employee = getCurrentUser();
 
         // Check for uniqueness
-        if (employeeSkillRepository.existsByEmployeeIdAndSkillNameIgnoreCase(employee.getId(), request.getSkillName())) {
+        if (employeeSkillRepository.existsByEmployeeIdAndSkillNameIgnoreCase(employee.getId(),
+                request.getSkillName())) {
             throw new RuntimeException("You have already added the skill: " + request.getSkillName());
         }
+
+        // Managers get auto-approved skills, employees need manager approval
+        SkillStatus initialStatus = (employee.getRole() == com.skillbridge.enums.Role.MANAGER)
+                ? SkillStatus.APPROVED
+                : SkillStatus.PENDING;
 
         EmployeeSkill skill = EmployeeSkill.builder()
                 .employeeId(employee.getId())
                 .skillName(request.getSkillName())
                 .proficiencyLevel(request.getProficiencyLevel())
-                .status(SkillStatus.PENDING)
+                .status(initialStatus)
                 .build();
 
         EmployeeSkill savedSkill = employeeSkillRepository.save(skill);
@@ -99,14 +105,18 @@ public class SkillService {
 
         // Check for uniqueness if name changed
         if (!skill.getSkillName().equalsIgnoreCase(request.getSkillName())) {
-            if (employeeSkillRepository.existsByEmployeeIdAndSkillNameIgnoreCase(employee.getId(), request.getSkillName())) {
+            if (employeeSkillRepository.existsByEmployeeIdAndSkillNameIgnoreCase(employee.getId(),
+                    request.getSkillName())) {
                 throw new RuntimeException("You already have a skill named: " + request.getSkillName());
             }
         }
 
         skill.setSkillName(request.getSkillName());
         skill.setProficiencyLevel(request.getProficiencyLevel());
-        skill.setStatus(SkillStatus.PENDING); // Reset status to PENDING on edit
+        // Managers get auto-approved, employees need manager approval
+        skill.setStatus(employee.getRole() == com.skillbridge.enums.Role.MANAGER
+                ? SkillStatus.APPROVED
+                : SkillStatus.PENDING);
 
         EmployeeSkill updated = employeeSkillRepository.save(skill);
         return mapToResponse(updated);
@@ -132,7 +142,7 @@ public class SkillService {
     private SkillResponse mapToResponse(EmployeeSkill skill) {
         User employee = userRepository.findById(skill.getEmployeeId())
                 .orElse(null);
-        
+
         return SkillResponse.builder()
                 .id(skill.getId())
                 .employeeId(skill.getEmployeeId())

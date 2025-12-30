@@ -40,27 +40,31 @@ const ProjectManagement = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [projectsRes, employeesRes] = await Promise.all([
+            const [projectsRes, employeesRes, managersRes] = await Promise.all([
                 api.get('/projects'),
-                api.get('/users/employees')
+                api.get('/users/employees'),
+                api.get('/users/managers')
             ]);
             setProjects(projectsRes.data);
 
-            // Fetch utilization for each employee to get assignments
-            const employeesWithUtil = await Promise.all(
-                employeesRes.data.map(async (emp) => {
+            // Combine employees and managers
+            const allUsers = [...employeesRes.data, ...managersRes.data];
+
+            // Fetch utilization for each user to get assignments
+            const usersWithUtil = await Promise.all(
+                allUsers.map(async (user) => {
                     try {
-                        const utilRes = await api.get(`/assignments/employee/${emp.id}/utilization`);
+                        const utilRes = await api.get(`/assignments/employee/${user.id}/utilization`);
                         return {
-                            ...emp,
+                            ...user,
                             assignments: utilRes.data.assignments || []
                         };
                     } catch {
-                        return { ...emp, assignments: [] };
+                        return { ...user, assignments: [] };
                     }
                 })
             );
-            setAllEmployees(employeesWithUtil);
+            setAllEmployees(usersWithUtil);
 
         } catch (err) {
             console.error('Failed to fetch data:', err);
@@ -202,12 +206,20 @@ const ProjectManagement = () => {
                     {/* Add Upcoming Project Button */}
                     {activeTab === 'UPCOMING' && (
                         <button
-                            className="btn btn-primary btn-lg text-white fw-bold"
+                            className="btn btn-primary text-white fw-bold rounded-circle"
                             onClick={() => setShowAddModal(true)}
-                            style={{ boxShadow: '0 4px 12px rgba(220, 53, 69, 0.3)' }}
+                            style={{
+                                boxShadow: '0 4px 12px rgba(220, 53, 69, 0.3)',
+                                width: '40px',
+                                height: '40px',
+                                padding: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                            title="Add Upcoming Project"
                         >
-                            <i className="bi bi-plus-circle-fill me-2"></i>
-                            Add Upcoming Project
+                            <i className="bi bi-plus fs-4"></i>
                         </button>
                     )}
                 </div>
@@ -523,7 +535,7 @@ const ProjectDetailsModal = ({ project, employees, onClose, onEndProject, tabCol
 // AddProjectModal Component
 const AddProjectModal = ({ formData, setFormData, catalogSkills, onSubmit, onClose, loading, handleInputChange }) => {
     return (
-        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2100 }}>
             <div className="modal-dialog modal-lg modal-dialog-centered">
                 <div className="modal-content" style={{ borderRadius: '15px' }}>
                     <div className="modal-header" style={{ borderBottom: '3px solid var(--color-primary)' }}>

@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import { allocationsApi } from '../api/allocations';
 import Sidebar from '../components/Sidebar';
+import ProfileSection from '../components/ProfileSection';
 
 
 const ManagerDashboard = () => {
@@ -20,23 +21,45 @@ const ManagerDashboard = () => {
     }, [activeSection]);
     const [loading, setLoading] = useState({
         data: true,
-        skills: true
+        skills: true,
+        mySkills: false,
+        myAlloc: false,
+        myUtil: false
     });
     const [error, setError] = useState({
         data: null,
-        skills: null
+        skills: null,
+        mySkills: null,
+        myAlloc: null,
+        myUtil: null
     });
     const [pendingAllocations, setPendingAllocations] = useState([]);
     const [allActiveProjects, setAllActiveProjects] = useState([]);
     const [actionLoading, setActionLoading] = useState(false);
 
-    // Manager menu items for sidebar
+    // Personal section states (My Skills, Allocation, Utilization, Profile)
+    const [mySkills, setMySkills] = useState([]);
+    const [myAllocation, setMyAllocation] = useState([]);
+    const [myUtilization, setMyUtilization] = useState(null);
+    const [profile, setProfile] = useState(null);
+    const [catalogSkills, setCatalogSkills] = useState([]);
+    const [newSkill, setNewSkill] = useState({ skillName: '', proficiencyLevel: 'BEGINNER' });
+    const [editingSkill, setEditingSkill] = useState(null);
+    const [addingSkill, setAddingSkill] = useState(false);
+    const [skillSuccess, setSkillSuccess] = useState(null);
+    const [skillError, setSkillError] = useState(null);
+    const [selectedSkillLevel, setSelectedSkillLevel] = useState('BEGINNER');
+
+    // Manager menu items for sidebar (Personal + Team Management)
     const managerMenuItems = [
         { id: null, label: 'Dashboard', icon: 'bi-speedometer2' },
+        { id: 'my_skills', label: 'My Skills', icon: 'bi-star-fill' },
+        { id: 'my_utilization', label: 'My Utilization', icon: 'bi-graph-up' },
         { id: 'team', label: 'My Team', icon: 'bi-people' },
         { id: 'allocations', label: 'Active Projects', icon: 'bi-journal-code' },
         { id: 'alloc_requests', label: 'Allocations', icon: 'bi-patch-check' },
-        { id: 'pending_skills', label: 'Verifications', icon: 'bi-star' }
+        { id: 'pending_skills', label: 'Verifications', icon: 'bi-star' },
+        { id: 'my_profile', label: 'My Profile', icon: 'bi-person-circle' }
     ];
 
     // Modal State
@@ -98,6 +121,128 @@ const ManagerDashboard = () => {
         }
     };
 
+    // Personal data fetch functions
+    const fetchMySkills = async () => {
+        setLoading(prev => ({ ...prev, mySkills: true }));
+        try {
+            const response = await api.get('/skills/my');
+            setMySkills(response.data);
+            setError(prev => ({ ...prev, mySkills: null }));
+        } catch (err) {
+            console.error('Error fetching my skills:', err);
+            setError(prev => ({ ...prev, mySkills: 'Failed to load skills.' }));
+        } finally {
+            setLoading(prev => ({ ...prev, mySkills: false }));
+        }
+    };
+
+    const fetchMyAllocation = async () => {
+        setLoading(prev => ({ ...prev, myAlloc: true }));
+        try {
+            const response = await api.get('/assignments/my');
+            setMyAllocation(response.data);
+            setError(prev => ({ ...prev, myAlloc: null }));
+        } catch (err) {
+            console.error('Error fetching my allocation:', err);
+            if (err.response?.status === 404) {
+                setMyAllocation([]);
+            } else {
+                setError(prev => ({ ...prev, myAlloc: 'Failed to load allocation.' }));
+            }
+        } finally {
+            setLoading(prev => ({ ...prev, myAlloc: false }));
+        }
+    };
+
+    const fetchMyUtilization = async () => {
+        setLoading(prev => ({ ...prev, myUtil: true }));
+        try {
+            const response = await api.get('/utilization/me');
+            setMyUtilization(response.data);
+            setError(prev => ({ ...prev, myUtil: null }));
+        } catch (err) {
+            console.error('Error fetching my utilization:', err);
+            setError(prev => ({ ...prev, myUtil: 'Failed to load utilization.' }));
+        } finally {
+            setLoading(prev => ({ ...prev, myUtil: false }));
+        }
+    };
+
+    const fetchProfile = async () => {
+        try {
+            const response = await api.get('/users/me');
+            setProfile(response.data);
+        } catch (err) {
+            console.error('Failed to load profile:', err);
+        }
+    };
+
+    const fetchCatalog = async () => {
+        try {
+            const response = await api.get('/catalog/skills');
+            setCatalogSkills(response.data);
+        } catch (err) {
+            console.error('Failed to load catalog:', err);
+        }
+    };
+
+    // Skill handlers for manager's own skills
+    const handleAddSkill = async (e) => {
+        e.preventDefault();
+        const isDuplicate = mySkills.some(s => s.skillName.toLowerCase() === newSkill.skillName.toLowerCase());
+        if (isDuplicate) {
+            setSkillError(`You already have "${newSkill.skillName}" in your list.`);
+            return;
+        }
+        setAddingSkill(true);
+        setSkillError(null);
+        setSkillSuccess(null);
+        try {
+            await api.post('/skills', newSkill);
+            setNewSkill({ skillName: '', proficiencyLevel: 'BEGINNER' });
+            setSkillSuccess('Skill added (auto-approved)!');
+            fetchMySkills();
+            setTimeout(() => setSkillSuccess(null), 3000);
+        } catch (err) {
+            setSkillError(err.response?.data?.message || 'Failed to add skill.');
+        } finally {
+            setAddingSkill(false);
+        }
+    };
+
+    const handleUpdateSkill = async (e) => {
+        e.preventDefault();
+        setAddingSkill(true);
+        setSkillError(null);
+        setSkillSuccess(null);
+        try {
+            await api.put(`/skills/${editingSkill.id}`, {
+                skillName: editingSkill.skillName,
+                proficiencyLevel: editingSkill.proficiencyLevel
+            });
+            setSkillSuccess('Skill updated!');
+            setEditingSkill(null);
+            fetchMySkills();
+            setTimeout(() => setSkillSuccess(null), 3000);
+        } catch (err) {
+            setSkillError(err.response?.data?.message || 'Failed to update skill.');
+        } finally {
+            setAddingSkill(false);
+        }
+    };
+
+    const handleDeleteSkill = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this skill?')) return;
+        try {
+            await api.delete(`/skills/${id}`);
+            setSkillSuccess('Skill deleted.');
+            fetchMySkills();
+            setTimeout(() => setSkillSuccess(null), 3000);
+        } catch (err) {
+            setSkillError(err.response?.data?.message || 'Failed to delete skill.');
+        }
+    };
+
     // New functions for allocation request actions
     const handleForward = async () => {
         setActionLoading(true);
@@ -153,6 +298,12 @@ const ManagerDashboard = () => {
     useEffect(() => {
         fetchData();
         fetchPendingSkills();
+        // Personal data for manager
+        fetchMySkills();
+        fetchMyAllocation();
+        fetchMyUtilization();
+        fetchProfile();
+        fetchCatalog();
     }, []);
 
     const handleSkillAction = async (skillId, status) => {
@@ -269,11 +420,17 @@ const ManagerDashboard = () => {
                             {activeSection === 'allocations' && 'Active Projects'}
                             {activeSection === 'alloc_requests' && 'Allocation Requests'}
                             {activeSection === 'pending_skills' && 'Skill Verifications'}
+                            {activeSection === 'my_skills' && 'My Skills'}
+                            {activeSection === 'my_allocation' && 'My Allocation'}
+                            {activeSection === 'my_utilization' && 'My Utilization'}
+                            {activeSection === 'my_profile' && 'My Profile'}
                         </h1>
                         <p className="lead text-muted">
                             {activeSection === null
                                 ? `Welcome back, ${user?.sub?.split('@')[0] || 'Manager'}`
-                                : 'Manage your organization\'s workforce and projects from one place.'}
+                                : activeSection?.startsWith('my_')
+                                    ? 'Manage your personal skills, allocations and profile.'
+                                    : 'Manage your organization\'s workforce and projects from one place.'}
                         </p>
                     </header>
 
@@ -592,6 +749,261 @@ const ManagerDashboard = () => {
                                         </div>
                                     </div>
                                 )}
+
+                                {/* =============== PERSONAL SECTIONS =============== */}
+
+                                {/* MY SKILLS */}
+                                {activeSection === 'my_skills' && (
+                                    <div className="row g-4">
+                                        <div className="col-lg-4">
+                                            <div className="card shadow-sm border-0 p-4 sticky-top" style={{ top: '0', backgroundColor: '#fff', borderLeft: '5px solid var(--color-accent)' }}>
+                                                <h4 className="fw-bold mb-3">{editingSkill ? 'Edit Skill' : 'Add New Skill'}</h4>
+                                                <form onSubmit={editingSkill ? handleUpdateSkill : handleAddSkill}>
+                                                    <div className="mb-3">
+                                                        <label className="form-label small text-muted text-uppercase fw-bold">Skill Name</label>
+                                                        <select
+                                                            className="form-select border-2 shadow-none"
+                                                            value={editingSkill ? editingSkill.skillName : newSkill.skillName}
+                                                            onChange={(e) => editingSkill
+                                                                ? setEditingSkill({ ...editingSkill, skillName: e.target.value })
+                                                                : setNewSkill({ ...newSkill, skillName: e.target.value })
+                                                            }
+                                                            required
+                                                        >
+                                                            <option value="">Select a skill...</option>
+                                                            {catalogSkills.map(s => (
+                                                                <option key={s.id} value={s.name}>{s.name}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                    <div className="mb-4">
+                                                        <label className="form-label small text-muted text-uppercase fw-bold">Proficiency Level</label>
+                                                        <select
+                                                            className="form-select border-2 shadow-none"
+                                                            value={editingSkill ? editingSkill.proficiencyLevel : newSkill.proficiencyLevel}
+                                                            onChange={(e) => editingSkill
+                                                                ? setEditingSkill({ ...editingSkill, proficiencyLevel: e.target.value })
+                                                                : setNewSkill({ ...newSkill, proficiencyLevel: e.target.value })
+                                                            }
+                                                        >
+                                                            <option value="BEGINNER">Beginner</option>
+                                                            <option value="INTERMEDIATE">Intermediate</option>
+                                                            <option value="ADVANCED">Advanced</option>
+                                                        </select>
+                                                    </div>
+                                                    {skillError && <div className="alert alert-danger p-2 small mb-3">{skillError}</div>}
+                                                    {skillSuccess && <div className="alert alert-success p-2 small mb-3">{skillSuccess}</div>}
+                                                    <div className="d-flex gap-2">
+                                                        <button type="submit" className={`btn btn-accent w-100 fw-bold py-2 ${editingSkill ? 'btn-info text-white' : ''}`} disabled={addingSkill}>
+                                                            {addingSkill ? 'Processing...' : editingSkill ? 'Update Skill' : 'Add Skill'}
+                                                        </button>
+                                                        {editingSkill && (
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-outline-secondary w-50 fw-bold"
+                                                                onClick={() => { setEditingSkill(null); setSkillError(null); }}
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </form>
+                                                <div className="mt-3 text-center">
+                                                    <small className="text-success"><i className="bi bi-check-circle me-1"></i>Manager skills are auto-approved</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="col-lg-8">
+                                            {/* Tab Navigation */}
+                                            <div className="nav nav-pills mb-4 bg-white p-2 rounded-4 shadow-sm d-flex justify-content-between gap-2">
+                                                {['BEGINNER', 'INTERMEDIATE', 'ADVANCED'].map(level => (
+                                                    <button
+                                                        key={level}
+                                                        className={`nav-link flex-grow-1 fw-bold rounded-pill py-2 ${selectedSkillLevel === level ? 'active bg-accent text-white' : 'text-muted'}`}
+                                                        onClick={() => setSelectedSkillLevel(level)}
+                                                    >
+                                                        {level}
+                                                        <span className={`ms-2 badge rounded-pill ${selectedSkillLevel === level ? 'bg-white text-dark' : 'bg-light text-muted'}`}>
+                                                            {mySkills.filter(s => s.proficiencyLevel === level).length}
+                                                        </span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            {loading.mySkills ? renderLoading() : error.mySkills ? renderError(error.mySkills) : (
+                                                <div className="card shadow-sm border-0 overflow-hidden rounded-4">
+                                                    <div className="card-header py-3 px-4 border-0 d-flex justify-content-between align-items-center bg-white" style={{ borderBottom: '2px solid var(--color-accent)' }}>
+                                                        <h5 className="mb-0 fw-bold">{selectedSkillLevel} Skills</h5>
+                                                    </div>
+                                                    <div className="card-body p-0">
+                                                        <div className="table-responsive">
+                                                            <table className="table table-hover align-middle mb-0">
+                                                                <thead className="table-light">
+                                                                    <tr>
+                                                                        <th className="px-4 py-3">Skill Name</th>
+                                                                        <th className="px-4 py-3 text-center">Status</th>
+                                                                        <th className="px-4 py-3 text-end">Actions</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {mySkills.filter(s => s.proficiencyLevel === selectedSkillLevel).length > 0 ? (
+                                                                        mySkills.filter(s => s.proficiencyLevel === selectedSkillLevel).map((skill) => (
+                                                                            <tr key={skill.id}>
+                                                                                <td className="px-4 py-3 fw-bold text-dark">{skill.skillName}</td>
+                                                                                <td className="px-4 py-3 text-center">
+                                                                                    <span className={`badge px-3 py-2 rounded-pill ${skill.status === 'APPROVED' ? 'bg-success' : skill.status === 'PENDING' ? 'bg-secondary' : 'bg-danger'}`}>
+                                                                                        {skill.status}
+                                                                                    </span>
+                                                                                </td>
+                                                                                <td className="px-4 py-3 text-end">
+                                                                                    <button
+                                                                                        className="btn btn-sm btn-outline-accent rounded-pill px-4"
+                                                                                        onClick={() => { setEditingSkill(skill); setSkillError(null); }}
+                                                                                    >
+                                                                                        <i className="bi bi-pencil-square me-1"></i> Edit
+                                                                                    </button>
+                                                                                </td>
+                                                                            </tr>
+                                                                        ))
+                                                                    ) : (
+                                                                        <tr>
+                                                                            <td colSpan="3" className="text-center py-5 text-muted">
+                                                                                No {selectedSkillLevel.toLowerCase()} skills found.
+                                                                            </td>
+                                                                        </tr>
+                                                                    )}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* MY ALLOCATION */}
+                                {activeSection === 'my_allocation' && (
+                                    <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
+                                        <div className="card-header bg-white p-4 border-0">
+                                            <h2 className="fw-bold mb-0 h4">My Project Assignments</h2>
+                                        </div>
+                                        <div className="card-body p-4">
+                                            {loading.myAlloc ? renderLoading() : error.myAlloc ? renderError(error.myAlloc) :
+                                                (!myAllocation || (Array.isArray(myAllocation) && myAllocation.length === 0)) ? (
+                                                    <div className="text-center py-5">
+                                                        <i className="bi bi-briefcase display-1 text-muted opacity-25"></i>
+                                                        <h3 className="text-muted mt-3">Currently on Bench</h3>
+                                                        <p className="text-muted">You are not currently allocated to any project.</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                                                        {(Array.isArray(myAllocation) ? myAllocation : [myAllocation]).map((alloc, idx) => (
+                                                            <div key={idx} className="col">
+                                                                <div className="card h-100 shadow-sm border-0" style={{ borderRadius: '15px', borderTop: '4px solid var(--color-accent)' }}>
+                                                                    <div className="card-body p-4">
+                                                                        <h5 className="fw-bold text-accent mb-2">{alloc.projectName}</h5>
+                                                                        <div className="mb-3">
+                                                                            <span className={`badge rounded-pill px-3 py-2 ${alloc.assignmentStatus === 'ACTIVE' ? 'bg-success' : 'bg-warning text-dark'}`}>
+                                                                                {alloc.assignmentStatus}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="small text-muted">
+                                                                            <p className="mb-1"><strong>Billing:</strong> {alloc.billingType || 'N/A'}</p>
+                                                                            <p className="mb-1"><strong>Start:</strong> {alloc.startDate ? new Date(alloc.startDate).toLocaleDateString() : 'N/A'}</p>
+                                                                            <p className="mb-0"><strong>End:</strong> {alloc.endDate ? new Date(alloc.endDate).toLocaleDateString() : 'Ongoing'}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )
+                                            }
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* MY UTILIZATION */}
+                                {activeSection === 'my_utilization' && (
+                                    <div className="card shadow-sm border-0 p-4 rounded-4">
+                                        {loading.myUtil ? renderLoading() : error.myUtil ? renderError(error.myUtil) : (
+                                            <div className="row g-4">
+                                                <div className="col-lg-4 text-center border-end">
+                                                    <div className="py-3">
+                                                        <div className="utilization-disk mx-auto mb-4 p-4" style={{
+                                                            width: '200px',
+                                                            height: '200px',
+                                                            borderRadius: '50%',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            backgroundColor: 'var(--color-bg)',
+                                                            border: '12px solid var(--color-accent)',
+                                                            boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                                                        }}>
+                                                            <span className="display-4 fw-bold text-accent">
+                                                                {myUtilization?.totalUtilization || 0}%
+                                                            </span>
+                                                        </div>
+                                                        <h3 className="fw-bold text-dark mt-3">{myUtilization?.allocationStatus || 'BENCH'}</h3>
+                                                        <p className="text-muted small">Your total utilization based on active project assignments.</p>
+                                                    </div>
+                                                </div>
+                                                <div className="col-lg-8">
+                                                    {myUtilization?.assignments && myUtilization.assignments.length > 0 ? (
+                                                        <div>
+                                                            <h5 className="fw-bold mb-3 text-muted text-uppercase small">Active Allocations</h5>
+                                                            <div className="table-responsive">
+                                                                <table className="table table-hover align-middle mb-0">
+                                                                    <thead className="table-light">
+                                                                        <tr>
+                                                                            <th className="py-2 ps-3">Project</th>
+                                                                            <th className="py-2">Allocation</th>
+                                                                            <th className="py-2">Start Date</th>
+                                                                            <th className="py-2 pe-3 text-end">Type</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {myUtilization.assignments.map((assign, idx) => (
+                                                                            <tr key={idx}>
+                                                                                <td className="ps-3 fw-bold text-accent">{assign.projectName}</td>
+                                                                                <td>
+                                                                                    <div className="d-flex align-items-center">
+                                                                                        <div className="progress flex-grow-1" style={{ height: '6px', maxWidth: '80px' }}>
+                                                                                            <div className="progress-bar bg-accent" style={{ width: `${assign.allocationPercent}%` }}></div>
+                                                                                        </div>
+                                                                                        <span className="ms-2 small fw-bold">{assign.allocationPercent}%</span>
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td className="small text-muted">{new Date(assign.startDate).toLocaleDateString()}</td>
+                                                                                <td className="pe-3 text-end">
+                                                                                    <span className={`badge rounded-pill px-2 py-1 small ${assign.billingType === 'BILLABLE' ? 'bg-success' : 'bg-secondary'}`}>
+                                                                                        {assign.billingType || 'N/A'}
+                                                                                    </span>
+                                                                                </td>
+                                                                            </tr>
+                                                                        ))}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-center py-5 text-muted">
+                                                            <i className="bi bi-pie-chart display-4 opacity-25"></i>
+                                                            <p className="mt-3">No active allocations at this time.</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* MY PROFILE */}
+                                {activeSection === 'my_profile' && (
+                                    <ProfileSection profile={profile} utilization={myUtilization} />
+                                )}
+
                             </div>
                         </>
                     </div>

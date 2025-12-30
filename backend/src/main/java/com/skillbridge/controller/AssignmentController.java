@@ -41,7 +41,7 @@ public class AssignmentController {
     }
 
     @GetMapping("/my")
-    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'MANAGER')")
     public ResponseEntity<java.util.List<AssignmentResponse>> getMyAssignments() {
         return ResponseEntity.ok(assignmentService.getMyAssignments());
     }

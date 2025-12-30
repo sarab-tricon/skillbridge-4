@@ -22,7 +22,7 @@ public class UtilizationController {
     private final UserService userService;
 
     @GetMapping("/me")
-    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'MANAGER')")
     public ResponseEntity<EmployeeUtilizationResponse> getMyUtilization() {
         return ResponseEntity.ok(assignmentService.getMyUtilization());
     }
@@ -43,10 +43,17 @@ public class UtilizationController {
     @GetMapping("/all")
     @PreAuthorize("hasRole('HR')")
     public ResponseEntity<List<EmployeeUtilizationResponse>> getAllUtilization() {
+        // Get both employees and managers for utilization tracking
         List<com.skillbridge.dto.UserProfileResponse> employees = userService.getAllEmployees();
+        List<com.skillbridge.dto.UserProfileResponse> managers = userService.getManagers();
 
-        List<EmployeeUtilizationResponse> utilizations = employees.stream()
-                .map(employee -> assignmentService.getEmployeeUtilization(employee.getId()))
+        // Combine employees and managers
+        java.util.List<com.skillbridge.dto.UserProfileResponse> allUsers = new java.util.ArrayList<>();
+        allUsers.addAll(employees);
+        allUsers.addAll(managers);
+
+        List<EmployeeUtilizationResponse> utilizations = allUsers.stream()
+                .map(user -> assignmentService.getEmployeeUtilization(user.getId()))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(utilizations);
