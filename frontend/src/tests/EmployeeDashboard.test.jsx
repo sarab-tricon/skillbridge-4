@@ -64,6 +64,7 @@ describe('EmployeeDashboard Business Logic', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        localStorage.clear();
         useAuth.mockReturnValue({ user: mockUser });
 
         // Default API resolutions
