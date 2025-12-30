@@ -63,6 +63,22 @@ const HRDashboard = () => {
     const [talentLoading, setTalentLoading] = useState(false);
     const [talentError, setTalentError] = useState(null);
 
+    // Edit/Delete State
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingUser, setEditingUser] = useState(null);
+    const [editFormData, setEditFormData] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        role: '',
+        managerId: ''
+    });
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deletingUser, setDeletingUser] = useState(null);
+    const [actionLoading, setActionLoading] = useState(false);
+    const [actionError, setActionError] = useState(null);
+    const [actionSuccess, setActionSuccess] = useState(null);
+
     const [peopleTab, setPeopleTab] = useState('EMPLOYEES'); // 'EMPLOYEES', 'MANAGERS', 'HRS'
 
     // -- Effects --
@@ -170,6 +186,70 @@ const HRDashboard = () => {
             setOnboardingError(errorMsg);
         } finally {
             setOnboardingLoading(false);
+        }
+    };
+
+    const handleEditClick = (user) => {
+        setEditingUser(user);
+        setEditFormData({
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: user.role,
+            managerId: user.managerId || ''
+        });
+        setIsEditing(true);
+        setActionError(null);
+        setActionSuccess(null);
+    };
+
+    const handleEditSubmit = async (e) => {
+        e.preventDefault();
+        setActionLoading(true);
+        setActionError(null);
+        setActionSuccess(null);
+
+        if (editFormData.role === 'EMPLOYEE' && !editFormData.managerId) {
+            setActionError('Please select a manager for the employee.');
+            setActionLoading(false);
+            return;
+        }
+
+        try {
+            await api.put(`/users/${editingUser.id}`, editFormData);
+            setActionSuccess('User updated successfully!');
+            fetchInitialData(); // Refresh all lists
+            setTimeout(() => setIsEditing(false), 1500);
+        } catch (err) {
+            console.error('Failed to update user:', err);
+            setActionError(err.response?.data?.message || 'Failed to update user.');
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleDeleteClick = (user) => {
+        setDeletingUser(user);
+        setIsDeleting(true);
+        setActionError(null);
+        setActionSuccess(null);
+    };
+
+    const confirmDelete = async () => {
+        setActionLoading(true);
+        setActionError(null);
+        setActionSuccess(null);
+
+        try {
+            await api.delete(`/users/${deletingUser.id}`);
+            setActionSuccess('User deleted successfully!');
+            fetchInitialData(); // Refresh all lists
+            setTimeout(() => setIsDeleting(false), 1500);
+        } catch (err) {
+            console.error('Failed to delete user:', err);
+            setActionError(err.response?.data?.message || 'Failed to delete user.');
+        } finally {
+            setActionLoading(false);
         }
     };
 
@@ -365,6 +445,7 @@ const HRDashboard = () => {
                                     <th>Name</th>
                                     <th>Email</th>
                                     {peopleTab === 'EMPLOYEES' && <th>Manager Name</th>}
+                                    <th className="text-end">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -374,11 +455,29 @@ const HRDashboard = () => {
                                             <td className="fw-bold">{user.firstName} {user.lastName}</td>
                                             <td>{user.email}</td>
                                             {peopleTab === 'EMPLOYEES' && <td><small className="text-muted">{user.managerName || 'N/A'}</small></td>}
+                                            <td className="text-end">
+                                                <div className="d-flex justify-content-end gap-2">
+                                                    <button
+                                                        className="btn btn-sm btn-outline-primary"
+                                                        onClick={() => handleEditClick(user)}
+                                                        title="Edit User"
+                                                    >
+                                                        <i className="bi bi-pencil"></i>
+                                                    </button>
+                                                    <button
+                                                        className="btn btn-sm btn-outline-danger"
+                                                        onClick={() => handleDeleteClick(user)}
+                                                        title="Delete User"
+                                                    >
+                                                        <i className="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={peopleTab === 'EMPLOYEES' ? '3' : '2'} className="text-center py-4 text-muted">No users found.</td>
+                                        <td colSpan={peopleTab === 'EMPLOYEES' ? '4' : '3'} className="text-center py-4 text-muted">No users found.</td>
                                     </tr>
                                 )}
                             </tbody>
@@ -643,6 +742,122 @@ const HRDashboard = () => {
         </div>
     );
 
+    const renderEditModal = () => (
+        <div className={`modal fade ${isEditing ? 'show d-block' : ''}`} tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <div className="modal-dialog modal-dialog-centered">
+                <div className="modal-content border-0 shadow">
+                    <div className="modal-header bg-primary text-white">
+                        <h5 className="modal-title fw-bold">Edit User Details</h5>
+                        <button type="button" className="btn-close btn-close-white" onClick={() => setIsEditing(false)} aria-label="Close"></button>
+                    </div>
+                    <form onSubmit={handleEditSubmit}>
+                        <div className="modal-body p-4">
+                            {actionError && <div className="alert alert-danger small py-2">{actionError}</div>}
+                            {actionSuccess && <div className="alert alert-success small py-2">{actionSuccess}</div>}
+
+                            <div className="row g-3">
+                                <div className="col-md-6">
+                                    <label className="form-label small fw-bold">First Name</label>
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm"
+                                        value={editFormData.firstName}
+                                        onChange={(e) => setEditFormData({ ...editFormData, firstName: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className="col-md-6">
+                                    <label className="form-label small fw-bold">Last Name</label>
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm"
+                                        value={editFormData.lastName}
+                                        onChange={(e) => setEditFormData({ ...editFormData, lastName: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className="col-12">
+                                    <label className="form-label small fw-bold">Email Address</label>
+                                    <input
+                                        type="email"
+                                        className="form-control form-control-sm"
+                                        value={editFormData.email}
+                                        onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className="col-md-6">
+                                    <label className="form-label small fw-bold">Role</label>
+                                    <select
+                                        className="form-select form-select-sm"
+                                        value={editFormData.role}
+                                        onChange={(e) => setEditFormData({ ...editFormData, role: e.target.value })}
+                                        required
+                                    >
+                                        <option value="EMPLOYEE">EMPLOYEE</option>
+                                        <option value="MANAGER">MANAGER</option>
+                                        <option value="HR">HR</option>
+                                    </select>
+                                </div>
+                                {editFormData.role === 'EMPLOYEE' && (
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Manager</label>
+                                        <select
+                                            className="form-select form-select-sm"
+                                            value={editFormData.managerId}
+                                            onChange={(e) => setEditFormData({ ...editFormData, managerId: e.target.value })}
+                                            required
+                                        >
+                                            <option value="">Select Manager...</option>
+                                            {managers.map(mgr => (
+                                                <option key={mgr.id} value={mgr.id}>{mgr.firstName} {mgr.lastName}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div className="modal-footer border-0 p-4 pt-0">
+                            <button type="button" className="btn btn-sm btn-light px-4" onClick={() => setIsEditing(false)}>Cancel</button>
+                            <button type="submit" className="btn btn-sm btn-primary px-4" disabled={actionLoading}>
+                                {actionLoading ? 'Updating...' : 'Save Changes'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderDeleteModal = () => (
+        <div className={`modal fade ${isDeleting ? 'show d-block' : ''}`} tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <div className="modal-dialog modal-dialog-centered border-0">
+                <div className="modal-content border-0 shadow">
+                    <div className="modal-header border-0 pb-0">
+                        <button type="button" className="btn-close" onClick={() => setIsDeleting(false)} aria-label="Close"></button>
+                    </div>
+                    <div className="modal-body p-4 text-center">
+                        <i className="bi bi-exclamation-triangle-fill text-danger fs-1 mb-3 d-block"></i>
+                        <h4 className="fw-bold mb-2">Delete User?</h4>
+                        <p className="text-muted small px-3">
+                            Are you sure you want to delete <strong>{deletingUser?.firstName} {deletingUser?.lastName}</strong>?
+                            This action cannot be undone and will remove all related skills and assignments.
+                        </p>
+
+                        {actionError && <div className="alert alert-danger small py-2 mt-3">{actionError}</div>}
+                        {actionSuccess && <div className="alert alert-success small py-2 mt-3">{actionSuccess}</div>}
+                    </div>
+                    <div className="modal-footer border-0 p-4 pt-0 justify-content-center">
+                        <button type="button" className="btn btn-sm btn-light px-4" onClick={() => setIsDeleting(false)}>Cancel</button>
+                        <button type="button" className="btn btn-sm btn-danger px-4" onClick={confirmDelete} disabled={actionLoading}>
+                            {actionLoading ? 'Deleting...' : 'Confirm Deletion'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
     return (
         <>
             <a href="#main-content" className="skip-link">
@@ -689,6 +904,11 @@ const HRDashboard = () => {
                     </main>
                 </div>
             </div>
+
+            {/* Modals */}
+            {isEditing && renderEditModal()}
+            {isDeleting && renderDeleteModal()}
+
             <style>{`
                 .static-btn:hover, .static-btn:active, .static-btn:focus {
                     transform: none !important;

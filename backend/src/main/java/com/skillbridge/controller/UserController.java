@@ -1,6 +1,7 @@
 package com.skillbridge.controller;
 
 import com.skillbridge.dto.CreateUserRequest;
+import com.skillbridge.dto.UpdateUserRequest;
 import com.skillbridge.dto.UserProfileResponse;
 import com.skillbridge.service.UserService;
 import jakarta.validation.Valid;
@@ -9,8 +10,11 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -61,5 +65,18 @@ public class UserController {
     @PreAuthorize("hasAuthority('ROLE_HR')")
     public ResponseEntity<List<UserProfileResponse>> getBenchUsers() {
         return ResponseEntity.ok(userService.getBenchUsers());
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_HR')")
+    public ResponseEntity<UserProfileResponse> updateUser(@PathVariable UUID id, @RequestBody @Valid UpdateUserRequest request) {
+        return ResponseEntity.ok(userService.updateUser(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_HR')")
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,6 +1,7 @@
 package com.skillbridge.service;
 
 import com.skillbridge.dto.CreateUserRequest;
+import com.skillbridge.dto.UpdateUserRequest;
 import com.skillbridge.dto.UserProfileResponse;
 import com.skillbridge.dto.SkillResponse;
 import com.skillbridge.entity.User;
@@ -10,6 +11,7 @@ import com.skillbridge.repository.ProjectRepository;
 import com.skillbridge.repository.UserRepository;
 import com.skillbridge.security.CustomUserDetails;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -117,6 +119,50 @@ public class UserService {
                     .orElseThrow(() -> new RuntimeException("User not found: " + email));
         }
         throw new RuntimeException("User not authenticated");
+    }
+
+    @Transactional
+    public UserProfileResponse updateUser(UUID id, UpdateUserRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!user.getEmail().equals(request.getEmail()) && userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email already active");
+        }
+
+        if (request.getRole() == com.skillbridge.enums.Role.EMPLOYEE && request.getManagerId() == null) {
+            throw new RuntimeException("Manager is required for Employee role");
+        }
+
+        user.setEmail(request.getEmail());
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setRole(request.getRole());
+        user.setManagerId(request.getRole() == com.skillbridge.enums.Role.EMPLOYEE ? request.getManagerId() : null);
+
+        User savedUser = userRepository.save(user);
+        return mapToResponse(savedUser);
+    }
+
+    @Transactional
+    public void deleteUser(UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Delete related skills
+        employeeSkillRepository.deleteAll(employeeSkillRepository.findByEmployeeId(id));
+
+        // Delete related assignments
+        assignmentRepository.deleteAll(assignmentRepository.findByEmployeeId(id));
+
+        // Handle manager relationship: if this user is a manager, update their employees
+        List<User> managedEmployees = userRepository.findAllByManagerId(id);
+        for (User employee : managedEmployees) {
+            employee.setManagerId(null);
+            userRepository.save(employee);
+        }
+
+        userRepository.delete(user);
     }
 
     private UserProfileResponse mapToResponse(User user) {
