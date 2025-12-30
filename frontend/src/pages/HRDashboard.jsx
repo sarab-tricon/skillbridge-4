@@ -393,7 +393,7 @@ const HRDashboard = () => {
             }
         };
 
-        const currentList = getList();
+        const currentList = getList().filter(u => u.id !== user.userId);
         const title = peopleTab === 'MANAGERS' ? 'Managers' : peopleTab === 'HRS' ? 'HR Administrators' : 'Employee Directory';
 
         return (
@@ -450,28 +450,30 @@ const HRDashboard = () => {
                             </thead>
                             <tbody>
                                 {currentList.length > 0 ? (
-                                    currentList.map(user => (
-                                        <tr key={user.id}>
-                                            <td className="fw-bold">{user.firstName} {user.lastName}</td>
-                                            <td>{user.email}</td>
-                                            {peopleTab === 'EMPLOYEES' && <td><small className="text-muted">{user.managerName || 'N/A'}</small></td>}
+                                    currentList.map(listUser => (
+                                        <tr key={listUser.id}>
+                                            <td className="fw-bold">{listUser.firstName} {listUser.lastName}</td>
+                                            <td>{listUser.email}</td>
+                                            {peopleTab === 'EMPLOYEES' && <td><small className="text-muted">{listUser.managerName || 'N/A'}</small></td>}
                                             <td className="text-end">
-                                                <div className="d-flex justify-content-end gap-2">
-                                                    <button
-                                                        className="btn btn-sm btn-outline-primary"
-                                                        onClick={() => handleEditClick(user)}
-                                                        title="Edit User"
-                                                    >
-                                                        <i className="bi bi-pencil"></i>
-                                                    </button>
-                                                    <button
-                                                        className="btn btn-sm btn-outline-danger"
-                                                        onClick={() => handleDeleteClick(user)}
-                                                        title="Delete User"
-                                                    >
-                                                        <i className="bi bi-trash"></i>
-                                                    </button>
-                                                </div>
+                                                {listUser.id !== user.userId && (
+                                                    <div className="d-flex justify-content-end gap-2">
+                                                        <button
+                                                            className="btn btn-sm btn-outline-primary"
+                                                            onClick={() => handleEditClick(listUser)}
+                                                            title="Edit User"
+                                                        >
+                                                            <i className="bi bi-pencil"></i>
+                                                        </button>
+                                                        <button
+                                                            className="btn btn-sm btn-outline-danger"
+                                                            onClick={() => handleDeleteClick(listUser)}
+                                                            title="Delete User"
+                                                        >
+                                                            <i className="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </td>
                                         </tr>
                                     ))
