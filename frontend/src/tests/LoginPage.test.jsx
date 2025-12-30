@@ -33,8 +33,8 @@ describe('LoginPage', () => {
         );
 
         expect(screen.getByText('Login', { selector: 'h3' })).toBeInTheDocument();
-        expect(screen.getByLabelText(/Email Address/i)).toBeInTheDocument();
-        expect(screen.getByLabelText(/Password/i)).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('email')).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('password')).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /Login/i })).toBeInTheDocument();
     });
 
@@ -45,8 +45,8 @@ describe('LoginPage', () => {
             </MemoryRouter>
         );
 
-        const emailInput = screen.getByPlaceholderText('name@company.com');
-        const passwordInput = screen.getByPlaceholderText('******');
+        const emailInput = screen.getByPlaceholderText('email');
+        const passwordInput = screen.getByPlaceholderText('password');
 
         fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
         fireEvent.change(passwordInput, { target: { value: 'password123' } });
@@ -64,8 +64,8 @@ describe('LoginPage', () => {
             </MemoryRouter>
         );
 
-        fireEvent.change(screen.getByPlaceholderText('name@company.com'), { target: { value: 'wrong@example.com' } });
-        fireEvent.change(screen.getByPlaceholderText('******'), { target: { value: 'wrongpass' } });
+        fireEvent.change(screen.getByPlaceholderText('email'), { target: { value: 'wrong@example.com' } });
+        fireEvent.change(screen.getByPlaceholderText('password'), { target: { value: 'wrongpass' } });
         fireEvent.click(screen.getByRole('button', { name: /Login/i }));
 
         await waitFor(() => {
@@ -82,8 +82,8 @@ describe('LoginPage', () => {
             </MemoryRouter>
         );
 
-        fireEvent.change(screen.getByPlaceholderText('name@company.com'), { target: { value: 'emp@example.com' } });
-        fireEvent.change(screen.getByPlaceholderText('******'), { target: { value: 'password' } });
+        fireEvent.change(screen.getByPlaceholderText('email'), { target: { value: 'emp@example.com' } });
+        fireEvent.change(screen.getByPlaceholderText('password'), { target: { value: 'password' } });
         fireEvent.click(screen.getByRole('button', { name: /Login/i }));
 
         await waitFor(() => {
@@ -100,8 +100,8 @@ describe('LoginPage', () => {
             </MemoryRouter>
         );
 
-        fireEvent.change(screen.getByPlaceholderText('name@company.com'), { target: { value: 'mgr@example.com' } });
-        fireEvent.change(screen.getByPlaceholderText('******'), { target: { value: 'password' } });
+        fireEvent.change(screen.getByPlaceholderText('email'), { target: { value: 'mgr@example.com' } });
+        fireEvent.change(screen.getByPlaceholderText('password'), { target: { value: 'password' } });
         fireEvent.click(screen.getByRole('button', { name: /Login/i }));
 
         await waitFor(() => {
@@ -118,8 +118,8 @@ describe('LoginPage', () => {
             </MemoryRouter>
         );
 
-        fireEvent.change(screen.getByPlaceholderText('name@company.com'), { target: { value: 'hr@example.com' } });
-        fireEvent.change(screen.getByPlaceholderText('******'), { target: { value: 'password' } });
+        fireEvent.change(screen.getByPlaceholderText('email'), { target: { value: 'hr@example.com' } });
+        fireEvent.change(screen.getByPlaceholderText('password'), { target: { value: 'password' } });
         fireEvent.click(screen.getByRole('button', { name: /Login/i }));
 
         await waitFor(() => {

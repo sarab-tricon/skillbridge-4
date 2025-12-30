@@ -275,7 +275,7 @@ const BenchAllocation = () => {
                             <input type="text" className="form-control form-control-sm mb-3" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
 
                             {/* Table */}
-                            <div className="flex-grow-1 overflow-auto">
+                            <div className="flex-grow-1 overflow-auto" style={{ maxHeight: '60vh' }}>
                                 <table className="table table-hover table-sm align-middle">
                                     <thead className="table-light sticky-top">
                                         <tr>
@@ -442,4 +442,6 @@ const BenchAllocation = () => {
     );
 };
 
+
 export default BenchAllocation;
+

@@ -70,6 +70,7 @@ const ManagerDashboard = () => {
     const [showRejectModal, setShowRejectModal] = useState(false);
     const [modalComment, setModalComment] = useState('');
     const [modalReason, setModalReason] = useState('');
+    const [errors, setErrors] = useState({});
 
     const fetchData = async () => {
         try {
@@ -191,6 +192,12 @@ const ManagerDashboard = () => {
     // Skill handlers for manager's own skills
     const handleAddSkill = async (e) => {
         e.preventDefault();
+
+        if (!newSkill.skillName) {
+            setErrors({ skillName: 'Please select a skill' });
+            return;
+        }
+
         const isDuplicate = mySkills.some(s => s.skillName.toLowerCase() === newSkill.skillName.toLowerCase());
         if (isDuplicate) {
             setSkillError(`You already have "${newSkill.skillName}" in your list.`);
@@ -214,6 +221,12 @@ const ManagerDashboard = () => {
 
     const handleUpdateSkill = async (e) => {
         e.preventDefault();
+
+        if (!editingSkill.skillName) {
+            setErrors({ skillName: 'Please select a skill' });
+            return;
+        }
+
         setAddingSkill(true);
         setSkillError(null);
         setSkillSuccess(null);
@@ -267,7 +280,7 @@ const ManagerDashboard = () => {
 
     const handleReject = async () => {
         if (!modalReason.trim()) {
-            alert('Rejection reason is mandatory');
+            setErrors({ rejectReason: 'Rejection reason is mandatory' });
             return;
         }
         setActionLoading(true);
@@ -758,19 +771,21 @@ const ManagerDashboard = () => {
                                                     <div className="mb-3">
                                                         <label className="form-label small text-muted text-uppercase fw-bold">Skill Name</label>
                                                         <select
-                                                            className="form-select border-2 shadow-none"
+                                                            className={`form-select border-2 shadow-none ${errors.skillName ? 'is-invalid' : ''}`}
                                                             value={editingSkill ? editingSkill.skillName : newSkill.skillName}
-                                                            onChange={(e) => editingSkill
-                                                                ? setEditingSkill({ ...editingSkill, skillName: e.target.value })
-                                                                : setNewSkill({ ...newSkill, skillName: e.target.value })
-                                                            }
-                                                            required
+                                                            onChange={(e) => {
+                                                                if (editingSkill) setEditingSkill({ ...editingSkill, skillName: e.target.value });
+                                                                else setNewSkill({ ...newSkill, skillName: e.target.value });
+
+                                                                if (errors.skillName) setErrors({ ...errors, skillName: null });
+                                                            }}
                                                         >
                                                             <option value="">Select a skill...</option>
                                                             {catalogSkills.map(s => (
                                                                 <option key={s.id} value={s.name}>{s.name}</option>
                                                             ))}
                                                         </select>
+                                                        {errors.skillName && <div className="invalid-feedback">{errors.skillName}</div>}
                                                     </div>
                                                     <div className="mb-4">
                                                         <label className="form-label small text-muted text-uppercase fw-bold">Proficiency Level</label>
@@ -1084,14 +1099,17 @@ const ManagerDashboard = () => {
                                 <p className="text-muted mb-3">Please provide a reason for rejection (mandatory):</p>
                                 <textarea
                                     id="reject-reason"
-                                    className="form-control"
+                                    className={`form-control ${errors.rejectReason ? 'is-invalid' : ''}`}
                                     rows="3"
                                     value={modalReason}
-                                    onChange={(e) => setModalReason(e.target.value)}
+                                    onChange={(e) => {
+                                        setModalReason(e.target.value);
+                                        if (errors.rejectReason) setErrors({ ...errors, rejectReason: null });
+                                    }}
                                     placeholder="e.g., Skills do not match project requirements..."
                                     aria-label="Rejection reason"
-                                    required
                                 ></textarea>
+                                {errors.rejectReason && <div className="invalid-feedback d-block">{errors.rejectReason}</div>}
                             </div>
                             <div className="modal-footer border-0 pt-0">
                                 <button type="button" className="btn btn-light rounded-pill" onClick={() => setShowRejectModal(false)}>Cancel</button>
@@ -1128,38 +1146,9 @@ const ManagerDashboard = () => {
                 #main-content::-webkit-scrollbar {
                     display: none;
                 }
-                .custom-scroll::-webkit-scrollbar {
-                    width: 10px;
-                    height: 10px;
-                }
-                .custom-scroll::-webkit-scrollbar-track {
-                    background: #f1f1f1;
-                    border-radius: 10px;
-                }
-                .custom-scroll::-webkit-scrollbar-thumb {
-                    background: #bbb;
-                    border-radius: 10px;
-                    border: 2px solid #f1f1f1;
-                }
-                .custom-scroll::-webkit-scrollbar-thumb:hover {
-                    background: var(--color-accent);
-                }
                 .custom-scroll {
                     scrollbar-width: thin;
                     scrollbar-color: #bbb #f1f1f1;
-                }
-                .skip-link {
-                    position: absolute;
-                    top: -40px;
-                    left: 0;
-                    background: #212529;
-                    color: white;
-                    padding: 8px;
-                    z-index: 100;
-                    transition: top 0.3s;
-                }
-                .skip-link:focus {
-                    top: 0;
                 }
                 .nav-link {
                     transition: none;

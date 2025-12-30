@@ -47,6 +47,7 @@ const EmployeeDashboard = () => {
     const [errorSkills, setErrorSkills] = useState(null);
     const [errorAlloc, setErrorAlloc] = useState(null);
     const [errorUtil, setErrorUtil] = useState(null);
+    const [errors, setErrors] = useState({});
 
     // Employee menu items for sidebar
     const employeeMenuItems = [
@@ -155,6 +156,11 @@ const EmployeeDashboard = () => {
         e.preventDefault();
 
         // Client-side uniqueness check
+        if (!newSkill.skillName) {
+            setErrors({ skillName: 'Please select a skill' });
+            return;
+        }
+
         const isDuplicate = skills.some(s => s.skillName.toLowerCase() === newSkill.skillName.toLowerCase());
         if (isDuplicate) {
             setAddSkillError(`You already have "${newSkill.skillName}" in your list.`);
@@ -216,14 +222,18 @@ const EmployeeDashboard = () => {
 
     const handleRequestAllocation = async (e) => {
         e.preventDefault();
-        if (!selectedProject) return;
+        if (!selectedProject) {
+            setErrors({ selectedProject: 'Please select a project' });
+            return;
+        }
         setRequestingAlloc(true);
         setRequestAllocError(null);
         try {
             await allocationsApi.createRequest(selectedProject); // Use new API
             setSelectedProject('');
             fetchMyRequests(); // Refresh requests list
-            alert('Request submitted to Manager for approval.');
+            setSuccessMessage('Request submitted to Manager for approval.');
+            setTimeout(() => setSuccessMessage(null), 3000);
         } catch (err) {
             setRequestAllocError(err.response?.data?.message || err.response?.data?.error || 'Failed to request allocation.');
             console.error(err);
@@ -316,20 +326,23 @@ const EmployeeDashboard = () => {
                             <form onSubmit={editingSkill ? handleUpdateSkill : handleAddSkill}>
                                 <div className="mb-3">
                                     <label className="form-label small text-muted text-uppercase fw-bold">Skill Name</label>
+                                    <label className="form-label small text-muted text-uppercase fw-bold">Skill Name</label>
                                     <select
-                                        className="form-select border-2 shadow-none"
+                                        className={`form-select border-2 shadow-none ${errors.skillName ? 'is-invalid' : ''}`}
                                         value={editingSkill ? editingSkill.skillName : newSkill.skillName}
-                                        onChange={(e) => editingSkill
-                                            ? setEditingSkill({ ...editingSkill, skillName: e.target.value })
-                                            : setNewSkill({ ...newSkill, skillName: e.target.value })
-                                        }
-                                        required
+                                        onChange={(e) => {
+                                            if (editingSkill) setEditingSkill({ ...editingSkill, skillName: e.target.value });
+                                            else setNewSkill({ ...newSkill, skillName: e.target.value });
+
+                                            if (errors.skillName) setErrors({ ...errors, skillName: null });
+                                        }}
                                     >
                                         <option value="">Select a skill...</option>
                                         {catalogSkills.map(s => (
                                             <option key={s.id} value={s.name}>{s.name}</option>
                                         ))}
                                     </select>
+                                    {errors.skillName && <div className="invalid-feedback">{errors.skillName}</div>}
                                 </div>
                                 <div className="mb-4">
                                     <label className="form-label small text-muted text-uppercase fw-bold">Proficiency Level</label>
@@ -533,10 +546,12 @@ const EmployeeDashboard = () => {
                             <form onSubmit={handleRequestAllocation}>
                                 <div className="mb-3">
                                     <select
-                                        className="form-select shadow-none border-2"
+                                        className={`form-select shadow-none border-2 ${errors.selectedProject ? 'is-invalid' : ''}`}
                                         value={selectedProject}
-                                        onChange={(e) => setSelectedProject(e.target.value)}
-                                        required
+                                        onChange={(e) => {
+                                            setSelectedProject(e.target.value);
+                                            if (errors.selectedProject) setErrors({ ...errors, selectedProject: null });
+                                        }}
                                         disabled={myRequests.some(r =>
                                             r.requestStatus.startsWith('PENDING')
                                         )}
@@ -548,6 +563,7 @@ const EmployeeDashboard = () => {
                                             </option>
                                         ))}
                                     </select>
+                                    {errors.selectedProject && <div className="invalid-feedback">{errors.selectedProject}</div>}
                                 </div>
 
                                 {requestAllocError && (
@@ -707,7 +723,7 @@ const EmployeeDashboard = () => {
                     />
 
                     {/* MAIN CONTENT AREA */}
-                    <main role="main" id="main-content" className="col h-100 p-4 p-md-5" style={{ backgroundColor: 'var(--color-bg)', overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                    <main role="main" id="main-content" aria-label="Employee Dashboard Content" className="col h-100 p-4 p-md-5" style={{ backgroundColor: 'var(--color-bg)', overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }} tabIndex="-1">
                         <div className="max-width-xl mx-auto">
                             <div className="page-header mb-4">
                                 <h1 className="page-title fw-bold text-accent">
