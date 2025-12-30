@@ -8,25 +8,16 @@ const LandingPage = () => {
             <a href="#main-content" className="skip-link">
                 Skip to main content
             </a>
-            <main role="main" id="main-content">
-                <div className="container d-flex flex-column justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
-                    <div className="text-center">
+            <main role="main" id="main-content" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', overflow: 'hidden', zIndex: 1000, backgroundColor: 'var(--color-bg)' }}>
+                <div className="container h-100 d-flex flex-column justify-content-center align-items-center p-0 m-0 w-100" style={{ maxWidth: '100%' }}>
+                    <div className="text-center p-0 m-0 mb-5">
                         <img
-                            src="/skillbridgeLOGO.jpeg"
+                            src="/new_logo.png"
                             alt="SkillBridge Logo"
-                            className="mb-4"
-                            style={{ height: '180px', width: 'auto', mixBlendMode: 'multiply', filter: 'brightness(1.1)' }}
+                            className="mb-0 mt-5"
+                            style={{ height: '380px', width: 'auto', mixBlendMode: 'multiply', filter: 'brightness(1.1)' }}
                         />
-                        <h1 className="display-1 fw-bold mb-3" style={{ color: 'var(--color-primary)' }}>
-                            SkillBridge
-                        </h1>
-                        <h2 className="display-5 lead mb-2">
-                            Smart Solutions for Smart People
-                        </h2>
-                        <h3 className="h4 text-muted mb-4 fst-italic">
-                            Trust is rare and expensive
-                        </h3>
-                        <p className="lead mb-5">
+                        <p className="lead mb-3">
                             Discover skills, manage allocations, and track utilization in one place.
                         </p>
                         <button
