@@ -58,7 +58,7 @@ const ManagerDashboard = () => {
         { id: 'my_utilization', label: 'Utilization', icon: 'bi-graph-up' },
         { id: 'team', label: 'My Team', icon: 'bi-people' },
         { id: 'allocations', label: 'Active Projects', icon: 'bi-journal-code' },
-        { id: 'alloc_requests', label: 'Allocations', icon: 'bi-patch-check' },
+        { id: 'alloc_requests', label: 'Requests', icon: 'bi-clipboard-check' },
         { id: 'pending_skills', label: 'Verifications', icon: 'bi-star' },
         { id: 'my_allocation', label: 'Allocation', icon: 'bi-briefcase-fill' },
         { id: 'my_profile', label: 'My Profile', icon: 'bi-person-circle' }
@@ -414,26 +414,19 @@ const ManagerDashboard = () => {
                     onSectionChange={setActiveSection}
                 />
 
-                <main id="main-content" className="col h-100 p-4 p-md-5" style={{ overflowY: 'auto', scrollbarGutter: 'stable' }} tabIndex="-1">
+                <main id="main-content" className="col h-100 p-4 p-md-5" style={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }} tabIndex="-1">
                     <header className="page-header mb-4">
                         <h1 className="page-title fw-bold text-accent">
-                            {activeSection === null && 'Manager Control Panel'}
+                            {activeSection === null && 'Dashboard Overview'}
                             {activeSection === 'team' && 'Team Management'}
                             {activeSection === 'allocations' && 'Active Projects'}
-                            {activeSection === 'alloc_requests' && 'Allocation Requests'}
+                            {activeSection === 'alloc_requests' && 'Project Requests'}
                             {activeSection === 'pending_skills' && 'Skill Verifications'}
                             {activeSection === 'my_profile' && 'My Profile'}
                             {activeSection === 'my_utilization' && 'Utilization'}
-                            {activeSection === 'my_skills' && 'Skill Management'}
+                            {activeSection === 'my_skills' && 'MANAGER Skills'}
                             {activeSection === 'my_allocation' && 'My Projects'}
                         </h1>
-                        <p className="lead text-muted">
-                            {activeSection === null
-                                ? `Welcome back, ${user?.sub?.split('@')[0] || 'Manager'}`
-                                : activeSection?.startsWith('my_')
-                                    ? 'Manage your personal skills, allocations and profile.'
-                                    : 'Manage your organization\'s workforce and projects from one place.'}
-                        </p>
                     </header>
 
                     <div className="animate-fade-in">
@@ -452,7 +445,7 @@ const ManagerDashboard = () => {
                                         </div>
                                         <div className="col-md-3">
                                             <SectionCard
-                                                title="Allocations"
+                                                title="Requests"
                                                 count={loading.data ? '...' : pendingAllocations.length}
                                                 sectionId="alloc_requests"
                                                 color="#CF4B00"
@@ -497,9 +490,9 @@ const ManagerDashboard = () => {
                                             {loading.data ? renderLoading() :
                                                 error.data ? renderError(error.data) :
                                                     mergedTeam.length === 0 ? renderEmpty('No team members found.') : (
-                                                        <div className="table-responsive" tabIndex="0" role="region" aria-label="Team Directory table">
+                                                        <div className="custom-scroll" style={{ maxHeight: 'calc(100vh - 280px)', overflowY: 'auto' }} tabIndex="0" role="region" aria-label="Team Directory table">
                                                             <table className="table table-hover align-middle mb-0">
-                                                                <thead className="table-light">
+                                                                <thead className="table-light sticky-top" style={{ zIndex: 1, backgroundColor: '#f8f9fa' }}>
                                                                     <tr>
                                                                         <th className="px-4 py-3">Employee</th>
                                                                         <th className="py-3">Current Assignment</th>
@@ -547,15 +540,15 @@ const ManagerDashboard = () => {
                                 {activeSection === 'alloc_requests' && (
                                     <div className="card shadow border-0 rounded-4 overflow-hidden mb-5">
                                         <div className="card-header bg-white p-4 border-0">
-                                            <h2 className="fw-bold mb-0 h3 text-dark">Pending Allocation Requests</h2>
+                                            <h2 className="fw-bold mb-0 h3 text-dark">Pending Project Requests</h2>
                                         </div>
                                         <div className="card-body p-0">
                                             {loading.data ? renderLoading() :
                                                 error.data ? renderError(error.data) :
                                                     pendingAllocations.length === 0 ? renderEmpty('No pending allocation requests.') : (
-                                                        <div className="table-responsive" tabIndex="0" role="region" aria-label="Pending Allocation Requests table">
+                                                        <div className="custom-scroll" style={{ maxHeight: '450px', overflow: 'auto' }} tabIndex="0" role="region" aria-label="Pending Allocation Requests table">
                                                             <table className="table table-hover align-middle mb-0">
-                                                                <thead className="table-light">
+                                                                <thead className="table-light sticky-top" style={{ zIndex: 1, backgroundColor: '#f8f9fa' }}>
                                                                     <tr>
                                                                         <th className="px-4 py-3">Employee</th>
                                                                         <th className="py-3">Requested Project</th>
@@ -618,9 +611,6 @@ const ManagerDashboard = () => {
 
                                 {activeSection === 'allocations' && (
                                     <div className="animate-fade-in">
-                                        <div className="d-flex justify-content-between align-items-center mb-4">
-                                            <h2 className="fw-bold mb-0 h3 text-dark">Active Projects & Assignments</h2>
-                                        </div>
                                         <div className="row g-4">
                                             {/* Organization Projects */}
                                             <div className="col-lg-6">
@@ -632,9 +622,9 @@ const ManagerDashboard = () => {
                                                         {loading.data ? renderLoading() :
                                                             error.data ? renderError(error.data) :
                                                                 allActiveProjects.length === 0 ? renderEmpty('No active organization projects found.') : (
-                                                                    <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'scroll', overflowX: 'hidden' }} tabIndex="0" role="region" aria-label="Organization Projects table">
+                                                                    <div className="custom-scroll" style={{ maxHeight: '420px', overflow: 'auto' }} tabIndex="0" role="region" aria-label="Organization Projects table">
                                                                         <table className="table table-hover align-middle mb-0">
-                                                                            <thead className="table-light sticky-top" style={{ zIndex: 1 }}>
+                                                                            <thead className="table-light sticky-top" style={{ zIndex: 1, backgroundColor: '#f8f9fa' }}>
                                                                                 <tr>
                                                                                     <th className="px-4 py-3">Project Name</th>
                                                                                     <th className="py-3">Company</th>
@@ -671,9 +661,9 @@ const ManagerDashboard = () => {
                                                         {loading.data ? renderLoading() :
                                                             error.data ? renderError(error.data) :
                                                                 mergedTeam.filter(m => m.projectName).length === 0 ? renderEmpty('No active team assignments.') : (
-                                                                    <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'scroll', overflowX: 'hidden' }} tabIndex="0" role="region" aria-label="Active Team Assignments table">
+                                                                    <div className="custom-scroll" style={{ maxHeight: '420px', overflow: 'auto' }} tabIndex="0" role="region" aria-label="Active Team Assignments table">
                                                                         <table className="table table-hover align-middle mb-0">
-                                                                            <thead className="table-light sticky-top" style={{ zIndex: 1 }}>
+                                                                            <thead className="table-light sticky-top" style={{ zIndex: 1, backgroundColor: '#f8f9fa' }}>
                                                                                 <tr>
                                                                                     <th className="px-4 py-3">Employee</th>
                                                                                     <th className="py-3 px-4 text-end">Project</th>
@@ -709,9 +699,9 @@ const ManagerDashboard = () => {
                                             {loading.skills ? renderLoading() :
                                                 error.skills ? renderError(error.skills) :
                                                     pendingSkills.length === 0 ? renderEmpty('All skill requests have been processed.') : (
-                                                        <div className="table-responsive" tabIndex="0" role="region" aria-label="Pending Skill Verifications table">
+                                                        <div className="custom-scroll" style={{ maxHeight: '450px', overflow: 'auto' }} tabIndex="0" role="region" aria-label="Pending Skill Verifications table">
                                                             <table className="table table-hover align-middle mb-0">
-                                                                <thead className="table-light">
+                                                                <thead className="table-light sticky-top" style={{ zIndex: 1, backgroundColor: '#f8f9fa' }}>
                                                                     <tr>
                                                                         <th className="px-4 py-3">Employee</th>
                                                                         <th className="py-3">Skill</th>
@@ -821,21 +811,29 @@ const ManagerDashboard = () => {
                                         </div>
                                         <div className="col-lg-8">
                                             <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
-                                                <div className="card-header bg-white py-3 px-4 border-0 d-flex justify-content-between align-items-center" style={{ borderBottom: '2px solid var(--color-accent)' }}>
-                                                    <h5 className="mb-0 fw-bold">Current Skills</h5>
-                                                    <div className="d-flex gap-2">
+                                                <div className="card-header bg-accent-header py-3 px-4 border-0">
+                                                    <div className="nav nav-pills bg-white p-2 rounded-4 shadow-sm d-flex justify-content-between gap-2 w-100">
                                                         {['BEGINNER', 'INTERMEDIATE', 'ADVANCED'].map(level => (
                                                             <button
                                                                 key={level}
-                                                                className={`btn btn-sm rounded-pill px-3 fw-bold ${selectedSkillLevel === level ? 'bg-accent text-white' : 'btn-outline-secondary'}`}
+                                                                className={`nav-link flex-grow-1 fw-bold rounded-pill py-2 transition-all ${selectedSkillLevel === level ? 'active-accent' : 'text-muted'}`}
                                                                 onClick={() => setSelectedSkillLevel(level)}
                                                             >
                                                                 {level}
+                                                                <span className={`ms-2 badge rounded-pill ${selectedSkillLevel === level ? 'bg-primary text-white' : 'bg-light text-muted'}`}>
+                                                                    {mySkills.filter(s => s.proficiencyLevel === level).length}
+                                                                </span>
                                                             </button>
                                                         ))}
                                                     </div>
                                                 </div>
                                                 <div className="card-body p-0">
+                                                    <div className="px-4 py-3 bg-light border-bottom animate-fade-in">
+                                                        <h5 className="mb-0 fw-bold d-flex align-items-center gap-2 text-dark">
+                                                            <i className={`bi ${selectedSkillLevel === 'ADVANCED' ? 'bi-award-fill' : selectedSkillLevel === 'INTERMEDIATE' ? 'bi-shield-check' : 'bi-speedometer'}`}></i>
+                                                            {selectedSkillLevel} Skills
+                                                        </h5>
+                                                    </div>
                                                     <div className="custom-scroll" style={{ height: '350px', overflowY: 'auto' }}>
                                                         {loading.mySkills ? renderLoading() : error.mySkills ? renderError(error.mySkills) : (
                                                             <div className="table-responsive">
@@ -1127,6 +1125,29 @@ const ManagerDashboard = () => {
                     color: white !important;
                     transform: scale(1.05);
                 }
+                #main-content::-webkit-scrollbar {
+                    display: none;
+                }
+                .custom-scroll::-webkit-scrollbar {
+                    width: 10px;
+                    height: 10px;
+                }
+                .custom-scroll::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                    border-radius: 10px;
+                }
+                .custom-scroll::-webkit-scrollbar-thumb {
+                    background: #bbb;
+                    border-radius: 10px;
+                    border: 2px solid #f1f1f1;
+                }
+                .custom-scroll::-webkit-scrollbar-thumb:hover {
+                    background: var(--color-accent);
+                }
+                .custom-scroll {
+                    scrollbar-width: thin;
+                    scrollbar-color: #bbb #f1f1f1;
+                }
                 .skip-link {
                     position: absolute;
                     top: -40px;
@@ -1139,6 +1160,28 @@ const ManagerDashboard = () => {
                 }
                 .skip-link:focus {
                     top: 0;
+                }
+                .nav-link {
+                    transition: none;
+                    border-radius: 8px !important;
+                    font-weight: 500;
+                    box-sizing: border-box;
+                    border: 1px solid transparent;
+                }
+                .nav-link:hover:not(.active) {
+                    background-color: rgba(181, 64, 0, 0.1);
+                    border: 1px solid var(--color-primary);
+                    color: var(--color-primary) !important;
+                }
+                .nav-link.active-accent {
+                    background-color: rgba(181, 64, 0, 0.12) !important;
+                    color: var(--color-accent) !important;
+                    border: 1px solid var(--color-accent) !important;
+                }
+                .bg-accent-header {
+                    background-color: rgba(181, 64, 0, 0.08) !important;
+                    color: var(--color-accent) !important;
+                    border-bottom: 1px solid rgba(181, 64, 0, 0.15);
                 }
             `}</style>
         </div>
