@@ -672,7 +672,9 @@ const HRDashboard = () => {
                                         {activeSection === 'catalog' && 'Skill Catalog'}
                                         {activeSection === 'talent' && 'Talent Discovery'}
                                     </h1>
-                                    <p className="lead text-muted m-0 small">Manage your organization's workforce and projects from one place.</p>
+                                    {activeSection === 'overview' && (
+                                        <p className="lead text-muted m-0 small">Manage your organization's workforce and projects from one place.</p>
+                                    )}
                                 </div>
                             </div>
 
