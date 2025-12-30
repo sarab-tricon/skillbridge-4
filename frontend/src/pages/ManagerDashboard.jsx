@@ -1128,22 +1128,6 @@ const ManagerDashboard = () => {
                 #main-content::-webkit-scrollbar {
                     display: none;
                 }
-                .custom-scroll::-webkit-scrollbar {
-                    width: 10px;
-                    height: 10px;
-                }
-                .custom-scroll::-webkit-scrollbar-track {
-                    background: #f1f1f1;
-                    border-radius: 10px;
-                }
-                .custom-scroll::-webkit-scrollbar-thumb {
-                    background: #bbb;
-                    border-radius: 10px;
-                    border: 2px solid #f1f1f1;
-                }
-                .custom-scroll::-webkit-scrollbar-thumb:hover {
-                    background: var(--color-accent);
-                }
                 .custom-scroll {
                     scrollbar-width: thin;
                     scrollbar-color: #bbb #f1f1f1;

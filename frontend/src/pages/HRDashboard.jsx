@@ -874,7 +874,7 @@ const HRDashboard = () => {
                     />
 
                     {/* Main Content */}
-                    <main role="main" id="main-content" className="col h-100" style={{ overflowY: 'auto', scrollbarGutter: 'stable' }}>
+                    <main role="main" id="main-content" className="col h-100" style={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                         <div className="p-4 p-md-5">
                             <div className="page-header mb-4">
                                 <div>
@@ -887,9 +887,7 @@ const HRDashboard = () => {
                                         {activeSection === 'catalog' && 'Skill Catalog'}
                                         {activeSection === 'talent' && 'Talent Discovery'}
                                     </h1>
-                                    {activeSection === 'overview' && (
-                                        <p className="lead text-muted m-0 small">Manage your organization's workforce and projects from one place.</p>
-                                    )}
+
                                 </div>
                             </div>
 
@@ -915,6 +913,9 @@ const HRDashboard = () => {
                 .static-btn:hover, .static-btn:active, .static-btn:focus {
                     transform: none !important;
                     transition: none !important;
+                }
+                #main-content::-webkit-scrollbar {
+                    display: none;
                 }
             `}</style>
         </>

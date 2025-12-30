@@ -113,9 +113,9 @@ const SkillCatalog = () => {
                 ) : skills.length === 0 ? (
                     <p className="text-center text-muted">No skills in the catalog yet.</p>
                 ) : (
-                    <div className="table-responsive">
+                    <div className="table-responsive" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
                         <table className="table table-hover align-middle">
-                            <thead className="table-light">
+                            <thead className="table-light sticky-top" style={{ zIndex: 1 }}>
                                 <tr>
                                     <th>Skill Name</th>
                                     <th>Category</th>
