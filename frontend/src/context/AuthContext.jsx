@@ -51,8 +51,11 @@ export const AuthProvider = ({ children }) => {
             });
             const { token: receivedToken } = response.data;
             localStorage.setItem('token', receivedToken);
-            setToken(receivedToken);
             const decoded = jwtDecode(receivedToken);
+            // Update all state synchronously to avoid race condition with navigation
+            setToken(receivedToken);
+            setUser(decoded);
+            setRole(decoded.role);
             return { success: true, role: decoded.role };
         } catch (error) {
             console.error("Login failed", error);
