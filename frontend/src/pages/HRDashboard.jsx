@@ -21,7 +21,7 @@ const HRDashboard = () => {
 
     // HR menu items for sidebar
     const hrMenuItems = [
-        { id: 'overview', label: 'Overview', icon: 'bi-speedometer2' },
+        { id: 'overview', label: 'Dashboard', icon: 'bi-speedometer2' },
         { id: 'people', label: 'People', icon: 'bi-people-fill' },
         { id: 'projects', label: 'Projects', icon: 'bi-folder' },
         { id: 'approvals', label: 'Approvals', icon: 'bi-check-circle' },

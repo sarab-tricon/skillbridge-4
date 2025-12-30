@@ -4,6 +4,7 @@ import api from '../api/axios';
 import { allocationsApi } from '../api/allocations';
 import Sidebar from '../components/Sidebar';
 import ProfileSection from '../components/ProfileSection';
+import AllocationCard from '../components/AllocationCard';
 
 
 const ManagerDashboard = () => {
@@ -54,11 +55,12 @@ const ManagerDashboard = () => {
     const managerMenuItems = [
         { id: null, label: 'Dashboard', icon: 'bi-speedometer2' },
         { id: 'my_skills', label: 'My Skills', icon: 'bi-star-fill' },
-        { id: 'my_utilization', label: 'My Utilization', icon: 'bi-graph-up' },
+        { id: 'my_utilization', label: 'Utilization', icon: 'bi-graph-up' },
         { id: 'team', label: 'My Team', icon: 'bi-people' },
         { id: 'allocations', label: 'Active Projects', icon: 'bi-journal-code' },
         { id: 'alloc_requests', label: 'Allocations', icon: 'bi-patch-check' },
         { id: 'pending_skills', label: 'Verifications', icon: 'bi-star' },
+        { id: 'my_allocation', label: 'Allocation', icon: 'bi-briefcase-fill' },
         { id: 'my_profile', label: 'My Profile', icon: 'bi-person-circle' }
     ];
 
@@ -420,10 +422,10 @@ const ManagerDashboard = () => {
                             {activeSection === 'allocations' && 'Active Projects'}
                             {activeSection === 'alloc_requests' && 'Allocation Requests'}
                             {activeSection === 'pending_skills' && 'Skill Verifications'}
-                            {activeSection === 'my_skills' && 'My Skills'}
-                            {activeSection === 'my_allocation' && 'My Allocation'}
-                            {activeSection === 'my_utilization' && 'My Utilization'}
                             {activeSection === 'my_profile' && 'My Profile'}
+                            {activeSection === 'my_utilization' && 'Utilization'}
+                            {activeSection === 'my_skills' && 'Skill Management'}
+                            {activeSection === 'my_allocation' && 'My Projects'}
                         </h1>
                         <p className="lead text-muted">
                             {activeSection === null
@@ -491,9 +493,6 @@ const ManagerDashboard = () => {
 
                                 {activeSection === 'team' && (
                                     <div className="card shadow border-0 rounded-4 overflow-hidden mb-5">
-                                        <div className="card-header bg-white p-4 border-0">
-                                            <h2 className="fw-bold mb-0 h3 text-dark">Team Directory</h2>
-                                        </div>
                                         <div className="card-body p-0">
                                             {loading.data ? renderLoading() :
                                                 error.data ? renderError(error.data) :
@@ -516,7 +515,14 @@ const ManagerDashboard = () => {
                                                                             </td>
                                                                             <td>
                                                                                 {member.projectName ? (
-                                                                                    <span className="assignment-badge assignment-badge-active">
+                                                                                    <span
+                                                                                        className="assignment-badge"
+                                                                                        style={{
+                                                                                            backgroundColor: '#CF4B00',
+                                                                                            color: 'white',
+                                                                                            border: 'none'
+                                                                                        }}
+                                                                                    >
                                                                                         {member.projectName}
                                                                                     </span>
                                                                                 ) : (
@@ -814,112 +820,108 @@ const ManagerDashboard = () => {
                                             </div>
                                         </div>
                                         <div className="col-lg-8">
-                                            {/* Tab Navigation */}
-                                            <div className="nav nav-pills mb-4 bg-white p-2 rounded-4 shadow-sm d-flex justify-content-between gap-2">
-                                                {['BEGINNER', 'INTERMEDIATE', 'ADVANCED'].map(level => (
-                                                    <button
-                                                        key={level}
-                                                        className={`nav-link flex-grow-1 fw-bold rounded-pill py-2 ${selectedSkillLevel === level ? 'active bg-accent text-white' : 'text-muted'}`}
-                                                        onClick={() => setSelectedSkillLevel(level)}
-                                                    >
-                                                        {level}
-                                                        <span className={`ms-2 badge rounded-pill ${selectedSkillLevel === level ? 'bg-white text-dark' : 'bg-light text-muted'}`}>
-                                                            {mySkills.filter(s => s.proficiencyLevel === level).length}
-                                                        </span>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                            {loading.mySkills ? renderLoading() : error.mySkills ? renderError(error.mySkills) : (
-                                                <div className="card shadow-sm border-0 overflow-hidden rounded-4">
-                                                    <div className="card-header py-3 px-4 border-0 d-flex justify-content-between align-items-center bg-white" style={{ borderBottom: '2px solid var(--color-accent)' }}>
-                                                        <h5 className="mb-0 fw-bold">{selectedSkillLevel} Skills</h5>
-                                                    </div>
-                                                    <div className="card-body p-0">
-                                                        <div className="table-responsive">
-                                                            <table className="table table-hover align-middle mb-0">
-                                                                <thead className="table-light">
-                                                                    <tr>
-                                                                        <th className="px-4 py-3">Skill Name</th>
-                                                                        <th className="px-4 py-3 text-center">Status</th>
-                                                                        <th className="px-4 py-3 text-end">Actions</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    {mySkills.filter(s => s.proficiencyLevel === selectedSkillLevel).length > 0 ? (
-                                                                        mySkills.filter(s => s.proficiencyLevel === selectedSkillLevel).map((skill) => (
-                                                                            <tr key={skill.id}>
-                                                                                <td className="px-4 py-3 fw-bold text-dark">{skill.skillName}</td>
-                                                                                <td className="px-4 py-3 text-center">
-                                                                                    <span className={`badge px-3 py-2 rounded-pill ${skill.status === 'APPROVED' ? 'bg-success' : skill.status === 'PENDING' ? 'bg-secondary' : 'bg-danger'}`}>
-                                                                                        {skill.status}
-                                                                                    </span>
-                                                                                </td>
-                                                                                <td className="px-4 py-3 text-end">
-                                                                                    <button
-                                                                                        className="btn btn-sm btn-outline-accent rounded-pill px-4"
-                                                                                        onClick={() => { setEditingSkill(skill); setSkillError(null); }}
-                                                                                    >
-                                                                                        <i className="bi bi-pencil-square me-1"></i> Edit
-                                                                                    </button>
-                                                                                </td>
-                                                                            </tr>
-                                                                        ))
-                                                                    ) : (
-                                                                        <tr>
-                                                                            <td colSpan="3" className="text-center py-5 text-muted">
-                                                                                No {selectedSkillLevel.toLowerCase()} skills found.
-                                                                            </td>
-                                                                        </tr>
-                                                                    )}
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
+                                            <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
+                                                <div className="card-header bg-white py-3 px-4 border-0 d-flex justify-content-between align-items-center" style={{ borderBottom: '2px solid var(--color-accent)' }}>
+                                                    <h5 className="mb-0 fw-bold">Current Skills</h5>
+                                                    <div className="d-flex gap-2">
+                                                        {['BEGINNER', 'INTERMEDIATE', 'ADVANCED'].map(level => (
+                                                            <button
+                                                                key={level}
+                                                                className={`btn btn-sm rounded-pill px-3 fw-bold ${selectedSkillLevel === level ? 'bg-accent text-white' : 'btn-outline-secondary'}`}
+                                                                onClick={() => setSelectedSkillLevel(level)}
+                                                            >
+                                                                {level}
+                                                            </button>
+                                                        ))}
                                                     </div>
                                                 </div>
-                                            )}
+                                                <div className="card-body p-0">
+                                                    <div className="custom-scroll" style={{ height: '350px', overflowY: 'auto' }}>
+                                                        {loading.mySkills ? renderLoading() : error.mySkills ? renderError(error.mySkills) : (
+                                                            <div className="table-responsive">
+                                                                <table className="table table-hover align-middle mb-0">
+                                                                    <thead className="table-light sticky-top">
+                                                                        <tr>
+                                                                            <th className="px-4 py-3">Skill Name</th>
+                                                                            <th className="px-4 py-3 text-center">Status</th>
+                                                                            <th className="px-4 py-3 text-end">Actions</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {mySkills.filter(s => s.proficiencyLevel === selectedSkillLevel).length > 0 ? (
+                                                                            mySkills.filter(s => s.proficiencyLevel === selectedSkillLevel).map((skill) => (
+                                                                                <tr key={skill.id}>
+                                                                                    <td className="px-4 py-3 fw-bold text-dark">{skill.skillName}</td>
+                                                                                    <td className="px-4 py-3 text-center">
+                                                                                        <span className={`badge px-3 py-1 rounded-pill ${skill.status === 'APPROVED' ? 'bg-success' : 'bg-secondary'}`} style={{ fontSize: '0.7rem' }}>
+                                                                                            {skill.status}
+                                                                                        </span>
+                                                                                    </td>
+                                                                                    <td className="px-4 py-3 text-end">
+                                                                                        <div className="d-flex justify-content-end gap-2">
+                                                                                            <button
+                                                                                                className="btn btn-sm btn-outline-info rounded-circle shadow-sm"
+                                                                                                onClick={() => { setEditingSkill(skill); setSkillError(null); }}
+                                                                                                title="Edit Skill"
+                                                                                            >
+                                                                                                <i className="bi bi-pencil"></i>
+                                                                                            </button>
+                                                                                            <button
+                                                                                                className="btn btn-sm btn-outline-danger rounded-circle shadow-sm"
+                                                                                                onClick={() => handleDeleteSkill(skill.id)}
+                                                                                                title="Delete Skill"
+                                                                                            >
+                                                                                                <i className="bi bi-trash"></i>
+                                                                                            </button>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            ))
+                                                                        ) : (
+                                                                            <tr>
+                                                                                <td colSpan="3" className="text-center py-5 text-muted">
+                                                                                    No {selectedSkillLevel.toLowerCase()} skills found.
+                                                                                </td>
+                                                                            </tr>
+                                                                        )}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
 
                                 {/* MY ALLOCATION */}
                                 {activeSection === 'my_allocation' && (
-                                    <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
-                                        <div className="card-header bg-white p-4 border-0">
-                                            <h2 className="fw-bold mb-0 h4">My Project Assignments</h2>
-                                        </div>
-                                        <div className="card-body p-4">
-                                            {loading.myAlloc ? renderLoading() : error.myAlloc ? renderError(error.myAlloc) :
-                                                (!myAllocation || (Array.isArray(myAllocation) && myAllocation.length === 0)) ? (
-                                                    <div className="text-center py-5">
-                                                        <i className="bi bi-briefcase display-1 text-muted opacity-25"></i>
-                                                        <h3 className="text-muted mt-3">Currently on Bench</h3>
-                                                        <p className="text-muted">You are not currently allocated to any project.</p>
-                                                    </div>
-                                                ) : (
-                                                    <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                                                        {(Array.isArray(myAllocation) ? myAllocation : [myAllocation]).map((alloc, idx) => (
-                                                            <div key={idx} className="col">
-                                                                <div className="card h-100 shadow-sm border-0" style={{ borderRadius: '15px', borderTop: '4px solid var(--color-accent)' }}>
-                                                                    <div className="card-body p-4">
-                                                                        <h5 className="fw-bold text-accent mb-2">{alloc.projectName}</h5>
-                                                                        <div className="mb-3">
-                                                                            <span className={`badge rounded-pill px-3 py-2 ${alloc.assignmentStatus === 'ACTIVE' ? 'bg-success' : 'bg-warning text-dark'}`}>
-                                                                                {alloc.assignmentStatus}
-                                                                            </span>
-                                                                        </div>
-                                                                        <div className="small text-muted">
-                                                                            <p className="mb-1"><strong>Billing:</strong> {alloc.billingType || 'N/A'}</p>
-                                                                            <p className="mb-1"><strong>Start:</strong> {alloc.startDate ? new Date(alloc.startDate).toLocaleDateString() : 'N/A'}</p>
-                                                                            <p className="mb-0"><strong>End:</strong> {alloc.endDate ? new Date(alloc.endDate).toLocaleDateString() : 'Ongoing'}</p>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )
-                                            }
-                                        </div>
+                                    <div className="py-2">
+                                        {loading.myAlloc ? renderLoading() : error.myAlloc ? renderError(error.myAlloc) :
+                                            (!myAllocation || (Array.isArray(myAllocation) && myAllocation.length === 0)) ? (
+                                                <div className="text-center py-5 border rounded-4 bg-white shadow-sm">
+                                                    <i className="bi bi-briefcase display-1 text-muted opacity-25"></i>
+                                                    <h3 className="text-muted mt-3 fw-bold">Currently on Bench</h3>
+                                                    <p className="text-muted">You are not currently allocated to any project.</p>
+                                                </div>
+                                            ) : (
+                                                <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 align-items-start" style={{ overflowX: 'hidden' }}>
+                                                    {(Array.isArray(myAllocation) ? myAllocation : [myAllocation]).map((alloc, idx) => {
+                                                        const utilAssignment = myUtilization?.assignments?.find(a => a.assignmentId === alloc.assignmentId);
+                                                        const percent = utilAssignment?.allocationPercent || 0;
+                                                        return (
+                                                            <AllocationCard
+                                                                key={idx}
+                                                                alloc={alloc}
+                                                                companyName={alloc.companyName || 'Corporate Client'}
+                                                                allocationValue={percent}
+                                                            />
+                                                        );
+                                                    })}
+                                                </div>
+                                            )
+                                        }
                                     </div>
                                 )}
 
@@ -928,6 +930,7 @@ const ManagerDashboard = () => {
                                     <div className="card shadow-sm border-0 p-4 rounded-4">
                                         {loading.myUtil ? renderLoading() : error.myUtil ? renderError(error.myUtil) : (
                                             <div className="row g-4">
+                                                {/* Left Column: Chart & Summary */}
                                                 <div className="col-lg-4 text-center border-end">
                                                     <div className="py-3">
                                                         <div className="utilization-disk mx-auto mb-4 p-4" style={{
@@ -946,12 +949,16 @@ const ManagerDashboard = () => {
                                                             </span>
                                                         </div>
                                                         <h3 className="fw-bold text-dark mt-3">{myUtilization?.allocationStatus || 'BENCH'}</h3>
-                                                        <p className="text-muted small">Your total utilization based on active project assignments.</p>
+                                                        <p className="text-muted small mx-auto" style={{ maxWidth: '300px' }}>
+                                                            Your total utilization based on active project assignments.
+                                                        </p>
                                                     </div>
                                                 </div>
+
+                                                {/* Right Column: Allocation Details */}
                                                 <div className="col-lg-8">
                                                     {myUtilization?.assignments && myUtilization.assignments.length > 0 ? (
-                                                        <div>
+                                                        <div className="h-100">
                                                             <h5 className="fw-bold mb-3 text-muted text-uppercase small">Active Allocations</h5>
                                                             <div className="table-responsive">
                                                                 <table className="table table-hover align-middle mb-0">
@@ -959,7 +966,7 @@ const ManagerDashboard = () => {
                                                                         <tr>
                                                                             <th className="py-2 ps-3">Project</th>
                                                                             <th className="py-2">Allocation</th>
-                                                                            <th className="py-2">Start Date</th>
+                                                                            <th className="py-2">Dates</th>
                                                                             <th className="py-2 pe-3 text-end">Type</th>
                                                                         </tr>
                                                                     </thead>
@@ -970,12 +977,20 @@ const ManagerDashboard = () => {
                                                                                 <td>
                                                                                     <div className="d-flex align-items-center">
                                                                                         <div className="progress flex-grow-1" style={{ height: '6px', maxWidth: '80px' }}>
-                                                                                            <div className="progress-bar bg-accent" style={{ width: `${assign.allocationPercent}%` }}></div>
+                                                                                            <div
+                                                                                                className="progress-bar bg-accent"
+                                                                                                role="progressbar"
+                                                                                                style={{ width: `${assign.allocationPercent}%` }}
+                                                                                            ></div>
                                                                                         </div>
                                                                                         <span className="ms-2 small fw-bold">{assign.allocationPercent}%</span>
                                                                                     </div>
                                                                                 </td>
-                                                                                <td className="small text-muted">{new Date(assign.startDate).toLocaleDateString()}</td>
+                                                                                <td>
+                                                                                    <div className="small text-muted">
+                                                                                        {new Date(assign.startDate).toLocaleDateString()}
+                                                                                    </div>
+                                                                                </td>
                                                                                 <td className="pe-3 text-end">
                                                                                     <span className={`badge rounded-pill px-2 py-1 small ${assign.billingType === 'BILLABLE' ? 'bg-success' : 'bg-secondary'}`}>
                                                                                         {assign.billingType || 'N/A'}
@@ -988,9 +1003,9 @@ const ManagerDashboard = () => {
                                                             </div>
                                                         </div>
                                                     ) : (
-                                                        <div className="text-center py-5 text-muted">
-                                                            <i className="bi bi-pie-chart display-4 opacity-25"></i>
-                                                            <p className="mt-3">No active allocations at this time.</p>
+                                                        <div className="h-100 d-flex flex-column align-items-center justify-content-center text-muted border rounded bg-light p-4">
+                                                            <i className="bi bi-clipboard-x display-4 mb-3 opacity-25"></i>
+                                                            <p>No active project allocations found.</p>
                                                         </div>
                                                     )}
                                                 </div>
@@ -1001,7 +1016,17 @@ const ManagerDashboard = () => {
 
                                 {/* MY PROFILE */}
                                 {activeSection === 'my_profile' && (
-                                    <ProfileSection profile={profile} utilization={myUtilization} />
+                                    <div style={{
+                                        '--profile-theme-color': 'var(--color-primary)',
+                                        '--profile-theme-dark': '#802d00',
+                                        '--profile-theme-rgb': '181, 64, 0'
+                                    }}>
+                                        <ProfileSection
+                                            profile={profile}
+                                            utilization={myUtilization}
+                                            onNavigateToSkills={() => setActiveSection('my_skills')}
+                                        />
+                                    </div>
                                 )}
 
                             </div>
