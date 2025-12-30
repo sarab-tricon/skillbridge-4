@@ -70,6 +70,7 @@ const ManagerDashboard = () => {
     const [showRejectModal, setShowRejectModal] = useState(false);
     const [modalComment, setModalComment] = useState('');
     const [modalReason, setModalReason] = useState('');
+    const [errors, setErrors] = useState({});
 
     const fetchData = async () => {
         try {
@@ -267,7 +268,7 @@ const ManagerDashboard = () => {
 
     const handleReject = async () => {
         if (!modalReason.trim()) {
-            alert('Rejection reason is mandatory');
+            setErrors({ rejectReason: 'Rejection reason is mandatory' });
             return;
         }
         setActionLoading(true);
@@ -1084,14 +1085,17 @@ const ManagerDashboard = () => {
                                 <p className="text-muted mb-3">Please provide a reason for rejection (mandatory):</p>
                                 <textarea
                                     id="reject-reason"
-                                    className="form-control"
+                                    className={`form-control ${errors.rejectReason ? 'is-invalid' : ''}`}
                                     rows="3"
                                     value={modalReason}
-                                    onChange={(e) => setModalReason(e.target.value)}
+                                    onChange={(e) => {
+                                        setModalReason(e.target.value);
+                                        if (errors.rejectReason) setErrors({ ...errors, rejectReason: null });
+                                    }}
                                     placeholder="e.g., Skills do not match project requirements..."
                                     aria-label="Rejection reason"
-                                    required
                                 ></textarea>
+                                {errors.rejectReason && <div className="invalid-feedback d-block">{errors.rejectReason}</div>}
                             </div>
                             <div className="modal-footer border-0 pt-0">
                                 <button type="button" className="btn btn-light rounded-pill" onClick={() => setShowRejectModal(false)}>Cancel</button>
@@ -1131,19 +1135,6 @@ const ManagerDashboard = () => {
                 .custom-scroll {
                     scrollbar-width: thin;
                     scrollbar-color: #bbb #f1f1f1;
-                }
-                .skip-link {
-                    position: absolute;
-                    top: -40px;
-                    left: 0;
-                    background: #212529;
-                    color: white;
-                    padding: 8px;
-                    z-index: 100;
-                    transition: top 0.3s;
-                }
-                .skip-link:focus {
-                    top: 0;
                 }
                 .nav-link {
                     transition: none;

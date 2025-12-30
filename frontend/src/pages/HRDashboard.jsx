@@ -78,6 +78,7 @@ const HRDashboard = () => {
     const [actionLoading, setActionLoading] = useState(false);
     const [actionError, setActionError] = useState(null);
     const [actionSuccess, setActionSuccess] = useState(null);
+    const [errors, setErrors] = useState({});
 
     const [peopleTab, setPeopleTab] = useState('EMPLOYEES'); // 'EMPLOYEES', 'MANAGERS', 'HRS'
 
@@ -203,17 +204,29 @@ const HRDashboard = () => {
         setActionSuccess(null);
     };
 
+    const validateEditForm = () => {
+        const newErrors = {};
+        if (!editFormData.firstName.trim()) newErrors.firstName = 'First Name is required';
+        if (!editFormData.lastName.trim()) newErrors.lastName = 'Last Name is required';
+        if (!editFormData.email.trim()) newErrors.email = 'Email is required';
+        else if (!/\S+@\S+\.\S+/.test(editFormData.email)) newErrors.email = 'Invalid email format';
+
+        if (editFormData.role === 'EMPLOYEE' && !editFormData.managerId) {
+            newErrors.managerId = 'Please select a manager for the employee';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleEditSubmit = async (e) => {
         e.preventDefault();
+
+        if (!validateEditForm()) return;
+
         setActionLoading(true);
         setActionError(null);
         setActionSuccess(null);
-
-        if (editFormData.role === 'EMPLOYEE' && !editFormData.managerId) {
-            setActionError('Please select a manager for the employee.');
-            setActionLoading(false);
-            return;
-        }
 
         try {
             await api.put(`/users/${editingUser.id}`, editFormData);
@@ -762,31 +775,40 @@ const HRDashboard = () => {
                                     <label className="form-label small fw-bold">First Name</label>
                                     <input
                                         type="text"
-                                        className="form-control form-control-sm"
+                                        className={`form-control form-control-sm ${errors.firstName ? 'is-invalid' : ''}`}
                                         value={editFormData.firstName}
-                                        onChange={(e) => setEditFormData({ ...editFormData, firstName: e.target.value })}
-                                        required
+                                        onChange={(e) => {
+                                            setEditFormData({ ...editFormData, firstName: e.target.value });
+                                            if (errors.firstName) setErrors({ ...errors, firstName: null });
+                                        }}
                                     />
+                                    {errors.firstName && <div className="invalid-feedback">{errors.firstName}</div>}
                                 </div>
                                 <div className="col-md-6">
                                     <label className="form-label small fw-bold">Last Name</label>
                                     <input
                                         type="text"
-                                        className="form-control form-control-sm"
+                                        className={`form-control form-control-sm ${errors.lastName ? 'is-invalid' : ''}`}
                                         value={editFormData.lastName}
-                                        onChange={(e) => setEditFormData({ ...editFormData, lastName: e.target.value })}
-                                        required
+                                        onChange={(e) => {
+                                            setEditFormData({ ...editFormData, lastName: e.target.value });
+                                            if (errors.lastName) setErrors({ ...errors, lastName: null });
+                                        }}
                                     />
+                                    {errors.lastName && <div className="invalid-feedback">{errors.lastName}</div>}
                                 </div>
                                 <div className="col-12">
                                     <label className="form-label small fw-bold">Email Address</label>
                                     <input
                                         type="email"
-                                        className="form-control form-control-sm"
+                                        className={`form-control form-control-sm ${errors.email ? 'is-invalid' : ''}`}
                                         value={editFormData.email}
-                                        onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
-                                        required
+                                        onChange={(e) => {
+                                            setEditFormData({ ...editFormData, email: e.target.value });
+                                            if (errors.email) setErrors({ ...errors, email: null });
+                                        }}
                                     />
+                                    {errors.email && <div className="invalid-feedback">{errors.email}</div>}
                                 </div>
                                 <div className="col-md-6">
                                     <label className="form-label small fw-bold">Role</label>
@@ -805,16 +827,19 @@ const HRDashboard = () => {
                                     <div className="col-md-6">
                                         <label className="form-label small fw-bold">Manager</label>
                                         <select
-                                            className="form-select form-select-sm"
+                                            className={`form-select form-select-sm ${errors.managerId ? 'is-invalid' : ''}`}
                                             value={editFormData.managerId}
-                                            onChange={(e) => setEditFormData({ ...editFormData, managerId: e.target.value })}
-                                            required
+                                            onChange={(e) => {
+                                                setEditFormData({ ...editFormData, managerId: e.target.value });
+                                                if (errors.managerId) setErrors({ ...errors, managerId: null });
+                                            }}
                                         >
                                             <option value="">Select Manager...</option>
                                             {managers.map(mgr => (
                                                 <option key={mgr.id} value={mgr.id}>{mgr.firstName} {mgr.lastName}</option>
                                             ))}
                                         </select>
+                                        {errors.managerId && <div className="invalid-feedback">{errors.managerId}</div>}
                                     </div>
                                 )}
                             </div>
@@ -876,7 +901,7 @@ const HRDashboard = () => {
                     />
 
                     {/* Main Content */}
-                    <main role="main" id="main-content" className="col h-100" style={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                    <main role="main" id="main-content" aria-label="HR Dashboard Content" className="col h-100" style={{ overflowY: 'auto', scrollbarGutter: 'stable' }} tabIndex="-1">
                         <div className="p-4 p-md-5">
                             <div className="page-header mb-4">
                                 <div>

@@ -20,9 +20,12 @@ const LandingPage = () => {
                         <h1 className="display-1 fw-bold mb-3" style={{ color: 'var(--color-primary)' }}>
                             SkillBridge
                         </h1>
-                        <h2 className="display-5 mb-4" style={{ color: 'black' }}>
-                            Trust is rare and expensive
+                        <h2 className="display-5 lead mb-2">
+                            Smart Solutions for Smart People
                         </h2>
+                        <h3 className="h4 text-muted mb-4 fst-italic">
+                            Trust is rare and expensive
+                        </h3>
                         <p className="lead mb-5">
                             Discover skills, manage allocations, and track utilization in one place.
                         </p>

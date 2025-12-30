@@ -47,6 +47,7 @@ const EmployeeDashboard = () => {
     const [errorSkills, setErrorSkills] = useState(null);
     const [errorAlloc, setErrorAlloc] = useState(null);
     const [errorUtil, setErrorUtil] = useState(null);
+    const [errors, setErrors] = useState({});
 
     // Employee menu items for sidebar
     const employeeMenuItems = [
@@ -216,14 +217,18 @@ const EmployeeDashboard = () => {
 
     const handleRequestAllocation = async (e) => {
         e.preventDefault();
-        if (!selectedProject) return;
+        if (!selectedProject) {
+            setErrors({ selectedProject: 'Please select a project' });
+            return;
+        }
         setRequestingAlloc(true);
         setRequestAllocError(null);
         try {
             await allocationsApi.createRequest(selectedProject); // Use new API
             setSelectedProject('');
             fetchMyRequests(); // Refresh requests list
-            alert('Request submitted to Manager for approval.');
+            setSuccessMessage('Request submitted to Manager for approval.');
+            setTimeout(() => setSuccessMessage(null), 3000);
         } catch (err) {
             setRequestAllocError(err.response?.data?.message || err.response?.data?.error || 'Failed to request allocation.');
             console.error(err);
@@ -533,10 +538,12 @@ const EmployeeDashboard = () => {
                             <form onSubmit={handleRequestAllocation}>
                                 <div className="mb-3">
                                     <select
-                                        className="form-select shadow-none border-2"
+                                        className={`form-select shadow-none border-2 ${errors.selectedProject ? 'is-invalid' : ''}`}
                                         value={selectedProject}
-                                        onChange={(e) => setSelectedProject(e.target.value)}
-                                        required
+                                        onChange={(e) => {
+                                            setSelectedProject(e.target.value);
+                                            if (errors.selectedProject) setErrors({ ...errors, selectedProject: null });
+                                        }}
                                         disabled={myRequests.some(r =>
                                             r.requestStatus.startsWith('PENDING')
                                         )}
@@ -548,6 +555,7 @@ const EmployeeDashboard = () => {
                                             </option>
                                         ))}
                                     </select>
+                                    {errors.selectedProject && <div className="invalid-feedback">{errors.selectedProject}</div>}
                                 </div>
 
                                 {requestAllocError && (
@@ -707,7 +715,7 @@ const EmployeeDashboard = () => {
                     />
 
                     {/* MAIN CONTENT AREA */}
-                    <main role="main" id="main-content" className="col h-100 p-4 p-md-5" style={{ backgroundColor: 'var(--color-bg)', overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                    <main role="main" id="main-content" aria-label="Employee Dashboard Content" className="col h-100 p-4 p-md-5" style={{ backgroundColor: 'var(--color-bg)', overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }} tabIndex="-1">
                         <div className="max-width-xl mx-auto">
                             <div className="page-header mb-4">
                                 <h1 className="page-title fw-bold text-accent">
