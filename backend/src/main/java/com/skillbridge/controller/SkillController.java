@@ -26,13 +26,13 @@ public class SkillController {
     private final SkillService skillService;
 
     @PostMapping
-    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'MANAGER')")
     public ResponseEntity<SkillResponse> addSkill(@Valid @RequestBody AddSkillRequest request) {
         return ResponseEntity.ok(skillService.addSkill(request));
     }
 
     @GetMapping("/my")
-    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'MANAGER')")
     public ResponseEntity<List<SkillResponse>> getMySkills() {
         return ResponseEntity.ok(skillService.getMySkills());
     }
@@ -52,7 +52,7 @@ public class SkillController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'MANAGER')")
     public ResponseEntity<SkillResponse> updateSkill(
             @PathVariable UUID id,
             @Valid @RequestBody AddSkillRequest request) {
@@ -60,7 +60,7 @@ public class SkillController {
     }
 
     @org.springframework.web.bind.annotation.DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'MANAGER')")
     public ResponseEntity<Void> deleteSkill(@PathVariable UUID id) {
         skillService.deleteSkill(id);
         return ResponseEntity.noContent().build();

@@ -42,13 +42,16 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/error").permitAll()
 
-                        // 2. SPECIFIC EMPLOYEE-ONLY ENDPOINTS (must come before general rules)
-                        .requestMatchers("/api/assignments/my").hasAuthority("ROLE_EMPLOYEE")
+                        // 2. EMPLOYEE + MANAGER PERSONAL ENDPOINTS (must come before general rules)
+                        .requestMatchers("/api/assignments/my").hasAnyAuthority("ROLE_EMPLOYEE", "ROLE_MANAGER")
                         .requestMatchers(HttpMethod.POST, "/api/allocation-requests").hasAuthority("ROLE_EMPLOYEE")
-                        .requestMatchers("/api/skills/my").hasAuthority("ROLE_EMPLOYEE")
-                        .requestMatchers(HttpMethod.POST, "/api/skills").hasAuthority("ROLE_EMPLOYEE")
-                        .requestMatchers(HttpMethod.PUT, "/api/skills/*").hasAuthority("ROLE_EMPLOYEE")
-                        .requestMatchers(HttpMethod.DELETE, "/api/skills/*").hasAuthority("ROLE_EMPLOYEE")
+                        .requestMatchers("/api/skills/my").hasAnyAuthority("ROLE_EMPLOYEE", "ROLE_MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/api/skills")
+                        .hasAnyAuthority("ROLE_EMPLOYEE", "ROLE_MANAGER")
+                        .requestMatchers(HttpMethod.PUT, "/api/skills/*")
+                        .hasAnyAuthority("ROLE_EMPLOYEE", "ROLE_MANAGER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/skills/*")
+                        .hasAnyAuthority("ROLE_EMPLOYEE", "ROLE_MANAGER")
 
                         // 3. SPECIFIC MANAGER/HR ENDPOINTS
                         .requestMatchers("/api/users/team").hasAnyAuthority("ROLE_MANAGER", "ROLE_HR")

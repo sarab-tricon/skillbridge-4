@@ -37,20 +37,22 @@ const BenchAllocation = () => {
         setLoading(true);
         setError(null);
         try {
-            const [projectsRes, employeesRes, utilizationRes] = await Promise.all([
+            const [projectsRes, employeesRes, managersRes, utilizationRes] = await Promise.all([
                 api.get('/projects'),
                 api.get('/users/employees'),
+                api.get('/users/managers'),
                 api.get('/utilization/all')
             ]);
             setProjects(projectsRes.data);
 
-            const employees = employeesRes.data;
+            // Combine employees and managers
+            const allUsers = [...employeesRes.data, ...managersRes.data];
             const utilizations = utilizationRes.data;
 
             // Create a map for fast lookup of utilization data
             const utilizationMap = new Map((utilizations || []).map(u => [u.employeeId, u]));
 
-            const employeesWithUtil = employees.map(emp => {
+            const usersWithUtil = allUsers.map(emp => {
                 const utilData = utilizationMap.get(emp.id);
                 return {
                     ...emp,
@@ -60,7 +62,7 @@ const BenchAllocation = () => {
                 };
             });
 
-            setAllEmployees(employeesWithUtil);
+            setAllEmployees(usersWithUtil);
         } catch (err) {
             console.error('Failed to fetch data:', err);
             setError('Failed to load data');
@@ -186,16 +188,23 @@ const BenchAllocation = () => {
             {/* Tabs */}
             <div className="mb-4">
                 <div className="btn-group" role="group">
-                    {tabs.map(tab => (
-                        <button
-                            key={tab.key}
-                            type="button"
-                            className={`btn btn-lg ${activeTab === tab.key ? 'btn-primary' : 'btn-outline-primary'}`}
-                            onClick={() => { setActiveTab(tab.key); setSelectedProject(null); }}
-                        >
-                            <i className={`bi ${tab.icon} me-2`}></i>{tab.label} ({filteredProjects.length})
-                        </button>
-                    ))}
+                    {tabs.map(tab => {
+                        // Calculate count for each specific tab
+                        const tabProjectCount = projects.filter(p =>
+                            p.status === (tab.key === 'ACTIVE' ? 'ACTIVE' : 'PLANNED')
+                        ).length;
+                        return (
+                            <button
+                                key={tab.key}
+                                type="button"
+                                className={`btn ${activeTab === tab.key ? 'btn-primary' : 'btn-outline-primary'}`}
+                                onClick={() => { setActiveTab(tab.key); setSelectedProject(null); }}
+                                style={{ fontSize: '0.875rem' }}
+                            >
+                                <i className={`bi ${tab.icon} me-2`}></i>{tab.label} ({tabProjectCount})
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
