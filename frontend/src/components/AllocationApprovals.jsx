@@ -85,9 +85,9 @@ const AllocationApprovals = () => {
         <div className="card shadow-sm border-0 h-100" style={{ backgroundColor: '#fff', borderTop: '5px solid var(--color-primary)' }}>
             <div className="card-body p-4">
                 <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h3 className="card-title fw-bold m-0 text-dark">
-                        <i className="bi bi-check-circle-fill me-2 text-primary"></i>
-                    </h3>
+                    <h2 className="card-title fw-bold m-0 text-dark h5">
+                        <i className="bi bi-check-circle-fill me-2 text-primary"></i>Pending Approvals
+                    </h2>
                     <span className="badge bg-primary rounded-pill px-3">{requests.length} Pending</span>
                 </div>
 
@@ -99,7 +99,7 @@ const AllocationApprovals = () => {
                         <p>No pending allocation requests.</p>
                     </div>
                 ) : (
-                    <div className="table-responsive">
+                    <div className="table-responsive" tabIndex="0" role="region" aria-label="Pending allocation requests table">
                         <table className="table table-hover align-middle">
                             <thead className="table-light">
                                 <tr>
@@ -116,10 +116,10 @@ const AllocationApprovals = () => {
                                         <td className="text-primary">{req.projectName}</td>
                                         <td className="small text-muted">{new Date(req.requestedAt).toLocaleDateString()}</td>
                                         <td className="text-center">
-                                            <button className="btn btn-sm btn-success rounded-pill px-3 me-2" onClick={() => openApprove(req)}>
+                                            <button className="btn btn-sm btn-success rounded-pill px-3 me-2" onClick={() => openApprove(req)} aria-label={`Approve allocation for ${req.employeeName} to ${req.projectName}`}>
                                                 Approve
                                             </button>
-                                            <button className="btn btn-sm btn-outline-danger rounded-pill px-3" onClick={() => openReject(req)}>
+                                            <button className="btn btn-sm btn-outline-danger rounded-pill px-3" onClick={() => openReject(req)} style={{ color: '#b02a37', borderColor: '#b02a37' }} aria-label={`Reject allocation for ${req.employeeName} to ${req.projectName}`}>
                                                 Reject
                                             </button>
                                         </td>
@@ -137,7 +137,7 @@ const AllocationApprovals = () => {
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content rounded-4 border-0 shadow">
                             <div className="modal-header border-0">
-                                <h5 className="modal-title fw-bold">Approve Allocation</h5>
+                                <h2 className="modal-title fw-bold h5">Approve Allocation</h2>
                                 <button className="btn-close" onClick={() => setShowApproveModal(false)}></button>
                             </div>
                             <div className="modal-body">
@@ -145,13 +145,13 @@ const AllocationApprovals = () => {
 
                                 {selectedRequest?.managerName && (
                                     <div className="mb-3 px-3 py-2 bg-light rounded border-start border-4 border-info">
-                                        <label className="small text-muted text-uppercase fw-bold d-block mb-1">Forwarded by Manager</label>
+                                        <span className="small text-muted text-uppercase fw-bold d-block mb-1">Forwarded by Manager</span>
                                         <span className="fw-bold text-dark">{selectedRequest.managerName}</span>
                                     </div>
                                 )}
 
                                 <div className="mb-3 px-3 py-2 bg-white rounded border">
-                                    <label className="form-label fw-bold small text-muted text-uppercase mb-1">Billing Type</label>
+                                    <span className="form-label fw-bold small text-muted text-uppercase mb-1 d-block">Billing Type</span>
                                     <div className="fs-5 fw-bold text-dark">
                                         {selectedRequest?.billingType || 'BILLABLE'}
                                     </div>
@@ -174,7 +174,7 @@ const AllocationApprovals = () => {
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content rounded-4 border-0 shadow">
                             <div className="modal-header border-0">
-                                <h5 className="modal-title fw-bold text-danger">Reject Request</h5>
+                                <h2 className="modal-title fw-bold text-danger h5">Reject Request</h2>
                                 <button className="btn-close" onClick={() => setShowRejectModal(false)}></button>
                             </div>
                             <div className="modal-body">

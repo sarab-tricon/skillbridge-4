@@ -321,16 +321,12 @@ const HRDashboard = () => {
         <div className="col-md-3 mb-4">
             <div
                 className="card shadow-sm border-0 h-100 STAT-CARD"
-                style={{ cursor: 'pointer', borderLeft: `5px solid var(--color-primary)` }}
-                onClick={onClick}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
+                style={{ borderLeft: `5px solid var(--color-primary)` }}
             >
                 <div className="card-body d-flex flex-column">
-                    <div className="d-flex align-items-center justify-content-between mb-3">
+                    <div className="d-flex align-items-center justify-content-between mb-3" onClick={onClick} style={{ cursor: 'pointer' }} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }} aria-label={`View details for ${title}`}>
                         <div>
-                            <h6 className="text-muted text-uppercase mb-2" style={{ fontSize: '0.75rem', letterSpacing: '1px', fontWeight: '700' }}>{title}</h6>
+                            <span className="text-muted text-uppercase mb-2 d-block" style={{ fontSize: '0.75rem', letterSpacing: '1px', fontWeight: '700' }}>{title}</span>
                             <h2 className="fw-bold mb-0 text-dark">{value}</h2>
                         </div>
                         <div className="rounded-circle p-3 d-flex align-items-center justify-content-center"
@@ -426,9 +422,9 @@ const HRDashboard = () => {
             <div className="card shadow-sm border-0" style={{ backgroundColor: '#fff', borderTop: '5px solid var(--color-primary)' }}>
                 <div className="card-body p-4">
                     <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-                        <h4 className="card-title fw-bold m-0 text-dark">
-                            <i className="bi bi-people-fill me-2 text-primary"></i>{title}
-                        </h4>
+                        <h2 className="card-title fw-bold m-0 text-dark">
+                            <i className="bi bi-people-fill me-2 text-primary"></i>{title || 'Directory'}
+                        </h2>
                         <div className="d-flex gap-2">
                             <div className="btn-group btn-group-sm" role="group">
                                 <button
@@ -495,6 +491,8 @@ const HRDashboard = () => {
                                                             className="btn btn-sm btn-outline-danger"
                                                             onClick={() => handleDeleteClick(listUser)}
                                                             title="Delete User"
+                                                            style={{ color: '#b02a37', borderColor: '#b02a37' }}
+                                                            aria-label={`Delete ${listUser.firstName} ${listUser.lastName}`}
                                                         >
                                                             <i className="bi bi-trash"></i>
                                                         </button>
@@ -519,9 +517,9 @@ const HRDashboard = () => {
     const renderOnboarding = () => (
         <div className="card shadow-sm border-0" style={{ backgroundColor: '#fff', borderTop: '5px solid var(--color-primary)' }}>
             <div className="card-body p-4">
-                <h3 className="card-title fw-bold mb-4 text-dark">
+                <h2 className="card-title fw-bold mb-4 text-dark">
                     <i className="bi bi-person-plus-fill me-2 text-primary"></i>New User
-                </h3>
+                </h2>
 
                 {onboardingSuccess && (
                     <div className="alert alert-success alert-dismissible fade show" role="alert">
@@ -540,10 +538,12 @@ const HRDashboard = () => {
                 <form onSubmit={handleOnboardingSubmit}>
                     <div className="row g-2">
                         <div className="col-md-6 mb-2">
-                            <label className="form-label fw-bold small">First Name</label>
+                            <label htmlFor="firstName" className="form-label fw-bold small">First Name</label>
                             <input
                                 type="text"
+                                id="firstName"
                                 name="firstName"
+                                autoComplete="given-name"
                                 className={`form-control form-control-sm ${errors.onboardingFirstName ? 'is-invalid' : ''}`}
                                 placeholder="John"
                                 value={formData.firstName}
@@ -555,10 +555,12 @@ const HRDashboard = () => {
                             {errors.onboardingFirstName && <div className="invalid-feedback">{errors.onboardingFirstName}</div>}
                         </div>
                         <div className="col-md-6 mb-2">
-                            <label className="form-label fw-bold small">Last Name</label>
+                            <label htmlFor="lastName" className="form-label fw-bold small">Last Name</label>
                             <input
                                 type="text"
+                                id="lastName"
                                 name="lastName"
+                                autoComplete="family-name"
                                 className={`form-control form-control-sm ${errors.onboardingLastName ? 'is-invalid' : ''}`}
                                 placeholder="Doe"
                                 value={formData.lastName}
@@ -572,10 +574,12 @@ const HRDashboard = () => {
                     </div>
 
                     <div className="mb-2">
-                        <label className="form-label fw-bold small">Email Address</label>
+                        <label htmlFor="email" className="form-label fw-bold small">Email Address</label>
                         <input
                             type="email"
+                            id="email"
                             name="email"
+                            autoComplete="email"
                             className={`form-control form-control-sm ${errors.onboardingEmail ? 'is-invalid' : ''}`}
                             placeholder="user@skillbridge.com"
                             value={formData.email}
@@ -588,11 +592,13 @@ const HRDashboard = () => {
                     </div>
 
                     <div className="mb-2">
-                        <label className="form-label fw-bold small">Initial Password</label>
+                        <label htmlFor="password" className="form-label fw-bold small">Initial Password</label>
                         <div className="position-relative">
                             <input
                                 type={showPassword ? "text" : "password"}
+                                id="password"
                                 name="password"
+                                autoComplete="new-password"
                                 className={`form-control form-control-sm ${errors.onboardingPassword ? 'is-invalid' : ''}`}
                                 style={{ paddingRight: '30px' }}
                                 placeholder="••••••••"
@@ -617,10 +623,13 @@ const HRDashboard = () => {
 
                     <div className="row g-2">
                         <div className={formData.role === 'EMPLOYEE' ? "col-md-6 mb-2" : "col-12 mb-2"}>
-                            <label className="form-label fw-bold small">Role</label>
+                            <label htmlFor="role" className="form-label fw-bold small">Role</label>
                             <select
+                                id="role"
                                 name="role"
+                                autoComplete="organization-title"
                                 className="form-select form-select-sm"
+                                style={{ backgroundColor: '#fff', color: '#212529', backgroundImage: 'none', appearance: 'auto', WebkitAppearance: 'revert' }}
                                 value={formData.role}
                                 onChange={handleInputChange}
                             >
@@ -632,10 +641,13 @@ const HRDashboard = () => {
 
                         {formData.role === 'EMPLOYEE' && (
                             <div className="col-md-6 mb-2">
-                                <label className="form-label fw-bold small">Manager</label>
+                                <label htmlFor="managerId" className="form-label fw-bold small">Manager</label>
                                 <select
+                                    id="managerId"
                                     name="managerId"
+                                    autoComplete="off"
                                     className={`form-select form-select-sm ${errors.onboardingManagerId ? 'is-invalid' : ''}`}
+                                    style={{ backgroundColor: '#fff', color: '#212529', backgroundImage: 'none', appearance: 'auto', WebkitAppearance: 'revert' }}
                                     value={formData.managerId}
                                     onChange={(e) => {
                                         handleInputChange(e);
@@ -672,9 +684,9 @@ const HRDashboard = () => {
         <div className="card shadow-sm border-0 h-100" style={{ backgroundColor: '#fff', borderTop: '5px solid var(--color-primary)' }}>
             <div className="card-body p-3">
                 <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h4 className="card-title fw-bold m-0 text-dark">
-                        <i className="bi bi-search me-2 text-primary"></i>
-                    </h4>
+                    <h2 className="card-title fw-bold m-0 text-dark h4">
+                        <i className="bi bi-search me-2 text-primary"></i>Talent Discovery
+                    </h2>
                     <div className="d-flex gap-2">
                         <span className="badge bg-success small">Advanced</span>
                         <span className="badge bg-primary small">Intermediate</span>
@@ -703,6 +715,9 @@ const HRDashboard = () => {
                     <div className="input-group input-group-sm">
                         <select
                             className="form-select border-primary"
+                            aria-label="Add skill to search"
+                            autoComplete="off"
+                            style={{ backgroundColor: '#fff', backgroundImage: 'none', appearance: 'auto' }}
                             onChange={(e) => {
                                 const selected = e.target.value;
                                 if (selected && !searchSkills.includes(selected)) {
@@ -710,7 +725,6 @@ const HRDashboard = () => {
                                 }
                                 e.target.value = '';
                             }}
-                            aria-label="Add skill to search"
                         >
                             <option value="">+ Add Skill</option>
                             {catalogSkills.map(skill => (
@@ -800,9 +814,11 @@ const HRDashboard = () => {
 
                             <div className="row g-3">
                                 <div className="col-md-6">
-                                    <label className="form-label small fw-bold">First Name</label>
+                                    <label htmlFor="editFirstName" className="form-label small fw-bold">First Name</label>
                                     <input
                                         type="text"
+                                        id="editFirstName"
+                                        autoComplete="given-name"
                                         className={`form-control form-control-sm ${errors.firstName ? 'is-invalid' : ''}`}
                                         value={editFormData.firstName}
                                         onChange={(e) => {
@@ -813,9 +829,11 @@ const HRDashboard = () => {
                                     {errors.firstName && <div className="invalid-feedback">{errors.firstName}</div>}
                                 </div>
                                 <div className="col-md-6">
-                                    <label className="form-label small fw-bold">Last Name</label>
+                                    <label htmlFor="editLastName" className="form-label small fw-bold">Last Name</label>
                                     <input
                                         type="text"
+                                        id="editLastName"
+                                        autoComplete="family-name"
                                         className={`form-control form-control-sm ${errors.lastName ? 'is-invalid' : ''}`}
                                         value={editFormData.lastName}
                                         onChange={(e) => {
@@ -826,9 +844,11 @@ const HRDashboard = () => {
                                     {errors.lastName && <div className="invalid-feedback">{errors.lastName}</div>}
                                 </div>
                                 <div className="col-12">
-                                    <label className="form-label small fw-bold">Email Address</label>
+                                    <label htmlFor="editEmail" className="form-label small fw-bold">Email Address</label>
                                     <input
                                         type="email"
+                                        id="editEmail"
+                                        autoComplete="email"
                                         className={`form-control form-control-sm ${errors.email ? 'is-invalid' : ''}`}
                                         value={editFormData.email}
                                         onChange={(e) => {
@@ -839,9 +859,12 @@ const HRDashboard = () => {
                                     {errors.email && <div className="invalid-feedback">{errors.email}</div>}
                                 </div>
                                 <div className="col-md-6">
-                                    <label className="form-label small fw-bold">Role</label>
+                                    <label htmlFor="editRole" className="form-label small fw-bold">Role</label>
                                     <select
+                                        id="editRole"
+                                        autoComplete="organization-title"
                                         className="form-select form-select-sm"
+                                        style={{ backgroundColor: '#fff', color: '#212529', backgroundImage: 'none', appearance: 'auto', WebkitAppearance: 'revert' }}
                                         value={editFormData.role}
                                         onChange={(e) => setEditFormData({ ...editFormData, role: e.target.value })}
                                         required
@@ -853,9 +876,12 @@ const HRDashboard = () => {
                                 </div>
                                 {editFormData.role === 'EMPLOYEE' && (
                                     <div className="col-md-6">
-                                        <label className="form-label small fw-bold">Manager</label>
+                                        <label htmlFor="editManagerId" className="form-label small fw-bold">Manager</label>
                                         <select
+                                            id="editManagerId"
+                                            autoComplete="off"
                                             className={`form-select form-select-sm ${errors.managerId ? 'is-invalid' : ''}`}
+                                            style={{ backgroundColor: '#fff', color: '#212529', backgroundImage: 'none', appearance: 'auto', WebkitAppearance: 'revert' }}
                                             value={editFormData.managerId}
                                             onChange={(e) => {
                                                 setEditFormData({ ...editFormData, managerId: e.target.value });
@@ -931,7 +957,7 @@ const HRDashboard = () => {
                     />
 
                     {/* Main Content */}
-                    <main role="main" id="main-content" aria-label="HR Dashboard Content" className="col h-100" style={{ overflowY: 'auto', scrollbarGutter: 'stable' }} tabIndex="-1">
+                    <main role="main" id="main-content" aria-label="HR Dashboard Content" className="col h-100" style={{ overflowY: 'auto', scrollbarGutter: 'stable' }} tabIndex="0">
                         <div className="p-4 p-md-5">
                             <div className="page-header mb-4">
                                 <div>

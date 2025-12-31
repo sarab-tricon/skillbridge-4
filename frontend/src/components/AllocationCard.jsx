@@ -11,12 +11,12 @@ const AllocationCard = ({ alloc, companyName, allocationValue }) => {
                 {!isExpanded ? (
                     <div className="card-body p-4 d-flex flex-column text-center">
                         <div className="mb-3">
-                            <h6 className="text-muted text-uppercase small fw-bold mb-2" style={{ letterSpacing: '1px' }}>
+                            <div className="text-muted text-uppercase small fw-bold mb-2" style={{ letterSpacing: '1px' }}>
                                 {companyName || 'Corporate Client'}
-                            </h6>
-                            <h5 className="fw-bold text-accent mb-0">
-                                {alloc.projectName}
-                            </h5>
+                            </div>
+                            <h2 className="fw-bold text-accent mb-0 h5">
+                                {alloc.projectName || 'Unnamed Project'}
+                            </h2>
                         </div>
                         <div className="mt-auto">
                             <button
@@ -32,7 +32,7 @@ const AllocationCard = ({ alloc, companyName, allocationValue }) => {
                         <div
                             className={`card-header p-2 text-center border-0 d-flex justify-content-between align-items-center ${isPending ? 'bg-warning' : 'bg-accent'}`}
                         >
-                            <h6 className="mb-0 fw-bold text-white flex-grow-1 text-center ps-4">Project Overview</h6>
+                            <h2 className="mb-0 fw-bold text-white flex-grow-1 text-center ps-4 h6">Project Overview</h2>
                             <button
                                 className="btn btn-sm text-white p-0 border-0"
                                 onClick={() => setIsExpanded(false)}
@@ -57,7 +57,7 @@ const AllocationCard = ({ alloc, companyName, allocationValue }) => {
                             {/* Details Grid */}
                             <div className="bg-light rounded-3 p-3 border border-1 shadow-sm">
                                 <div className="mb-2">
-                                    <label className="text-muted d-block fw-bold text-uppercase mb-0" style={{ fontSize: '0.6rem', letterSpacing: '1px' }}>Project Name</label>
+                                    <span className="text-muted d-block fw-bold text-uppercase mb-0" style={{ fontSize: '0.6rem', letterSpacing: '1px' }}>Project Name</span>
                                     <div className="d-flex align-items-center">
                                         <i className="bi bi-rocket-takeoff text-accent me-2 small"></i>
                                         <span className="fw-bold text-dark small">{alloc.projectName}</span>
@@ -65,7 +65,7 @@ const AllocationCard = ({ alloc, companyName, allocationValue }) => {
                                 </div>
 
                                 <div className="mb-2">
-                                    <label className="text-muted d-block fw-bold text-uppercase mb-0" style={{ fontSize: '0.6rem', letterSpacing: '1px' }}>Client / Company</label>
+                                    <span className="text-muted d-block fw-bold text-uppercase mb-0" style={{ fontSize: '0.6rem', letterSpacing: '1px' }}>Client / Company</span>
                                     <div className="d-flex align-items-center">
                                         <i className="bi bi-building text-accent me-2 small"></i>
                                         <span className="fw-bold text-dark small">{companyName || 'External Client'}</span>
@@ -74,14 +74,14 @@ const AllocationCard = ({ alloc, companyName, allocationValue }) => {
 
                                 <div className="row g-2">
                                     <div className="col-6 border-end">
-                                        <label className="text-muted d-block fw-bold text-uppercase mb-0" style={{ fontSize: '0.6rem', letterSpacing: '1px' }}>Billing</label>
+                                        <span className="text-muted d-block fw-bold text-uppercase mb-0" style={{ fontSize: '0.6rem', letterSpacing: '1px' }}>Billing</span>
                                         <div className="d-flex align-items-center">
                                             <i className="bi bi-cash-stack text-accent me-2 small"></i>
                                             <span className="fw-bold text-dark small">{alloc.billingType || 'N/A'}</span>
                                         </div>
                                     </div>
                                     <div className="col-6 ps-2">
-                                        <label className="text-muted d-block fw-bold text-uppercase mb-0" style={{ fontSize: '0.6rem', letterSpacing: '1px' }}>Alloc</label>
+                                        <span className="text-muted d-block fw-bold text-uppercase mb-0" style={{ fontSize: '0.6rem', letterSpacing: '1px' }}>Alloc</span>
                                         <div className="d-flex align-items-center">
                                             <i className="bi bi-pie-chart text-accent me-2 small"></i>
                                             <span className="fw-bold text-dark small">{allocationValue}%</span>
@@ -90,7 +90,7 @@ const AllocationCard = ({ alloc, companyName, allocationValue }) => {
                                 </div>
 
                                 <div className="mt-2 pt-2 border-top">
-                                    <label className="text-muted d-block fw-bold text-uppercase mb-0" style={{ fontSize: '0.6rem', letterSpacing: '1px' }}>Period</label>
+                                    <span className="text-muted d-block fw-bold text-uppercase mb-0" style={{ fontSize: '0.6rem', letterSpacing: '1px' }}>Period</span>
                                     <div className="d-flex align-items-center">
                                         <i className="bi bi-calendar3 text-accent me-2 small"></i>
                                         <span className="fw-bold text-dark" style={{ fontSize: '0.7rem' }}>

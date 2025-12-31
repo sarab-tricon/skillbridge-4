@@ -69,23 +69,30 @@ const SkillCatalog = () => {
                 {/* Add New Skill Form */}
                 <div className="card border-0 bg-light mb-4 text-dark">
                     <div className="card-body">
-                        <h5 className="fw-bold mb-3">Add New Skill</h5>
+                        <h2 className="fw-bold mb-3 h5">Add New Skill</h2>
                         <form onSubmit={handleAddSkill} className="row g-3">
                             <div className="col-md-5">
+                                <label htmlFor="skill-name-input" className="visually-hidden">Skill Name</label>
                                 <input
                                     type="text"
+                                    id="skill-name-input"
                                     className="form-control"
                                     placeholder="Skill Name (e.g. Kotlin)"
                                     value={newSkill.name}
                                     onChange={(e) => setNewSkill({ ...newSkill, name: e.target.value })}
                                     required
+                                    autoComplete="off"
                                 />
                             </div>
                             <div className="col-md-4">
+                                <label htmlFor="skill-category-select" className="visually-hidden">Category</label>
                                 <select
+                                    id="skill-category-select"
                                     className="form-select"
                                     value={newSkill.category}
                                     onChange={(e) => setNewSkill({ ...newSkill, category: e.target.value })}
+                                    autoComplete="off"
+                                    style={{ backgroundColor: '#fff', backgroundImage: 'none', appearance: 'auto' }}
                                 >
                                     <option value="General">General</option>
                                     <option value="Programming">Programming</option>
@@ -113,7 +120,7 @@ const SkillCatalog = () => {
                 ) : skills.length === 0 ? (
                     <p className="text-center text-muted">No skills in the catalog yet.</p>
                 ) : (
-                    <div className="table-responsive" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                    <div className="table-responsive" style={{ maxHeight: '60vh', overflowY: 'auto' }} tabIndex="0" role="region" aria-label="Skill catalog table">
                         <table className="table table-hover align-middle">
                             <thead className="table-light sticky-top" style={{ zIndex: 1 }}>
                                 <tr>
@@ -131,6 +138,8 @@ const SkillCatalog = () => {
                                             <button
                                                 className="btn btn-sm btn-outline-danger"
                                                 onClick={() => handleDeleteSkill(skill.id)}
+                                                style={{ color: '#b02a37', borderColor: '#b02a37' }}
+                                                aria-label={`Delete ${skill.name} from catalog`}
                                             >
                                                 <i className="bi bi-trash"></i>
                                             </button>
