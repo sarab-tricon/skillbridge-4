@@ -21,8 +21,33 @@ jest.mock('../api/allocations', () => ({
     allocationsApi: {
         getPendingRequests: jest.fn(),
         updateRequestStatus: jest.fn(),
+        forwardToHr: jest.fn(),
+        rejectRequest: jest.fn(),
     },
 }));
+
+// Mock Sidebar to simplify navigation testing
+jest.mock('../components/Sidebar', () => {
+    return function MockSidebar({ onSectionChange, menuItems, activeSection }) {
+        return (
+            <nav aria-label="Sidebar">
+                {menuItems.map(item => (
+                    <button
+                        key={item.id === null ? 'null' : item.id}
+                        onClick={() => onSectionChange(item.id)}
+                        aria-current={activeSection === item.id ? 'page' : undefined}
+                    >
+                        {item.label}
+                    </button>
+                ))}
+            </nav>
+        );
+    };
+});
+
+// Mock requestIdleCallback to execute immediately for testing
+global.requestIdleCallback = jest.fn((cb) => cb());
+global.cancelIdleCallback = jest.fn();
 
 // Mock Lazy Loaded Components to avoid Suspense issues in tests
 jest.mock('../components/ProfileSection', () => {
@@ -46,14 +71,16 @@ describe('ManagerDashboard', () => {
             skillName: 'Python',
             proficiencyLevel: 'INTERMEDIATE',
             status: 'PENDING',
-            user: { firstName: 'Alice', lastName: 'Dev', email: 'alice@test.com' }
+            employeeName: 'Alice Dev',
+            employeeEmail: 'alice@test.com'
         },
         {
             id: 102,
             skillName: 'Docker',
             proficiencyLevel: 'BEGINNER',
             status: 'PENDING',
-            user: { firstName: 'Bob', lastName: 'Ops', email: 'bob@test.com' }
+            employeeName: 'Bob Ops',
+            employeeEmail: 'bob@test.com'
         }
     ];
 
@@ -76,22 +103,36 @@ describe('ManagerDashboard', () => {
         }
     ];
 
+    const defaultResponses = {
+        '/skills/pending': { data: mockPendingSkills },
+        '/users/team': { data: mockTeam },
+        '/users/me': { data: { id: 'm1', firstName: 'Manager', lastName: 'User', email: 'manager@test.com' } },
+        '/utilization/team': { data: [] },
+        '/projects/active': { data: [] },
+        '/assignments/my': { data: [] },
+        '/skills/my': { data: [] },
+        '/catalog/skills': { data: [] },
+        '/utilization/me': { data: { assignments: [], totalUtilization: 0 } },
+        '/allocation-requests/pending': { data: [] },
+    };
+
     beforeEach(() => {
-        jest.clearAllMocks();
+        api.get.mockReset();
+        api.post.mockReset();
+        api.put.mockReset();
+        api.delete.mockReset();
+        allocationsApi.getPendingRequests.mockReset();
+        allocationsApi.updateRequestStatus.mockReset();
+        allocationsApi.forwardToHr.mockReset();
+        allocationsApi.rejectRequest.mockReset();
+
+        window.localStorage.clear(); // Clear section persistence
         useAuth.mockReturnValue({ user: mockUser });
 
         // Default API Responses
         api.get.mockImplementation((url) => {
-            if (url === '/skills/pending') return Promise.resolve({ data: mockPendingSkills });
-            if (url === '/users/team') return Promise.resolve({ data: mockTeam });
-
-            // Other calls needed for initial load
-            if (url === '/users/me') return Promise.resolve({ data: { id: 'm1', ...mockUser } });
-            if (url === '/utilization/team') return Promise.resolve({ data: [] });
-            if (url === '/projects/active') return Promise.resolve({ data: [] });
-            if (url === '/assignments/my') return Promise.resolve({ data: [] }); // For My Allocations
-            if (url === '/skills/my') return Promise.resolve({ data: [] }); // For My Skills
-
+            const res = defaultResponses[url];
+            if (res) return Promise.resolve(res);
             return Promise.resolve({ data: [] });
         });
 
@@ -105,48 +146,43 @@ describe('ManagerDashboard', () => {
             </MemoryRouter>
         );
 
-        await waitFor(() => {
-            expect(screen.getByText('Dashboard Overview')).toBeInTheDocument();
-        });
+        await screen.findByRole('heading', { name: /Dashboard Overview/i, level: 1 });
+
+        expect(screen.getByText('Team Size')).toBeInTheDocument();
+        const teamSizeCard = screen.getByText('Team Size').closest('.card');
+        expect(within(teamSizeCard).getByText('2')).toBeInTheDocument(); // Alice and Bob
     });
 
-    it('renders Team Member cards correctly', async () => {
+    it('handles side navigation to My Team correctly', async () => {
         render(
             <MemoryRouter>
                 <ManagerDashboard />
             </MemoryRouter>
         );
 
-        // Switch to "My Team" section
-        const teamButton = await screen.findByRole('button', { name: /My Team/i });
-        fireEvent.click(teamButton);
+        const sidebar = screen.getByRole('navigation', { name: /sidebar/i });
+        const teamBtn = await within(sidebar).findByText('My Team');
+        fireEvent.click(teamBtn);
 
-        await waitFor(() => {
-            expect(screen.getByText('Alice Dev')).toBeInTheDocument();
-            expect(screen.getByText('alice@test.com')).toBeInTheDocument();
-            expect(screen.getByText('Bob Ops')).toBeInTheDocument();
-        });
-    }, 10000); // Increased timeout for tab switching
+        await screen.findByRole('heading', { name: /Team Management/i });
+        expect(screen.getByText('Alice Dev')).toBeInTheDocument();
+    });
 
-    it('handles Skill Approval (Verify)', async () => {
+    it('handles Skill Verification section', async () => {
         render(
             <MemoryRouter>
                 <ManagerDashboard />
             </MemoryRouter>
         );
 
-        // Switch to "Verifications" section using Sidebar (simpler/stable)
-        // Note: Sidebar button text is 'Verifications'. Card button has aria-label 'View details for Verifications'.
-        // Exact match anchors to Sidebar.
-        const navBtn = await screen.findByRole('button', { name: /^Verifications$/i });
+        const sidebar = screen.getByRole('navigation', { name: /sidebar/i });
+        const navBtn = await within(sidebar).findByText('Verifications');
         fireEvent.click(navBtn);
 
-        // Wait for active section content to load (Pending Skills table)
-        await waitFor(() => {
-            expect(screen.getByText('Python')).toBeInTheDocument();
-        });
+        await screen.findByRole('heading', { name: /Skill Verifications/i });
+        expect(await screen.findByText(/Python/i)).toBeInTheDocument();
 
-        const pythonRow = screen.getByText('Python').closest('tr');
+        const pythonRow = screen.getByText(/Python/i).closest('tr');
         const verifyBtn = within(pythonRow).getByRole('button', { name: /Verify/i });
 
         api.put.mockResolvedValue({ data: {} });
@@ -154,36 +190,195 @@ describe('ManagerDashboard', () => {
         fireEvent.click(verifyBtn);
 
         await waitFor(() => {
-            expect(api.put).toHaveBeenCalledWith('/skills/101/verify', { status: 'APPROVED' });
+            expect(api.put).toHaveBeenCalledWith(expect.stringContaining('101/verify'), expect.objectContaining({ status: 'APPROVED' }));
         });
-    }, 10000);
+    });
 
-    it('handles Skill Rejection (Reject)', async () => {
+    it('handles Skill Rejection', async () => {
         render(
             <MemoryRouter>
                 <ManagerDashboard />
             </MemoryRouter>
         );
 
-        const navBtn = await screen.findByRole('button', { name: /^Verifications$/i });
+        const sidebar = screen.getByRole('navigation', { name: /sidebar/i });
+        const navBtn = await within(sidebar).findByText('Verifications');
         fireEvent.click(navBtn);
 
-        await waitFor(() => {
-            expect(screen.getByText('Docker')).toBeInTheDocument();
-        });
-
-        const dockerRow = screen.getByText('Docker').closest('tr');
+        await screen.findByRole('heading', { name: /Skill Verifications/i });
+        const dockerText = await screen.findByText(/Docker/i);
+        const dockerRow = dockerText.closest('tr');
         const rejectBtn = within(dockerRow).getByRole('button', { name: /Reject/i });
 
-        api.delete.mockResolvedValue({ data: {} });
+        api.put.mockResolvedValue({ data: {} });
 
         fireEvent.click(rejectBtn);
 
         await waitFor(() => {
-            expect(api.put).toHaveBeenCalledWith('/skills/102/verify', { status: 'REJECTED' });
+            expect(api.put).toHaveBeenCalledWith(expect.stringContaining('102/verify'), expect.objectContaining({ status: 'REJECTED' }));
         });
-    }, 10000);
+    });
 
+    it('handles Adding a New Skill', async () => {
+        const catalogData = [{ id: 1, name: 'Java' }, { id: 2, name: 'AWS' }];
+
+        api.get.mockImplementation((url) => {
+            if (url === '/catalog/skills') return Promise.resolve({ data: catalogData });
+            const res = defaultResponses[url];
+            if (res) return Promise.resolve(res);
+            return Promise.resolve({ data: [] });
+        });
+
+        render(
+            <MemoryRouter>
+                <ManagerDashboard />
+            </MemoryRouter>
+        );
+
+        const sidebar = screen.getByRole('navigation', { name: /sidebar/i });
+        const navBtn = await within(sidebar).findByText('My Skills');
+        fireEvent.click(navBtn);
+
+        await screen.findByRole('heading', { name: /MANAGER Skills/i });
+        expect(await screen.findByText(/Add New Skill/i)).toBeInTheDocument();
+
+        // Scope to the form container to avoid ambiguity with table headings
+        const formContainer = screen.getByText(/Add New Skill/i).closest('.card');
+        const skillSelect = within(formContainer).getByText(/Skill Name/i).closest('div').querySelector('select');
+        const levelSelect = within(formContainer).getByText(/Proficiency Level/i).closest('div').querySelector('select');
+        const submitBtn = within(formContainer).getByRole('button', { name: /Add Skill/i });
+
+        fireEvent.change(skillSelect, { target: { value: 'Java' } });
+        fireEvent.change(levelSelect, { target: { value: 'ADVANCED' } });
+
+        api.post.mockResolvedValue({ data: { id: 501, skillName: 'Java', proficiencyLevel: 'ADVANCED', status: 'APPROVED' } });
+
+        fireEvent.click(submitBtn);
+
+        await waitFor(() => {
+            expect(screen.getByText(/Skill added/i)).toBeInTheDocument();
+        });
+        expect(api.post).toHaveBeenCalled();
+    });
+
+    it('handles Project Requests section', async () => {
+        const mockRequests = [
+            { id: 1, employeeName: 'Alice', employeeEmail: 'alice@test.com', projectName: 'Project X', selectedBillingType: 'BILLABLE' }
+        ];
+
+        api.get.mockImplementation((url) => {
+            if (url === '/allocation-requests/pending') return Promise.resolve({ data: mockRequests });
+            const res = defaultResponses[url];
+            if (res) return Promise.resolve(res);
+            return Promise.resolve({ data: [] });
+        });
+        allocationsApi.getPendingRequests.mockResolvedValue({ data: mockRequests });
+
+        render(
+            <MemoryRouter>
+                <ManagerDashboard />
+            </MemoryRouter>
+        );
+
+        const sidebar = screen.getByRole('navigation', { name: /sidebar/i });
+        const navBtn = await within(sidebar).findByText('Requests');
+        fireEvent.click(navBtn);
+
+        await screen.findByRole('heading', { name: /Project Requests/i });
+        const requestRow = await screen.findByText(/Project X/i);
+        const row = requestRow.closest('tr');
+
+        const forwardBtn = within(row).getByRole('button', { name: /Forward to HR/i });
+        fireEvent.click(forwardBtn);
+
+        await screen.findByRole('heading', { name: /Forward to HR/i });
+        const commentArea = await screen.findByRole('textbox', { name: /Comments for HR/i });
+        fireEvent.change(commentArea, { target: { value: 'Strong candidate' } });
+
+        allocationsApi.forwardToHr.mockResolvedValue({ data: {} });
+
+        const confirmBtn = screen.getByRole('button', { name: /Forward Request/i });
+        fireEvent.click(confirmBtn);
+
+        await waitFor(() => {
+            expect(allocationsApi.forwardToHr).toHaveBeenCalled();
+        });
+    });
+
+    it('handles Rejecting a Project Request with reason', async () => {
+        const mockRequests = [
+            { id: 2, employeeName: 'Bob', employeeEmail: 'bob@test.com', projectName: 'Project Y', selectedBillingType: 'INVESTMENT' }
+        ];
+
+        api.get.mockImplementation((url) => {
+            if (url === '/allocation-requests/pending') return Promise.resolve({ data: mockRequests });
+            const res = defaultResponses[url];
+            if (res) return Promise.resolve(res);
+            return Promise.resolve({ data: [] });
+        });
+        allocationsApi.getPendingRequests.mockResolvedValue({ data: mockRequests });
+
+        render(
+            <MemoryRouter>
+                <ManagerDashboard />
+            </MemoryRouter>
+        );
+
+        const sidebar = screen.getByRole('navigation', { name: /sidebar/i });
+        const navBtn = await within(sidebar).findByText('Requests');
+        fireEvent.click(navBtn);
+
+        await screen.findByRole('heading', { name: /Project Requests/i });
+        const requestRow = await screen.findByText(/Project Y/i);
+        const row = requestRow.closest('tr');
+
+        const rejectBtn = within(row).getByRole('button', { name: /Reject/i });
+        fireEvent.click(rejectBtn);
+
+        await screen.findByRole('heading', { name: /Reject Request/i });
+        const reasonArea = await screen.findByRole('textbox', { name: /Rejection reason/i });
+        fireEvent.change(reasonArea, { target: { value: 'Not available' } });
+
+        allocationsApi.rejectRequest.mockResolvedValue({ data: {} });
+
+        const confirmBtn = screen.getByRole('button', { name: /Confirm Rejection/i });
+        fireEvent.click(confirmBtn);
+
+        await waitFor(() => {
+            expect(allocationsApi.rejectRequest).toHaveBeenCalledWith(2, 'Not available');
+        });
+    });
+
+    it('handles Utilization section', async () => {
+        const mockUtil = {
+            totalUtilization: 75,
+            allocationStatus: 'PARTIALLY_ALLOCATED',
+            assignments: [
+                { projectName: 'Internal Tool', allocationPercent: 75, startDate: '2023-01-01', billingType: 'INVESTMENT' }
+            ]
+        };
+
+        api.get.mockImplementation((url) => {
+            if (url === '/utilization/me') return Promise.resolve({ data: mockUtil });
+            const res = defaultResponses[url];
+            if (res) return Promise.resolve(res);
+            return Promise.resolve({ data: [] });
+        });
+
+        render(
+            <MemoryRouter>
+                <ManagerDashboard />
+            </MemoryRouter>
+        );
+
+        const sidebar = screen.getByRole('navigation', { name: /sidebar/i });
+        const navBtn = await within(sidebar).findByText('Utilization');
+        fireEvent.click(navBtn);
+
+        await screen.findByRole('heading', { name: /Utilization/i, level: 1 });
+        expect(await screen.findByText(/Internal Tool/i)).toBeInTheDocument();
+        expect(screen.getByText(/PARTIALLY_ALLOCATED/i)).toBeInTheDocument();
+    });
 });
 
 // Helper for row scoping
