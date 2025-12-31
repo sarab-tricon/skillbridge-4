@@ -441,14 +441,15 @@ const EmployeeDashboard = () => {
                                                                 </td>
                                                                 <td className="px-4 py-3 text-end">
                                                                     <button
-                                                                        className="btn btn-sm btn-outline-accent rounded-pill px-4 shadow-sm"
+                                                                        className="btn btn-sm btn-outline-primary"
                                                                         onClick={() => {
                                                                             setEditingSkill(skill);
                                                                             setAddSkillError(null);
                                                                             window.scrollTo({ top: 0, behavior: 'smooth' });
                                                                         }}
+                                                                        title="Edit Skill"
                                                                     >
-                                                                        <i className="bi bi-pencil-square me-1"></i> Edit
+                                                                        <i className="bi bi-pencil"></i>
                                                                     </button>
                                                                 </td>
                                                             </tr>

@@ -211,6 +211,7 @@ const ManagerDashboard = () => {
             setNewSkill({ skillName: '', proficiencyLevel: 'BEGINNER' });
             setSkillSuccess('Skill added (auto-approved)!');
             fetchMySkills();
+            fetchProfile();
             setTimeout(() => setSkillSuccess(null), 3000);
         } catch (err) {
             setSkillError(err.response?.data?.message || 'Failed to add skill.');
@@ -238,6 +239,7 @@ const ManagerDashboard = () => {
             setSkillSuccess('Skill updated!');
             setEditingSkill(null);
             fetchMySkills();
+            fetchProfile();
             setTimeout(() => setSkillSuccess(null), 3000);
         } catch (err) {
             setSkillError(err.response?.data?.message || 'Failed to update skill.');
@@ -252,6 +254,7 @@ const ManagerDashboard = () => {
             await api.delete(`/skills/${id}`);
             setSkillSuccess('Skill deleted.');
             fetchMySkills();
+            fetchProfile();
             setTimeout(() => setSkillSuccess(null), 3000);
         } catch (err) {
             setSkillError(err.response?.data?.message || 'Failed to delete skill.');
@@ -867,18 +870,11 @@ const ManagerDashboard = () => {
                                                                                     <td className="px-4 py-3 text-end">
                                                                                         <div className="d-flex justify-content-end gap-2">
                                                                                             <button
-                                                                                                className="btn btn-sm btn-outline-info rounded-circle shadow-sm"
+                                                                                                className="btn btn-sm btn-outline-primary"
                                                                                                 onClick={() => { setEditingSkill(skill); setSkillError(null); }}
                                                                                                 title="Edit Skill"
                                                                                             >
                                                                                                 <i className="bi bi-pencil"></i>
-                                                                                            </button>
-                                                                                            <button
-                                                                                                className="btn btn-sm btn-outline-danger rounded-circle shadow-sm"
-                                                                                                onClick={() => handleDeleteSkill(skill.id)}
-                                                                                                title="Delete Skill"
-                                                                                            >
-                                                                                                <i className="bi bi-trash"></i>
                                                                                             </button>
                                                                                         </div>
                                                                                     </td>
