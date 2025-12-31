@@ -37,9 +37,9 @@ const ProfileSection = ({ profile, utilization, onNavigateToSkills }) => {
                             </div>
 
                             <div className="text-white">
-                                <h3 className="fw-bold mb-1 text-white">
+                                <h2 className="fw-bold mb-1 text-white h3">
                                     {profile.firstName} {profile.lastName}
-                                </h3>
+                                </h2>
 
                                 <div className="d-flex align-items-center gap-2 opacity-75 small">
                                     <i className="bi bi-envelope"></i>
@@ -81,16 +81,16 @@ const ProfileSection = ({ profile, utilization, onNavigateToSkills }) => {
                 {/* Assignments */}
                 <div className="col-lg-7">
                     <div className="d-flex align-items-center mb-3">
-                        <h5
-                            className="fw-bold mb-0"
+                        <h3
+                            className="fw-bold mb-0 h5"
                             style={{ color: 'var(--profile-theme-color, var(--color-primary))' }}
                         >
                             <i className="bi bi-briefcase-fill me-2"></i>
                             Active Assignments
-                        </h5>
+                        </h3>
                     </div>
 
-                    <div className="custom-scroll" style={{ height: '240px', overflowY: 'auto', paddingRight: '5px' }}>
+                    <div className="custom-scroll" style={{ height: '240px', overflowY: 'auto', paddingRight: '5px' }} tabIndex="0" aria-label="Active assignments scroll list" role="region">
                         {assignments.length > 0 ? (
                             <div className="d-flex flex-column gap-3">
                                 {assignments.map((assign, idx) => (
@@ -98,7 +98,7 @@ const ProfileSection = ({ profile, utilization, onNavigateToSkills }) => {
                                         <div className="card-body p-3">
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <div>
-                                                    <h6 className="fw-bold mb-1 text-dark">{assign.projectName}</h6>
+                                                    <h4 className="fw-bold mb-1 text-dark h6">{assign.projectName}</h4>
                                                     <div className="text-muted small">
                                                         <i className="bi bi-building me-1"></i>
                                                         {assign.companyName || profile.companyName || 'Corporate Client'}
@@ -124,13 +124,13 @@ const ProfileSection = ({ profile, utilization, onNavigateToSkills }) => {
                 {/* Skills */}
                 <div className="col-lg-5">
                     <div className="d-flex justify-content-between align-items-center mb-3">
-                        <h5
-                            className="fw-bold mb-0"
+                        <h3
+                            className="fw-bold mb-0 h5"
                             style={{ color: 'var(--profile-theme-color, var(--color-primary))' }}
                         >
                             <i className="bi bi-lightning-charge-fill me-2"></i>
                             Skills
-                        </h5>
+                        </h3>
 
                         {onNavigateToSkills && (
                             <button
@@ -142,13 +142,14 @@ const ProfileSection = ({ profile, utilization, onNavigateToSkills }) => {
                                     borderColor: 'var(--profile-theme-color, var(--color-primary))'
                                 }}
                                 onClick={onNavigateToSkills}
+                                aria-label="Add Skill"
                             >
                                 <i className="bi bi-plus-lg"></i>
                             </button>
                         )}
                     </div>
 
-                    <div className="card border-0 shadow-sm rounded-3 custom-scroll" style={{ height: '240px', overflowY: 'auto' }}>
+                    <div className="card border-0 shadow-sm rounded-3 custom-scroll" style={{ height: '240px', overflowY: 'auto' }} tabIndex="0" aria-label="Skills scroll list" role="region">
                         <div className="card-body p-0">
                             {profile.skills && profile.skills.length > 0 ? (
                                 <div className="list-group list-group-flush">

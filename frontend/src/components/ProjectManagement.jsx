@@ -146,7 +146,7 @@ const ProjectManagement = () => {
     const tabs = [
         { key: 'ACTIVE', label: 'Active Projects', icon: 'bi-play-circle-fill', color: 'var(--color-primary)' },
         { key: 'UPCOMING', label: 'Upcoming Projects', icon: 'bi-calendar-plus', color: 'var(--color-primary)' },
-        { key: 'COMPLETED', label: 'Completed Projects', icon: 'bi-check-circle-fill', color: '#6c757d' }
+        { key: 'COMPLETED', label: 'Completed Projects', icon: 'bi-check-circle-fill', color: '#495057' }
     ];
 
     // Helper to get allocation count
@@ -241,7 +241,7 @@ const ProjectManagement = () => {
                     ) : filteredProjects.length === 0 ? (
                         <div className="text-center py-5">
                             <i className={`bi ${tabs.find(t => t.key === activeTab)?.icon} display-1 text-muted mb-3`}></i>
-                            <h4 className="text-muted">No {activeTab.toLowerCase()} projects found</h4>
+                            <h2 className="text-muted h4">No {activeTab.toLowerCase()} projects found</h2>
                         </div>
                     ) : (
                         <div className="row g-4">
@@ -314,7 +314,7 @@ const ProjectCard = ({ project, allocatedCount = 0, onEndProject, onClick }) => 
     };
 
     const badge = getStatusBadge(project.status);
-    const progressPercent = Math.min(100, Math.round((allocatedCount / project.employeesRequired) * 100));
+    const progressPercent = project.employeesRequired > 0 ? Math.min(100, Math.round((allocatedCount / project.employeesRequired) * 100)) : 0;
 
     return (
         <div
@@ -331,10 +331,10 @@ const ProjectCard = ({ project, allocatedCount = 0, onEndProject, onClick }) => 
                 {/* Header */}
                 <div className="d-flex justify-content-between align-items-start mb-3">
                     <div className="flex-grow-1" style={{ minWidth: 0, marginRight: '8px' }}>
-                        <h5 className="card-title fw-bold mb-1 text-dark" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }} title={project.name}>
+                        <h2 className="card-title fw-bold mb-1 text-dark h5" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>
                             {project.name}
-                        </h5>
-                        <p className="text-muted small mb-0" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }} title={project.companyName}>
+                        </h2>
+                        <p className="text-muted small mb-0" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>
                             <i className="bi bi-building me-1"></i>
                             {project.companyName}
                         </p>
@@ -418,16 +418,16 @@ const ProjectDetailsModal = ({ project, employees, onClose, onEndProject, tabCol
             <div className="modal-dialog modal-lg modal-dialog-centered">
                 <div className="modal-content border-0 shadow-lg">
                     <div className="modal-header bg-light">
-                        <h5 className="modal-title fw-bold text-primary">
+                        <h2 className="modal-title fw-bold text-primary h5">
                             <i className="bi bi-folder-fill me-2"></i>{project.name}
-                        </h5>
+                        </h2>
                         <button type="button" className="btn-close" onClick={onClose}></button>
                     </div>
                     <div className="modal-body p-4">
                         <div className="row g-4">
                             {/* Left: Metadata */}
                             <div className="col-md-5 border-end">
-                                <h6 className="fw-bold mb-3 text-muted">Project Details</h6>
+                                <h3 className="fw-bold mb-3 text-muted h6">Project Details</h3>
 
                                 <div className="mb-3">
                                     <small className="text-muted d-block">Company</small>
@@ -485,7 +485,7 @@ const ProjectDetailsModal = ({ project, employees, onClose, onEndProject, tabCol
                             {/* Right: Allocated Team */}
                             <div className="col-md-7">
                                 <div className="d-flex justify-content-between align-items-center mb-3">
-                                    <h6 className="fw-bold mb-0 text-muted">Allocated Team</h6>
+                                    <h3 className="fw-bold mb-0 text-muted h6">Allocated Team</h3>
                                     <span className="badge bg-primary">{teamMembers.length} / {project.employeesRequired}</span>
                                 </div>
 
@@ -539,37 +539,41 @@ const AddProjectModal = ({ formData, setFormData, catalogSkills, onSubmit, onClo
             <div className="modal-dialog modal-lg modal-dialog-centered">
                 <div className="modal-content" style={{ borderRadius: '15px' }}>
                     <div className="modal-header" style={{ borderBottom: '3px solid var(--color-primary)' }}>
-                        <h5 className="modal-title fw-bold text-dark">
+                        <h2 className="modal-title fw-bold text-dark h5">
                             <i className="bi bi-plus-circle-fill me-2 text-primary"></i>
                             Add Upcoming Project
-                        </h5>
+                        </h2>
                         <button type="button" className="btn-close" onClick={onClose}></button>
                     </div>
                     <div className="modal-body p-4">
                         <form onSubmit={onSubmit}>
                             <div className="row g-3">
                                 <div className="col-md-6">
-                                    <label className="form-label fw-bold">Project Name</label>
+                                    <label htmlFor="project-name-input" className="form-label fw-bold">Project Name</label>
                                     <input
                                         type="text"
+                                        id="project-name-input"
                                         name="name"
                                         className="form-control"
                                         required
                                         value={formData.name}
                                         onChange={handleInputChange}
                                         placeholder="e.g., E-Commerce Platform"
+                                        autoComplete="off"
                                     />
                                 </div>
                                 <div className="col-md-6">
-                                    <label className="form-label fw-bold">Company</label>
+                                    <label htmlFor="company-name-input" className="form-label fw-bold">Company</label>
                                     <input
                                         type="text"
+                                        id="company-name-input"
                                         name="companyName"
                                         className="form-control"
                                         required
                                         value={formData.companyName}
                                         onChange={handleInputChange}
                                         placeholder="e.g., Tech Corp"
+                                        autoComplete="organization"
                                     />
                                 </div>
                             </div>
@@ -596,8 +600,11 @@ const AddProjectModal = ({ formData, setFormData, catalogSkills, onSubmit, onClo
                                         ))
                                     )}
                                 </div>
+                                <label htmlFor="tech-stack-select" className="visually-hidden">Add Skill to Tech Stack</label>
                                 <select
+                                    id="tech-stack-select"
                                     className="form-select"
+                                    autoComplete="off"
                                     onChange={(e) => {
                                         const selectedSkill = e.target.value;
                                         if (selectedSkill && !formData.techStack.includes(selectedSkill)) {
@@ -615,39 +622,45 @@ const AddProjectModal = ({ formData, setFormData, catalogSkills, onSubmit, onClo
 
                             <div className="row g-3 mt-2">
                                 <div className="col-md-6">
-                                    <label className="form-label fw-bold">Start Date</label>
+                                    <label htmlFor="start-date-input" className="form-label fw-bold">Start Date</label>
                                     <input
                                         type="date"
+                                        id="start-date-input"
                                         name="startDate"
                                         className="form-control"
                                         required
                                         value={formData.startDate}
                                         onChange={handleInputChange}
+                                        autoComplete="off"
                                     />
                                 </div>
                                 <div className="col-md-6">
-                                    <label className="form-label fw-bold">End Date</label>
+                                    <label htmlFor="end-date-input" className="form-label fw-bold">End Date</label>
                                     <input
                                         type="date"
+                                        id="end-date-input"
                                         name="endDate"
                                         className="form-control"
                                         required
                                         value={formData.endDate}
                                         onChange={handleInputChange}
+                                        autoComplete="off"
                                     />
                                 </div>
                             </div>
 
                             <div className="mt-3">
-                                <label className="form-label fw-bold">Employees Required</label>
+                                <label htmlFor="employees-required-input" className="form-label fw-bold">Employees Required</label>
                                 <input
                                     type="number"
+                                    id="employees-required-input"
                                     name="employeesRequired"
                                     className="form-control"
                                     min="1"
                                     required
                                     value={formData.employeesRequired}
                                     onChange={handleInputChange}
+                                    autoComplete="off"
                                 />
                             </div>
 

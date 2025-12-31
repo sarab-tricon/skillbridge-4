@@ -258,7 +258,7 @@ const EmployeeDashboard = () => {
                     <div className="card h-100 shadow-sm border-0 border-top-primary">
                         <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
                             <i className="bi bi-person-badge h1 text-accent mb-2"></i>
-                            <h5 className="card-title fw-bold">My Skills</h5>
+                            <h2 className="card-title fw-bold h5">My Skills</h2>
                             <div className="mb-3">
                                 <p className="h2 fw-bold text-accent mb-0">
                                     {loadingSkills ? '...' : skills.filter(s => s.status === 'APPROVED').length}
@@ -276,7 +276,7 @@ const EmployeeDashboard = () => {
                     <div className="card h-100 shadow-sm border-0 border-top-primary">
                         <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
                             <i className="bi bi-briefcase h1 text-accent mb-2"></i>
-                            <h5 className="card-title fw-bold">Assignments</h5>
+                            <h2 className="card-title fw-bold h5">Assignments</h2>
                             <div className="mb-3">
                                 <p className="h2 fw-bold text-accent mb-0">
                                     {loadingAlloc ? '...' : projectCount}
@@ -294,7 +294,7 @@ const EmployeeDashboard = () => {
                     <div className="card h-100 shadow-sm border-0 border-top-primary">
                         <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
                             <i className="bi bi-graph-up h1 text-accent mb-2"></i>
-                            <h5 className="card-title fw-bold">Utilization</h5>
+                            <h2 className="card-title fw-bold h5">Utilization</h2>
                             <div className="mb-3">
                                 <p className="h2 fw-bold text-accent mb-0">
                                     {displayUtilization}%
@@ -322,13 +322,15 @@ const EmployeeDashboard = () => {
                 <div className="row g-4 h-100">
                     <div className="col-lg-4 h-100">
                         <div id="skill-form-container" className="card shadow-sm border-0 p-4 sticky-top scrollable-form" style={{ top: '0', zIndex: 1, backgroundColor: '#fff', borderLeft: '5px solid var(--color-accent)', maxHeight: '100%', overflowY: 'auto' }}>
-                            <h4 className="fw-bold mb-3">{editingSkill ? 'Edit Skill' : 'Add New Skill'}</h4>
+                            <h2 className="fw-bold mb-3 h4">{editingSkill ? 'Edit Skill' : 'Add New Skill'}</h2>
                             <form onSubmit={editingSkill ? handleUpdateSkill : handleAddSkill}>
                                 <div className="mb-3">
-                                    <label className="form-label small text-muted text-uppercase fw-bold">Skill Name</label>
-                                    <label className="form-label small text-muted text-uppercase fw-bold">Skill Name</label>
+                                    <label htmlFor="skillNameSelect" className="form-label small text-muted text-uppercase fw-bold">Skill Name</label>
                                     <select
+                                        id="skillNameSelect"
+                                        autoComplete="off"
                                         className={`form-select border-2 shadow-none ${errors.skillName ? 'is-invalid' : ''}`}
+                                        style={{ backgroundColor: '#fff', color: '#212529', backgroundImage: 'none', appearance: 'auto', WebkitAppearance: 'revert' }}
                                         value={editingSkill ? editingSkill.skillName : newSkill.skillName}
                                         onChange={(e) => {
                                             if (editingSkill) setEditingSkill({ ...editingSkill, skillName: e.target.value });
@@ -345,9 +347,12 @@ const EmployeeDashboard = () => {
                                     {errors.skillName && <div className="invalid-feedback">{errors.skillName}</div>}
                                 </div>
                                 <div className="mb-4">
-                                    <label className="form-label small text-muted text-uppercase fw-bold">Proficiency Level</label>
+                                    <label htmlFor="proficiencyLevelSelect" className="form-label small text-muted text-uppercase fw-bold">Proficiency Level</label>
                                     <select
+                                        id="proficiencyLevelSelect"
+                                        autoComplete="off"
                                         className="form-select border-2 shadow-none"
+                                        style={{ backgroundColor: '#fff', color: '#212529', backgroundImage: 'none', appearance: 'auto', WebkitAppearance: 'revert' }}
                                         value={editingSkill ? editingSkill.proficiencyLevel : newSkill.proficiencyLevel}
                                         onChange={(e) => editingSkill
                                             ? setEditingSkill({ ...editingSkill, proficiencyLevel: e.target.value })
@@ -410,13 +415,13 @@ const EmployeeDashboard = () => {
                             <div className="animate-fade-in">
                                 <div className="card shadow-sm border-0 overflow-hidden rounded-4">
                                     <div className="card-header py-3 px-4 border-0 d-flex justify-content-between align-items-center bg-accent-header">
-                                        <h5 className="mb-0 fw-bold d-flex align-items-center gap-2">
+                                        <h2 className="mb-0 fw-bold d-flex align-items-center gap-2 h5">
                                             <i className={`bi ${selectedSkillLevel === 'ADVANCED' ? 'bi-award-fill' : selectedSkillLevel === 'INTERMEDIATE' ? 'bi-shield-check' : 'bi-speedometer'}`}></i>
                                             {selectedSkillLevel} Skills
-                                        </h5>
+                                        </h2>
                                     </div>
                                     <div className="card-body p-0">
-                                        <div className="table-responsive scrollable-table-container" style={{ maxHeight: 'calc(100vh - 380px)', overflowY: 'auto' }}>
+                                        <div className="table-responsive scrollable-table-container" style={{ maxHeight: 'calc(100vh - 380px)', overflowY: 'auto' }} tabIndex="0" aria-label="Skills table" role="region">
                                             <table className="table table-hover align-middle mb-0">
                                                 <thead className="table-light small text-uppercase fw-bold text-muted sticky-top" style={{ zIndex: 5, background: '#f8f9fa' }}>
                                                     <tr>
@@ -487,21 +492,21 @@ const EmployeeDashboard = () => {
                     <div className="col-md-6">
                         <div className="text-center mb-4">
                             <i className="bi bi-briefcase h1 text-muted opacity-25"></i>
-                            <h3 className="text-muted">Currently on Bench</h3>
+                            <h2 className="text-muted h3">Currently on Bench</h2>
                             <p className="small text-muted mb-0">
                                 Select a project to request an allocation.
                             </p>
                         </div>
 
                         <div className="card shadow-sm border-0 p-4 bg-light">
-                            <h4 className="fw-bold mb-3 text-center">Request Allocation</h4>
+                            <h2 className="fw-bold mb-3 text-center h4">Request Allocation</h2>
 
                             {myRequests.some(r => r.requestStatus.startsWith('PENDING')) && (
                                 <div className="alert alert-info border-info text-dark mb-4">
-                                    <h6 className="fw-bold">
+                                    <h3 className="fw-bold h6">
                                         <i className="bi bi-info-circle-fill me-2"></i>
                                         Pending Request
-                                    </h6>
+                                    </h3>
                                     {myRequests
                                         .filter(r => r.requestStatus.startsWith('PENDING'))
                                         .map(req => (
@@ -524,10 +529,10 @@ const EmployeeDashboard = () => {
 
                             {myRequests.some(r => r.requestStatus === 'REJECTED') && (
                                 <div className="alert alert-danger border-danger mb-4">
-                                    <h6 className="fw-bold">
+                                    <h3 className="fw-bold h6">
                                         <i className="bi bi-x-circle-fill me-2"></i>
                                         Request Rejected
-                                    </h6>
+                                    </h3>
                                     {myRequests
                                         .filter(r => r.requestStatus === 'REJECTED')
                                         .map(req => (
@@ -546,8 +551,12 @@ const EmployeeDashboard = () => {
 
                             <form onSubmit={handleRequestAllocation}>
                                 <div className="mb-3">
+                                    <label htmlFor="projectAllocationSelect" className="form-label small text-muted text-uppercase fw-bold d-block">Available Projects</label>
                                     <select
+                                        id="projectAllocationSelect"
+                                        autoComplete="off"
                                         className={`form-select shadow-none border-2 ${errors.selectedProject ? 'is-invalid' : ''}`}
+                                        style={{ backgroundColor: '#fff', color: '#212529', backgroundImage: 'none', appearance: 'auto', WebkitAppearance: 'revert' }}
                                         value={selectedProject}
                                         onChange={(e) => {
                                             setSelectedProject(e.target.value);
@@ -642,7 +651,7 @@ const EmployeeDashboard = () => {
                                     {utilization?.totalUtilization || 0}%
                                 </span>
                             </div>
-                            <h3 className="fw-bold text-dark mt-3">{utilization?.allocationStatus || 'BENCH'}</h3>
+                            <h2 className="fw-bold text-dark mt-3 h3">{utilization?.allocationStatus || 'BENCH'}</h2>
                             <p className="text-muted small mx-auto" style={{ maxWidth: '300px' }}>
                                 Your total utilization based on active project assignments.
                             </p>
@@ -653,8 +662,8 @@ const EmployeeDashboard = () => {
                     <div className="col-lg-8">
                         {utilization?.assignments && utilization.assignments.length > 0 ? (
                             <div className="h-100">
-                                <h5 className="fw-bold mb-3 text-muted text-uppercase small">Active Allocations</h5>
-                                <div className="table-responsive">
+                                <h2 className="fw-bold mb-3 text-muted text-uppercase small">Active Allocations</h2>
+                                <div className="table-responsive" tabIndex="0" aria-label="Active allocations table" role="region">
                                     <table className="table table-hover align-middle mb-0">
                                         <thead className="table-light">
                                             <tr>
@@ -724,7 +733,7 @@ const EmployeeDashboard = () => {
                     />
 
                     {/* MAIN CONTENT AREA */}
-                    <main role="main" id="main-content" aria-label="Employee Dashboard Content" className="col h-100 p-4 p-md-5" style={{ backgroundColor: 'var(--color-bg)', overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }} tabIndex="-1">
+                    <main role="main" id="main-content" aria-label="Employee Dashboard Content" className="col h-100 p-4 p-md-5" style={{ backgroundColor: 'var(--color-bg)', overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }} tabIndex="0">
                         <div className="max-width-xl mx-auto">
                             <div className="page-header mb-4">
                                 <h1 className="page-title fw-bold text-accent">

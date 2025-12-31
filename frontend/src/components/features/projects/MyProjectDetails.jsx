@@ -110,14 +110,14 @@ const MyProjectDetails = ({ setActiveSection }) => { // Accept setActiveSection 
                         <div className="col-md-6">
                             <div className="text-center mb-4">
                                 <i className="bi bi-briefcase h1 text-muted opacity-25"></i>
-                                <h3 className="text-muted">Currently on Bench</h3>
+                                <h2 className="text-muted h3">Currently on Bench</h2>
                                 <p className="small text-muted mb-0">
                                     Select a project to request an allocation.
                                 </p>
                             </div>
 
                             <div className="card shadow-sm border-0 p-4 bg-light">
-                                <h4 className="fw-bold mb-3 text-center">Request Allocation</h4>
+                                <h2 className="fw-bold mb-3 text-center h4">Request Allocation</h2>
 
                                 {myRequests.some(r => r.requestStatus.startsWith('PENDING')) && (
                                     <div className="alert alert-info border-info text-dark mb-4">
@@ -226,7 +226,7 @@ const MyProjectDetails = ({ setActiveSection }) => { // Accept setActiveSection 
                                             : 'bg-accent'
                                             }`}
                                     >
-                                        <h4 className="mb-0">Project Details</h4>
+                                        <h2 className="mb-0 h4">Project Details</h2>
                                     </div>
 
                                     <div className="card-body p-3 p-md-4 text-center">
@@ -256,7 +256,7 @@ const MyProjectDetails = ({ setActiveSection }) => { // Accept setActiveSection 
 
                                         {alloc.assignmentStatus === 'ACTIVE' && (
                                             <div className="mt-4 pt-3 border-top">
-                                                <h5 className="fw-bold text-accent mb-3">{alloc.projectName}</h5>
+                                                <h3 className="fw-bold text-accent mb-3 h5">{alloc.projectName}</h3>
                                                 <div className="row g-2 justify-content-center">
                                                     <div className="col-6">
                                                         <div className="p-2 bg-light rounded-3">
@@ -320,7 +320,7 @@ const MyProjectDetails = ({ setActiveSection }) => { // Accept setActiveSection 
                                         {utilization?.totalUtilization || 0}%
                                     </span>
                                 </div>
-                                <h3 className="fw-bold text-dark mt-3">{utilization?.allocationStatus || 'BENCH'}</h3>
+                                <h2 className="fw-bold text-dark mt-3 h3">{utilization?.allocationStatus || 'BENCH'}</h2>
                                 <p className="text-muted small mx-auto" style={{ maxWidth: '300px' }}>
                                     Your total utilization based on active project assignments.
                                 </p>
@@ -331,7 +331,7 @@ const MyProjectDetails = ({ setActiveSection }) => { // Accept setActiveSection 
                         <div className="col-lg-8">
                             {utilization?.assignments && utilization.assignments.length > 0 ? (
                                 <div className="h-100">
-                                    <h5 className="fw-bold mb-3 text-muted text-uppercase small">Active Allocations</h5>
+                                    <h3 className="fw-bold mb-3 text-muted text-uppercase small h5">Active Allocations</h3>
                                     <div className="table-responsive">
                                         <table className="table table-hover align-middle mb-0">
                                             <thead className="table-light">

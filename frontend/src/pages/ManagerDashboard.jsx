@@ -453,7 +453,7 @@ const ManagerDashboard = () => {
                     onSectionChange={setActiveSection}
                 />
 
-                <main id="main-content" className="col h-100 p-4 p-md-5" style={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }} tabIndex="-1">
+                <main id="main-content" className="col h-100 p-4 p-md-5" style={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }} tabIndex="0" role="region" aria-label="Main content">
                     <header className="page-header mb-4">
                         <h1 className="page-title fw-bold text-accent">
                             {activeSection === null && 'Dashboard Overview'}
@@ -652,7 +652,7 @@ const ManagerDashboard = () => {
                                             <div className="col-lg-6">
                                                 <div className="card shadow border-0 rounded-4 h-100 overflow-hidden">
                                                     <div className="card-header bg-white p-4 border-0">
-                                                        <h3 className="fw-bold mb-0 text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Organization Projects</h3>
+                                                        <h2 className="fw-bold mb-0 text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Organization Projects</h2>
                                                     </div>
                                                     <div className="card-body p-0">
                                                         {loading.data ? renderLoading() :
@@ -691,7 +691,7 @@ const ManagerDashboard = () => {
                                             <div className="col-lg-6">
                                                 <div className="card shadow border-0 rounded-4 h-100 overflow-hidden">
                                                     <div className="card-header bg-white p-4 border-0">
-                                                        <h3 className="fw-bold mb-0 text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Active Team Assignments</h3>
+                                                        <h2 className="fw-bold mb-0 text-muted small text-uppercase" style={{ letterSpacing: '1px' }}>Active Team Assignments</h2>
                                                     </div>
                                                     <div className="card-body p-0">
                                                         {loading.data ? renderLoading() :
@@ -786,7 +786,7 @@ const ManagerDashboard = () => {
                                     <div className="row g-4">
                                         <div className="col-lg-4">
                                             <div className="card shadow-sm border-0 p-4 sticky-top" style={{ top: '0', backgroundColor: '#fff', borderLeft: '5px solid var(--color-accent)' }}>
-                                                <h4 className="fw-bold mb-3">{editingSkill ? 'Edit Skill' : 'Add New Skill'}</h4>
+                                                <h2 className="fw-bold mb-3 h4">{editingSkill ? 'Edit Skill' : 'Add New Skill'}</h2>
                                                 <form onSubmit={editingSkill ? handleUpdateSkill : handleAddSkill}>
                                                     <div className="mb-3">
                                                         <label className="form-label small text-muted text-uppercase fw-bold">Skill Name</label>
@@ -864,10 +864,10 @@ const ManagerDashboard = () => {
                                                 </div>
                                                 <div className="card-body p-0">
                                                     <div className="px-4 py-3 bg-light border-bottom animate-fade-in">
-                                                        <h5 className="mb-0 fw-bold d-flex align-items-center gap-2 text-dark">
+                                                        <h3 className="mb-0 fw-bold d-flex align-items-center gap-2 text-dark h5">
                                                             <i className={`bi ${selectedSkillLevel === 'ADVANCED' ? 'bi-award-fill' : selectedSkillLevel === 'INTERMEDIATE' ? 'bi-shield-check' : 'bi-speedometer'}`}></i>
                                                             {selectedSkillLevel} Skills
-                                                        </h5>
+                                                        </h3>
                                                     </div>
                                                     <div className="custom-scroll" style={{ height: '350px', overflowY: 'auto' }}>
                                                         {loading.mySkills ? renderLoading() : error.mySkills ? renderError(error.mySkills) : (
@@ -928,7 +928,7 @@ const ManagerDashboard = () => {
                                             (!myAllocation || (Array.isArray(myAllocation) && myAllocation.length === 0)) ? (
                                                 <div className="text-center py-5 border rounded-4 bg-white shadow-sm">
                                                     <i className="bi bi-briefcase display-1 text-muted opacity-25"></i>
-                                                    <h3 className="text-muted mt-3 fw-bold">Currently on Bench</h3>
+                                                    <h2 className="text-muted mt-3 fw-bold h3">Currently on Bench</h2>
                                                     <p className="text-muted">You are not currently allocated to any project.</p>
                                                 </div>
                                             ) : (
@@ -976,7 +976,7 @@ const ManagerDashboard = () => {
                                                                 {myUtilization?.totalUtilization || 0}%
                                                             </span>
                                                         </div>
-                                                        <h3 className="fw-bold text-dark mt-3">{myUtilization?.allocationStatus || 'BENCH'}</h3>
+                                                        <h2 className="fw-bold text-dark mt-3 h3">{myUtilization?.allocationStatus || 'BENCH'}</h2>
                                                         <p className="text-muted small mx-auto" style={{ maxWidth: '300px' }}>
                                                             Your total utilization based on active project assignments.
                                                         </p>
@@ -987,7 +987,7 @@ const ManagerDashboard = () => {
                                                 <div className="col-lg-8">
                                                     {myUtilization?.assignments && myUtilization.assignments.length > 0 ? (
                                                         <div className="h-100">
-                                                            <h5 className="fw-bold mb-3 text-muted text-uppercase small">Active Allocations</h5>
+                                                            <h3 className="fw-bold mb-3 text-muted text-uppercase small h5">Active Allocations</h3>
                                                             <div className="table-responsive">
                                                                 <table className="table table-hover align-middle mb-0">
                                                                     <thead className="table-light">

@@ -132,9 +132,9 @@ const PeopleManagement = ({ setActiveSection }) => { // Accept setActiveSection 
             <div className="card shadow-sm border-0" style={{ backgroundColor: '#fff', borderTop: '5px solid var(--color-primary)' }}>
                 <div className="card-body p-4">
                     <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-                        <h4 className="card-title fw-bold m-0 text-dark">
+                        <h2 className="card-title fw-bold m-0 text-dark">
                             <i className="bi bi-people-fill me-2 text-primary"></i>{title}
-                        </h4>
+                        </h2>
                         <div className="d-flex gap-2">
                             <div className="btn-group btn-group-sm" role="group">
                                 <button
@@ -211,9 +211,9 @@ const PeopleManagement = ({ setActiveSection }) => { // Accept setActiveSection 
     const renderOnboarding = () => (
         <div className="card shadow-sm border-0" style={{ backgroundColor: '#fff', borderTop: '5px solid var(--color-primary)' }}>
             <div className="card-body p-4">
-                <h3 className="card-title fw-bold mb-4 text-dark">
+                <h2 className="card-title fw-bold mb-4 text-dark">
                     <i className="bi bi-person-plus-fill me-2 text-primary"></i>Add New User
-                </h3>
+                </h2>
 
                 {onboardingSuccess && (
                     <div className="alert alert-success alert-dismissible fade show" role="alert">
@@ -232,10 +232,12 @@ const PeopleManagement = ({ setActiveSection }) => { // Accept setActiveSection 
                 <form onSubmit={handleOnboardingSubmit}>
                     <div className="row g-2">
                         <div className="col-md-6 mb-2">
-                            <label className="form-label fw-bold small">First Name</label>
+                            <label htmlFor="pm_firstName" className="form-label fw-bold small">First Name</label>
                             <input
                                 type="text"
+                                id="pm_firstName"
                                 name="firstName"
+                                autoComplete="given-name"
                                 className="form-control form-control-sm"
                                 placeholder="John"
                                 required
@@ -244,10 +246,12 @@ const PeopleManagement = ({ setActiveSection }) => { // Accept setActiveSection 
                             />
                         </div>
                         <div className="col-md-6 mb-2">
-                            <label className="form-label fw-bold small">Last Name</label>
+                            <label htmlFor="pm_lastName" className="form-label fw-bold small">Last Name</label>
                             <input
                                 type="text"
+                                id="pm_lastName"
                                 name="lastName"
+                                autoComplete="family-name"
                                 className="form-control form-control-sm"
                                 placeholder="Doe"
                                 required
@@ -258,10 +262,12 @@ const PeopleManagement = ({ setActiveSection }) => { // Accept setActiveSection 
                     </div>
 
                     <div className="mb-2">
-                        <label className="form-label fw-bold small">Email Address</label>
+                        <label htmlFor="pm_email" className="form-label fw-bold small">Email Address</label>
                         <input
                             type="email"
+                            id="pm_email"
                             name="email"
+                            autoComplete="email"
                             className="form-control form-control-sm"
                             placeholder="user@skillbridge.com"
                             required
@@ -271,10 +277,12 @@ const PeopleManagement = ({ setActiveSection }) => { // Accept setActiveSection 
                     </div>
 
                     <div className="mb-2">
-                        <label className="form-label fw-bold small">Initial Password</label>
+                        <label htmlFor="pm_password" className="form-label fw-bold small">Initial Password</label>
                         <input
                             type="password"
+                            id="pm_password"
                             name="password"
+                            autoComplete="new-password"
                             className="form-control form-control-sm"
                             placeholder="••••••••"
                             required
@@ -285,10 +293,13 @@ const PeopleManagement = ({ setActiveSection }) => { // Accept setActiveSection 
 
                     <div className="row g-2">
                         <div className={formData.role === 'EMPLOYEE' ? "col-md-6 mb-2" : "col-12 mb-2"}>
-                            <label className="form-label fw-bold small">Role</label>
+                            <label htmlFor="pm_role" className="form-label fw-bold small">Role</label>
                             <select
+                                id="pm_role"
                                 name="role"
+                                autoComplete="organization-title"
                                 className="form-select form-select-sm"
+                                style={{ backgroundColor: '#fff', color: '#212529', backgroundImage: 'none', appearance: 'auto', WebkitAppearance: 'revert' }}
                                 value={formData.role}
                                 onChange={handleInputChange}
                             >
@@ -300,10 +311,13 @@ const PeopleManagement = ({ setActiveSection }) => { // Accept setActiveSection 
 
                         {formData.role === 'EMPLOYEE' && (
                             <div className="col-md-6 mb-2">
-                                <label className="form-label fw-bold small">Manager</label>
+                                <label htmlFor="pm_managerId" className="form-label fw-bold small">Manager</label>
                                 <select
+                                    id="pm_managerId"
                                     name="managerId"
+                                    autoComplete="off"
                                     className="form-select form-select-sm"
+                                    style={{ backgroundColor: '#fff', color: '#212529', backgroundImage: 'none', appearance: 'auto', WebkitAppearance: 'revert' }}
                                     required
                                     value={formData.managerId}
                                     onChange={handleInputChange}

@@ -214,9 +214,9 @@ const BenchAllocation = () => {
                     <div className="card shadow-sm border-0 h-100" style={{ borderTop: `5px solid ${tabs.find(t => t.key === activeTab)?.color}` }}>
                         <div className="card-body p-0 d-flex flex-column">
                             <div className="p-3 border-bottom">
-                                <h5 className="fw-bold mb-0">Projects List</h5>
+                                <h2 className="fw-bold mb-0 h5">Projects List</h2>
                             </div>
-                            <div className="flex-grow-1 overflow-auto p-3" style={{ maxHeight: '70vh' }}>
+                            <div className="flex-grow-1 overflow-auto p-3" style={{ maxHeight: '70vh' }} tabIndex="0" role="region" aria-label="Projects list scrollable area">
                                 {filteredProjects.map(project => {
                                     const allocatedCount = getAllocationCount(project.id);
                                     return (
@@ -228,7 +228,7 @@ const BenchAllocation = () => {
                                         >
                                             <div className="card-body p-3">
                                                 <div className="d-flex justify-content-between align-items-start mb-2">
-                                                    <h6 className="fw-bold mb-0 text-truncate" style={{ maxWidth: '60%' }}>{project.name}</h6>
+                                                    <h3 className="fw-bold mb-0 text-truncate h6" style={{ maxWidth: '60%' }}>{project.name}</h3>
                                                     <div className="d-flex flex-column align-items-end">
                                                         <span className={`badge ${project.status === 'ACTIVE' ? 'bg-success' : 'bg-warning text-dark'} small mb-1`}>
                                                             {project.status === 'ACTIVE' ? 'Active' : 'Upcoming'}
@@ -258,24 +258,25 @@ const BenchAllocation = () => {
                 <div className="col-lg-8">
                     <div className="card shadow-sm border-0 h-100">
                         <div className="card-header bg-white pt-3 pb-3 border-bottom">
-                            <h5 className="mb-0 fw-bold text-primary">
+                            <h2 className="mb-0 fw-bold text-primary h5">
                                 {selectedProject ? `Allocating to: ${selectedProject.name}` : 'Select a Project based on Status'}
-                            </h5>
+                            </h2>
                         </div>
                         <div className="card-body p-3 d-flex flex-column">
                             {/* Filters */}
                             <div className="d-flex justify-content-between align-items-center mb-3">
-                                <h6 className="fw-bold mb-0">Available Employees</h6>
+                                <h3 className="fw-bold mb-0 h6">Available Employees</h3>
                                 <div className="btn-group btn-group-sm">
                                     <button className={`btn ${employeeFilter === 'ALL' ? 'btn-primary' : 'btn-outline-primary'}`} onClick={() => setEmployeeFilter('ALL')}>All</button>
-                                    <button className={`btn ${employeeFilter === 'BENCH' ? 'btn-success' : 'btn-outline-success'}`} onClick={() => setEmployeeFilter('BENCH')}>Bench Only</button>
-                                    <button className={`btn ${employeeFilter === 'SKILL_MATCH' ? 'btn-warning' : 'btn-outline-warning'}`} onClick={() => setEmployeeFilter('SKILL_MATCH')} disabled={!selectedProject}>Skill Match</button>
+                                    <button className={`btn ${employeeFilter === 'BENCH' ? 'btn-success' : 'btn-outline-success'}`} onClick={() => setEmployeeFilter('BENCH')} style={employeeFilter !== 'BENCH' ? { color: '#146c43', borderColor: '#146c43' } : {}}>Bench Only</button>
+                                    <button className={`btn ${employeeFilter === 'SKILL_MATCH' ? 'btn-warning' : 'btn-outline-warning'}`} onClick={() => setEmployeeFilter('SKILL_MATCH')} disabled={!selectedProject} style={employeeFilter !== 'SKILL_MATCH' ? { color: '#856404', borderColor: '#856404' } : {}}>Skill Match</button>
                                 </div>
                             </div>
-                            <input type="text" className="form-control form-control-sm mb-3" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                            <label htmlFor="employee-search" className="visually-hidden">Search Employees</label>
+                            <input type="text" id="employee-search" className="form-control form-control-sm mb-3" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} autoComplete="off" />
 
                             {/* Table */}
-                            <div className="flex-grow-1 overflow-auto" style={{ maxHeight: '60vh' }}>
+                            <div className="flex-grow-1 overflow-auto" style={{ maxHeight: '60vh' }} tabIndex="0" role="region" aria-label="Available employees scrollable table">
                                 <table className="table table-hover table-sm align-middle">
                                     <thead className="table-light sticky-top">
                                         <tr>
@@ -320,11 +321,11 @@ const BenchAllocation = () => {
                                                     </td>
                                                     <td>
                                                         {selectedProject && employee.availableCapacity > 0 ? (
-                                                            <button className="btn btn-sm btn-outline-primary" onClick={() => handleAllocateClick(employee)}>
+                                                            <button className="btn btn-sm btn-outline-primary" onClick={() => handleAllocateClick(employee)} aria-label={`Allocate ${employee.firstName} ${employee.lastName}`}>
                                                                 <i className="bi bi-plus-lg"></i>
                                                             </button>
                                                         ) : (
-                                                            <button className="btn btn-outline-secondary btn-sm" disabled>
+                                                            <button className="btn btn-outline-secondary btn-sm" disabled aria-label="Allocation not available">
                                                                 <i className="bi bi-dash"></i>
                                                             </button>
                                                         )}
@@ -346,9 +347,9 @@ const BenchAllocation = () => {
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content shadow">
                             <div className="modal-header bg-warning text-dark border-0">
-                                <h5 className="modal-title fw-bold">
+                                <h2 className="modal-title fw-bold h5">
                                     <i className="bi bi-exclamation-triangle-fill me-2"></i>Already Allocated
-                                </h5>
+                                </h2>
                                 <button type="button" className="btn-close" onClick={() => setShowUpdatePrompt(false)}></button>
                             </div>
                             <div className="modal-body p-4">
@@ -381,7 +382,7 @@ const BenchAllocation = () => {
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content">
                             <div className="modal-header bg-primary text-white">
-                                <h5 className="modal-title">{isUpdateMode ? 'Update Allocation' : `Allocate to ${selectedProject.name}`}</h5>
+                                <h2 className="modal-title h5">{isUpdateMode ? 'Update Allocation' : `Allocate to ${selectedProject.name}`}</h2>
                                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowAllocationModal(false)}></button>
                             </div>
                             <form onSubmit={handleAllocationSubmit}>
@@ -393,27 +394,31 @@ const BenchAllocation = () => {
                                         </div>
                                     </div>
                                     <div className="mb-3">
-                                        <label className="form-label">Project Role <span className="text-danger">*</span></label>
+                                        <label htmlFor="project-role-input" className="form-label">Project Role <span className="text-danger">*</span></label>
                                         <input
                                             type="text"
+                                            id="project-role-input"
                                             className="form-control"
                                             placeholder="e.g. Senior Developer, QA Lead"
                                             name="projectRole"
                                             value={allocationForm.projectRole}
                                             onChange={e => setAllocationForm({ ...allocationForm, projectRole: e.target.value })}
                                             required
+                                            autoComplete="off"
                                         />
                                     </div>
                                     <div className="mb-3">
-                                        <label className="form-label">Allocation % (Max {isUpdateMode ? (selectedEmployee.availableCapacity + (existingAssignment?.allocationPercent || 0)) : selectedEmployee.availableCapacity}%)</label>
+                                        <label htmlFor="allocation-percent-input" className="form-label">Allocation % (Max {isUpdateMode ? (selectedEmployee.availableCapacity + (existingAssignment?.allocationPercent || 0)) : selectedEmployee.availableCapacity}%)</label>
                                         <input
                                             type="number"
+                                            id="allocation-percent-input"
                                             className="form-control"
                                             name="allocationPercent"
                                             value={allocationForm.allocationPercent}
                                             onChange={e => setAllocationForm({ ...allocationForm, allocationPercent: e.target.value })}
                                             max={isUpdateMode ? (selectedEmployee.availableCapacity + (existingAssignment?.allocationPercent || 0)) : selectedEmployee.availableCapacity}
                                             required
+                                            autoComplete="off"
                                         />
                                     </div>
 
@@ -422,8 +427,15 @@ const BenchAllocation = () => {
                                     <input type="hidden" name="endDate" value={allocationForm.endDate} />
 
                                     <div className="mb-3">
-                                        <label className="form-label">Billing Type</label>
-                                        <select name="billingType" className="form-select" value={allocationForm.billingType} onChange={e => setAllocationForm({ ...allocationForm, billingType: e.target.value })}>
+                                        <label htmlFor="billing-type-select" className="form-label">Billing Type</label>
+                                        <select
+                                            id="billing-type-select"
+                                            name="billingType"
+                                            className="form-select"
+                                            value={allocationForm.billingType}
+                                            onChange={e => setAllocationForm({ ...allocationForm, billingType: e.target.value })}
+                                            autoComplete="off"
+                                        >
                                             <option value="BILLABLE">Billable</option>
                                             <option value="INVESTMENT">Investment</option>
                                         </select>
