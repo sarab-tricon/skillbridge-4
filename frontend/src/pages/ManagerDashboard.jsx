@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import { allocationsApi } from '../api/allocations';
 import Sidebar from '../components/Sidebar';
-import ProfileSection from '../components/ProfileSection';
-import AllocationCard from '../components/AllocationCard';
+
+// Lazy load below-the-fold components to reduce initial bundle size
+const ProfileSection = React.lazy(() => import('../components/ProfileSection'));
+const AllocationCard = React.lazy(() => import('../components/AllocationCard'));
 
 
 const ManagerDashboard = () => {
@@ -314,14 +316,35 @@ const ManagerDashboard = () => {
     };
 
     useEffect(() => {
+        // Priority: Fetch data needed for initial dashboard view
         fetchData();
         fetchPendingSkills();
-        // Personal data for manager
-        fetchMySkills();
-        fetchMyAllocation();
-        fetchMyUtilization();
-        fetchProfile();
-        fetchCatalog();
+    }, []);
+
+    // Defer secondary data fetching using requestIdleCallback for better performance
+    useEffect(() => {
+        const scheduleIdle = (callback) => {
+            if ('requestIdleCallback' in window) {
+                return window.requestIdleCallback(callback, { timeout: 2000 });
+            }
+            return setTimeout(callback, 200);
+        };
+
+        const idleId = scheduleIdle(() => {
+            fetchMySkills();
+            fetchMyAllocation();
+            fetchMyUtilization();
+            fetchProfile();
+            fetchCatalog();
+        });
+
+        return () => {
+            if ('requestIdleCallback' in window) {
+                window.cancelIdleCallback(idleId);
+            } else {
+                clearTimeout(idleId);
+            }
+        };
     }, []);
 
     const handleSkillAction = async (skillId, status) => {
@@ -910,18 +933,20 @@ const ManagerDashboard = () => {
                                                 </div>
                                             ) : (
                                                 <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 align-items-start" style={{ overflowX: 'hidden' }}>
-                                                    {(Array.isArray(myAllocation) ? myAllocation : [myAllocation]).map((alloc, idx) => {
-                                                        const utilAssignment = myUtilization?.assignments?.find(a => a.assignmentId === alloc.assignmentId);
-                                                        const percent = utilAssignment?.allocationPercent || 0;
-                                                        return (
-                                                            <AllocationCard
-                                                                key={idx}
-                                                                alloc={alloc}
-                                                                companyName={alloc.companyName || 'Corporate Client'}
-                                                                allocationValue={percent}
-                                                            />
-                                                        );
-                                                    })}
+                                                    <Suspense fallback={renderLoading()}>
+                                                        {(Array.isArray(myAllocation) ? myAllocation : [myAllocation]).map((alloc, idx) => {
+                                                            const utilAssignment = myUtilization?.assignments?.find(a => a.assignmentId === alloc.assignmentId);
+                                                            const percent = utilAssignment?.allocationPercent || 0;
+                                                            return (
+                                                                <AllocationCard
+                                                                    key={idx}
+                                                                    alloc={alloc}
+                                                                    companyName={alloc.companyName || 'Corporate Client'}
+                                                                    allocationValue={percent}
+                                                                />
+                                                            );
+                                                        })}
+                                                    </Suspense>
                                                 </div>
                                             )
                                         }
@@ -1024,11 +1049,13 @@ const ManagerDashboard = () => {
                                         '--profile-theme-dark': '#802d00',
                                         '--profile-theme-rgb': '181, 64, 0'
                                     }}>
-                                        <ProfileSection
-                                            profile={profile}
-                                            utilization={myUtilization}
-                                            onNavigateToSkills={() => setActiveSection('my_skills')}
-                                        />
+                                        <Suspense fallback={renderLoading()}>
+                                            <ProfileSection
+                                                profile={profile}
+                                                utilization={myUtilization}
+                                                onNavigateToSkills={() => setActiveSection('my_skills')}
+                                            />
+                                        </Suspense>
                                     </div>
                                 )}
 
