@@ -37,7 +37,7 @@ const HRDashboard = () => {
         activeRequests: 0
     });
     const [employees, setEmployees] = useState([]);
-    const [benchUsers, setBenchUsers] = useState([]);
+
 
     // Onboarding State
     const [formData, setFormData] = useState({
@@ -60,7 +60,7 @@ const HRDashboard = () => {
     const [catalogSkills, setCatalogSkills] = useState([]);
     const [talentResults, setTalentResults] = useState(null);
     const [talentLoading, setTalentLoading] = useState(false);
-    const [talentError, setTalentError] = useState(null);
+
 
     // Edit/Delete State
     const [isEditing, setIsEditing] = useState(false);
@@ -138,7 +138,7 @@ const HRDashboard = () => {
     const fetchBenchUsers = async () => {
         try {
             const response = await api.get('/users/bench');
-            setBenchUsers(response.data);
+            // setBenchUsers(response.data);
             setStats(prev => ({ ...prev, benchCount: response.data.length }));
         } catch (err) {
             console.error('Failed to fetch bench users:', err);
@@ -292,7 +292,6 @@ const HRDashboard = () => {
         if (searchSkills.length === 0) return;
 
         setTalentLoading(true);
-        setTalentError(null);
         setTalentResults([]);
 
         try {
@@ -301,7 +300,7 @@ const HRDashboard = () => {
             setTalentResults(response.data);
         } catch (err) {
             console.error('Failed to search talent:', err);
-            setTalentError('Error occurred while searching for talent.');
+            // setTalentError('Error occurred while searching for talent.');
         } finally {
             setTalentLoading(false);
         }

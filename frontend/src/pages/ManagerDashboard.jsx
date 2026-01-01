@@ -1,5 +1,4 @@
 import React, { useState, useEffect, Suspense } from 'react';
-import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import { allocationsApi } from '../api/allocations';
 import Sidebar from '../components/Sidebar';
@@ -10,7 +9,6 @@ const AllocationCard = React.lazy(() => import('../components/AllocationCard'));
 
 
 const ManagerDashboard = () => {
-    const { user } = useAuth();
     const [mergedTeam, setMergedTeam] = useState([]);
     const [pendingSkills, setPendingSkills] = useState([]);
     const [activeSection, setActiveSection] = useState(() => {
@@ -249,18 +247,7 @@ const ManagerDashboard = () => {
         }
     };
 
-    const handleDeleteSkill = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this skill?')) return;
-        try {
-            await api.delete(`/skills/${id}`);
-            setSkillSuccess('Skill deleted.');
-            fetchMySkills();
-            fetchProfile();
-            setTimeout(() => setSkillSuccess(null), 3000);
-        } catch (err) {
-            setSkillError(err.response?.data?.message || 'Failed to delete skill.');
-        }
-    };
+
 
     // New functions for allocation request actions
     const handleForward = async () => {
@@ -356,34 +343,9 @@ const ManagerDashboard = () => {
         }
     };
 
-    const handleAllocationAction = async (requestId, status, billingType = 'BILLABLE') => {
-        setActionLoading(true);
-        try {
-            if (status === 'APPROVED') {
-                await api.put(`/allocation-requests/${requestId}/approve`, { billingType });
-            } else {
-                await api.put(`/allocation-requests/${requestId}/reject`);
-            }
-            fetchData();
-        } catch (err) {
-            console.error(`Error ${status}ing allocation:`, err);
-        } finally {
-            setActionLoading(false);
-        }
-    };
 
-    const handleEndAllocation = async (assignmentId) => {
-        if (!window.confirm('Are you sure you want to end this project allocation?')) return;
-        setActionLoading(true);
-        try {
-            await api.put(`/assignments/${assignmentId}/end`);
-            fetchData();
-        } catch (err) {
-            console.error('Error ending allocation:', err);
-        } finally {
-            setActionLoading(false);
-        }
-    };
+
+
 
     const renderLoading = () => (
         <div className="text-center py-4">
@@ -405,27 +367,25 @@ const ManagerDashboard = () => {
         </div>
     );
 
-    const SectionCard = ({ title, count, sectionId, color }) => (
-        <div
-            className={`card h-100 shadow-sm border-0 cursor-pointer summary-card ${activeSection === sectionId ? 'ring-2' : ''}`}
+    const SectionCard = ({ title, count, sectionId, color, icon }) => (
+        <div className="card h-100 shadow-sm border-0 summary-card"
+            style={{ borderLeft: `5px solid ${color}` }}
             onClick={() => setActiveSection(activeSection === sectionId ? null : sectionId)}
-            style={{
-                backgroundColor: 'white',
-                borderTop: `6px solid ${color}`,
-                cursor: 'pointer',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                transform: activeSection === sectionId ? 'translateY(-5px)' : 'none',
-                boxShadow: activeSection === sectionId ? '0 10px 20px rgba(0,0,0,0.1)' : '0 2px 4px rgba(0,0,0,0.05)'
-            }}
         >
-            <div className="card-body p-4 text-center">
-                <h2 className="text-muted text-uppercase mb-3 fw-bold h6" style={{ letterSpacing: '1.5px' }}>{title}</h2>
-                <p className="display-4 fw-bold mb-0" style={{ color: 'var(--color-primary)' }}>{count}</p>
-                <div className="mt-3">
+            <div className="card-body d-flex flex-column" style={{ cursor: 'pointer' }}>
+                <div className="d-flex align-items-center justify-content-between mb-3">
+                    <div>
+                        <span className="text-muted text-uppercase mb-2 d-block" style={{ fontSize: '0.75rem', letterSpacing: '1px', fontWeight: '700' }}>{title}</span>
+                        <h2 className="fw-bold mb-0 text-dark">{count}</h2>
+                    </div>
+                    <div className="rounded-circle p-3 d-flex align-items-center justify-content-center"
+                        style={{ backgroundColor: 'rgba(181, 64, 0, 0.1)', width: '50px', height: '50px' }}>
+                        <i className={`bi ${icon} fs-4`} style={{ color: 'var(--color-primary)' }}></i>
+                    </div>
+                </div>
+                <div className="mt-auto">
                     <button
-                        className="btn btn-outline-accent btn-sm rounded-pill px-4 fw-bold"
-                        aria-label={`${activeSection === sectionId ? 'Hide' : 'View'} details for ${title}`}
-                        aria-expanded={activeSection === sectionId}
+                        className="btn btn-outline-accent btn-sm rounded-pill px-4 fw-bold w-100"
                         onClick={(e) => {
                             e.stopPropagation();
                             setActiveSection(activeSection === sectionId ? null : sectionId);
@@ -477,6 +437,7 @@ const ManagerDashboard = () => {
                                                 count={loading.data ? '...' : mergedTeam.length}
                                                 sectionId="team"
                                                 color="#CF4B00"
+                                                icon="bi-people"
                                             />
                                         </div>
                                         <div className="col-md-3">
@@ -485,6 +446,7 @@ const ManagerDashboard = () => {
                                                 count={loading.data ? '...' : pendingAllocations.length}
                                                 sectionId="alloc_requests"
                                                 color="#CF4B00"
+                                                icon="bi-clipboard-check"
                                             />
                                         </div>
                                         <div className="col-md-3">
@@ -493,6 +455,7 @@ const ManagerDashboard = () => {
                                                 count={loading.data ? '...' : allActiveProjects.length}
                                                 sectionId="allocations"
                                                 color="#CF4B00"
+                                                icon="bi-journal-code"
                                             />
                                         </div>
                                         <div className="col-md-3">
@@ -501,19 +464,11 @@ const ManagerDashboard = () => {
                                                 count={loading.skills ? '...' : pendingSkills.length}
                                                 sectionId="pending_skills"
                                                 color="#CF4B00"
+                                                icon="bi-star"
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="row justify-content-center mt-5">
-                                        <div className="col-md-8 text-center">
-                                            <div className="p-5 border-2 border-dashed rounded-4 bg-white shadow-sm">
-                                                <i className="bi bi-arrow-up-circle display-1 text-muted opacity-25 mb-4"></i>
-                                                <h2 className="text-muted fw-bold h3">Select a metric above to view detailed insights</h2>
-                                                <p className="text-muted">You can manage team allocations, verify skill requests, and track project deployments from this panel.</p>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </>
                             )}
 
@@ -1126,9 +1081,6 @@ const ManagerDashboard = () => {
             )}
 
             <style>{`
-                .cursor-pointer { cursor: pointer; }
-                .transition-all { transition: all 0.3s ease; }
-                .ring-2 { box-shadow: 0 0 0 3px rgba(207, 75, 0, 0.2); }
                 .animate-fade-in {
                     animation: fadeIn 0.5s ease-out;
                 }
@@ -1136,15 +1088,8 @@ const ManagerDashboard = () => {
                     from { opacity: 0; transform: translateY(10px); }
                     to { opacity: 1; transform: translateY(0); }
                 }
-                .card { transition: transform 0.2s ease-in-out; }
-                .summary-card:hover {
-                    transform: translateY(-8px) !important;
-                    box-shadow: 0 15px 30px rgba(0,0,0,0.12) !important;
-                }
-                .summary-btn:hover {
-                    background-color: var(--btn-theme-color) !important;
-                    color: white !important;
-                    transform: scale(1.05);
+                .summary-card {
+                     /* kept for potential future use or consistency, but currently no specific styles needed */
                 }
                 #main-content::-webkit-scrollbar {
                     display: none;
