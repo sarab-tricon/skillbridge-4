@@ -19,7 +19,6 @@ const EmployeeDashboard = () => {
     }, [activeSection]);
 
     // Section States
-    // Section States
     const [skills, setSkills] = useState([]);
     const [allocation, setAllocation] = useState(null);
     const [utilization, setUtilization] = useState(null);
@@ -740,7 +739,7 @@ const EmployeeDashboard = () => {
                                     {activeSection === 'overview' && 'Dashboard Overview'}
                                     {activeSection === 'skills' && 'Skill Management'}
                                     {activeSection === 'allocation' && 'My Projects'}
-                                    {activeSection === 'utilization' && 'Personal Utilization'}
+                                    {activeSection === 'utilization' && 'Utilization'}
                                     {activeSection === 'profile' && 'My Profile'}
                                 </h1>
                             </div>

@@ -84,8 +84,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             .map(auth -> auth.startsWith("ROLE_") ? auth : "ROLE_" + auth)
                             .toList();
 
-                    System.out.println("DEBUG: JWT Parsed. User: " + userEmail + ", Raw Authorities: "
-                            + authorityStrings + ", Final Authorities: " + finalAuthorities);
+                    log.debug("JWT Parsed. User: {}, Raw Authorities: {}, Final Authorities: {}", 
+                        userEmail, authorityStrings, finalAuthorities);
 
                     java.util.List<org.springframework.security.core.GrantedAuthority> authorities = finalAuthorities
                             .stream()
@@ -105,12 +105,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     // 4. Set security context
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                    System.out.println("DEBUG: SecurityContext Set. Authentication: " + authentication);
+                    log.debug("SecurityContext Set for user: {}", userEmail);
 
                 }
             }
         } catch (Exception e) {
-            System.err.println("DEBUG: JWT Auth Error: " + e.getMessage());
             log.error("JWT AUTH ERROR: {}", e.getMessage(), e);
             // In case of JWT parsing errors or other issues, we just continue.
             // The SecurityContext will remain empty, failing later stages if they need

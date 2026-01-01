@@ -80,25 +80,15 @@ public class AllocationRequestController {
         List<AssignmentResponse> responses = requests.stream().map(req -> {
             Project project = projectRepository.findById(req.getProjectId()).orElse(null);
 
-            // Map internal status to DTO status if needed, or just pass raw string if DTO
-            // allows
-            // Currently DTO has AssignmentStatus enum, we might need to extend it or just
-            // map to PENDING/REJECTED
-            // For now, let's just use the PENDING one and add a custom status string if DTO
-            // supports it,
-            // or rely on a new field.
-            // Wait, AssignmentResponse has assignmentStatus (Enum).
-            // I should check AssignmentResponse DTO.
-
             AssignmentStatus dtoStatus;
             try {
                 dtoStatus = AssignmentStatus.valueOf(req.getStatus());
             } catch (IllegalArgumentException e) {
-                // Handle PENDING_MANAGER / PENDING_HR mapping
+                // Map custom pending statuses
                 if (req.getStatus().startsWith("PENDING"))
                     dtoStatus = AssignmentStatus.PENDING;
                 else
-                    dtoStatus = AssignmentStatus.ENDED; // Fallback?
+                    dtoStatus = AssignmentStatus.ENDED;
             }
             if ("REJECTED".equals(req.getStatus()))
                 dtoStatus = AssignmentStatus.REJECTED;
@@ -131,9 +121,7 @@ public class AllocationRequestController {
         List<AllocationRequest> requests;
 
         if (currentUser.getRole().name().equals("MANAGER")) {
-            // Manager sees PENDING_MANAGER from their team
-            // NOTE: Ideally we'd filter at DB level, but doing in-memory for simplicity
-            // unless custom query exists
+            // Filter team requests
             List<User> reports = userRepository.findAllByManagerId(currentUser.getId());
             List<UUID> reportIds = reports.stream().map(User::getId).collect(Collectors.toList());
 
@@ -168,8 +156,7 @@ public class AllocationRequestController {
                     .projectName(project != null ? project.getName() : "Unknown")
                     .employeeName(employee != null ? employee.getFirstName() + " " + employee.getLastName() : "Unknown")
                     .requestedAt(req.getCreatedAt())
-                    .assignmentStatus(AssignmentStatus.PENDING) // General pending status for UI
-                    // Add extra fields context if DTO supported it, mainly used for UI display
+                    .assignmentStatus(AssignmentStatus.PENDING)
                     .requestStatus(req.getStatus())
                     .billingType(req.getBillingType())
                     .managerName(managerName)
@@ -237,10 +224,6 @@ public class AllocationRequestController {
         // Use stored immutable billing type
         BillingType billingType = req.getBillingType();
         if (billingType == null) {
-            // Fallback for old records or migration edge cases, though goal is strict.
-            // We'll stricter error or default. Let's default to BILLABLE with log warning
-            // ideally,
-            // or just error out. Given "strict", error might be better, but lets safeguard.
             billingType = BillingType.BILLABLE;
         }
 
@@ -287,8 +270,6 @@ public class AllocationRequestController {
             return ResponseEntity.badRequest().body("Manager can only reject requests pending manager review.");
         }
         if ("HR".equals(role) && !"PENDING_HR".equals(req.getStatus())) {
-            // HR can technically reject PENDING_MANAGER too if they want? No, stick to
-            // workflow.
             return ResponseEntity.badRequest().body("HR can only reject requests pending HR review.");
         }
 

@@ -4,7 +4,7 @@ import api from '../api/axios';
 import { allocationsApi } from '../api/allocations';
 import Sidebar from '../components/Sidebar';
 
-// Lazy load below-the-fold components to reduce initial bundle size
+// Lazy components
 const ProfileSection = React.lazy(() => import('../components/ProfileSection'));
 const AllocationCard = React.lazy(() => import('../components/AllocationCard'));
 
@@ -18,7 +18,7 @@ const ManagerDashboard = () => {
         return (saved === 'null' || saved === null) ? null : saved;
     });
 
-    // Persist active section to localStorage
+    // State sync
     useEffect(() => {
         localStorage.setItem('managerActiveSection', activeSection);
     }, [activeSection]);
@@ -56,7 +56,7 @@ const ManagerDashboard = () => {
     // Manager menu items for sidebar (Personal + Team Management)
     const managerMenuItems = [
         { id: null, label: 'Dashboard', icon: 'bi-speedometer2' },
-        { id: 'my_skills', label: 'My Skills', icon: 'bi-star-fill' },
+        { id: 'my_skills', label: 'Skill Management', icon: 'bi-star-fill' },
         { id: 'my_utilization', label: 'Utilization', icon: 'bi-graph-up' },
         { id: 'team', label: 'My Team', icon: 'bi-people' },
         { id: 'allocations', label: 'Active Projects', icon: 'bi-journal-code' },
@@ -70,7 +70,6 @@ const ManagerDashboard = () => {
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [showForwardModal, setShowForwardModal] = useState(false);
     const [showRejectModal, setShowRejectModal] = useState(false);
-    const [modalComment, setModalComment] = useState('');
     const [modalReason, setModalReason] = useState('');
     const [errors, setErrors] = useState({});
 
@@ -271,9 +270,8 @@ const ManagerDashboard = () => {
             const requestState = pendingAllocations.find(r => r.id === selectedRequest.id);
             const billingTypeToSubmit = requestState?.selectedBillingType || 'BILLABLE';
 
-            await allocationsApi.forwardToHr(selectedRequest.id, modalComment, billingTypeToSubmit);
+            await allocationsApi.forwardToHr(selectedRequest.id, null, billingTypeToSubmit); // No comment
             setShowForwardModal(false);
-            setModalComment('');
             fetchData(); // Refresh list
         } catch (error) {
             console.error('Failed to forward request:', error);
@@ -305,7 +303,6 @@ const ManagerDashboard = () => {
     const openForwardModal = (req) => {
         // Ensure billing type is set in state (it is by default, but UI selector updates it)
         setSelectedRequest(req);
-        setModalComment('');
         setShowForwardModal(true);
     };
 
@@ -457,13 +454,13 @@ const ManagerDashboard = () => {
                     <header className="page-header mb-4">
                         <h1 className="page-title fw-bold text-accent">
                             {activeSection === null && 'Dashboard Overview'}
-                            {activeSection === 'team' && 'Team Management'}
+                            {activeSection === 'team' && 'My Team'}
                             {activeSection === 'allocations' && 'Active Projects'}
                             {activeSection === 'alloc_requests' && 'Project Requests'}
                             {activeSection === 'pending_skills' && 'Skill Verifications'}
                             {activeSection === 'my_profile' && 'My Profile'}
                             {activeSection === 'my_utilization' && 'Utilization'}
-                            {activeSection === 'my_skills' && 'MANAGER Skills'}
+                            {activeSection === 'my_skills' && 'Skill Management'}
                             {activeSection === 'my_allocation' && 'My Projects'}
                         </h1>
                     </header>
@@ -855,7 +852,7 @@ const ManagerDashboard = () => {
                                                                 onClick={() => setSelectedSkillLevel(level)}
                                                             >
                                                                 {level}
-                                                                <span className={`ms-2 badge rounded-pill ${selectedSkillLevel === level ? 'bg-primary text-white' : 'bg-light text-muted'}`}>
+                                                                <span className={`ms-2 badge rounded-pill ${selectedSkillLevel === level ? 'bg-white text-dark' : 'bg-light text-muted'}`}>
                                                                     {mySkills.filter(s => s.proficiencyLevel === level).length}
                                                                 </span>
                                                             </button>
@@ -1075,16 +1072,6 @@ const ManagerDashboard = () => {
                                 <button type="button" className="btn-close" onClick={() => setShowForwardModal(false)}></button>
                             </div>
                             <div className="modal-body">
-                                <p className="text-muted mb-3">Add comments for HR (optional):</p>
-                                <textarea
-                                    id="forward-comment"
-                                    className="form-control mb-3"
-                                    rows="3"
-                                    value={modalComment}
-                                    onChange={(e) => setModalComment(e.target.value)}
-                                    placeholder="e.g., Recommend approval based on skills..."
-                                    aria-label="Comments for HR"
-                                ></textarea>
 
                                 <div className="alert alert-light border small">
                                     <strong>Confirm Forwarding:</strong>
@@ -1103,7 +1090,6 @@ const ManagerDashboard = () => {
                 </div>
             )}
 
-            {/* Reject Modal */}
             {showRejectModal && (
                 <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <div className="modal-dialog modal-dialog-centered">

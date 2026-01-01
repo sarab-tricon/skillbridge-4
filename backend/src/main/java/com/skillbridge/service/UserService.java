@@ -37,9 +37,7 @@ public class UserService {
             throw new RuntimeException("Email already active");
         }
 
-        // Validation Rules:
-        // EMPLOYEE must have managerId
-        // MANAGER and HR must not require managerId (enforce null for consistency)
+        // Manager check
         if (request.getRole() == com.skillbridge.enums.Role.EMPLOYEE && request.getManagerId() == null) {
             throw new RuntimeException("Manager is required for Employee role");
         }
@@ -84,8 +82,7 @@ public class UserService {
 
     public List<UserProfileResponse> getTeamMembers() {
         User manager = getAuthenticatedUser();
-        // Allow ONLY Manager or HR? Requirement says "GET /users/team (Manager only)"
-        // Assuming getting team members FOR the logged in manager.
+        // Fetch team members
         return userRepository.findByManagerId(manager.getId()).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -155,7 +152,8 @@ public class UserService {
         // Delete related assignments
         assignmentRepository.deleteAll(assignmentRepository.findByEmployeeId(id));
 
-        // Handle manager relationship: if this user is a manager, update their employees
+        // Handle manager relationship: if this user is a manager, update their
+        // employees
         List<User> managedEmployees = userRepository.findAllByManagerId(id);
         for (User employee : managedEmployees) {
             employee.setManagerId(null);
