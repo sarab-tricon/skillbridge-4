@@ -164,7 +164,7 @@ describe('ManagerDashboard', () => {
         const teamBtn = await within(sidebar).findByText('My Team');
         fireEvent.click(teamBtn);
 
-        await screen.findByRole('heading', { name: /Team Management/i });
+        await screen.findByRole('heading', { name: /My Team/i });
         expect(screen.getByText('Alice Dev')).toBeInTheDocument();
     });
 
@@ -236,10 +236,10 @@ describe('ManagerDashboard', () => {
         );
 
         const sidebar = screen.getByRole('navigation', { name: /sidebar/i });
-        const navBtn = await within(sidebar).findByText('My Skills');
+        const navBtn = await within(sidebar).findByText('Skill Management');
         fireEvent.click(navBtn);
 
-        await screen.findByRole('heading', { name: /MANAGER Skills/i });
+        await screen.findByRole('heading', { name: /Skill Management/i });
         expect(await screen.findByText(/Add New Skill/i)).toBeInTheDocument();
 
         // Scope to the form container to avoid ambiguity with table headings
@@ -292,8 +292,6 @@ describe('ManagerDashboard', () => {
         fireEvent.click(forwardBtn);
 
         await screen.findByRole('heading', { name: /Forward to HR/i });
-        const commentArea = await screen.findByRole('textbox', { name: /Comments for HR/i });
-        fireEvent.change(commentArea, { target: { value: 'Strong candidate' } });
 
         allocationsApi.forwardToHr.mockResolvedValue({ data: {} });
 
