@@ -7,9 +7,9 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -19,11 +19,11 @@ public class SkillSearchController {
 
     private final SkillSearchService skillSearchService;
 
-    @org.springframework.web.bind.annotation.GetMapping("/search")
+    @GetMapping("/search")
     @PreAuthorize("hasAnyRole('MANAGER', 'HR')")
     public ResponseEntity<List<SkillSearchResponse>> searchSkills(
-            @org.springframework.web.bind.annotation.RequestParam(value = "skills", required = false) List<String> skillNames,
-            @org.springframework.web.bind.annotation.RequestParam(value = "skill", required = false) String skillName) {
+            @RequestParam(value = "skills", required = false) List<String> skillNames,
+            @RequestParam(value = "skill", required = false) String skillName) {
         SkillSearchRequest request = SkillSearchRequest.builder()
                 .skillName(skillName)
                 .skillNames(skillNames)

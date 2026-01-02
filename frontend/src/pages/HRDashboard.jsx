@@ -6,6 +6,7 @@ import ProjectManagement from '../components/ProjectManagement';
 import SkillCatalog from '../components/SkillCatalog';
 import AllocationApprovals from '../components/AllocationApprovals';
 import Sidebar from '../components/Sidebar';
+import { allocationsApi } from '../api/allocations';
 
 
 const HRDashboard = () => {
@@ -30,15 +31,13 @@ const HRDashboard = () => {
         { id: 'talent', label: 'Talent', icon: 'bi-search' }
     ];
 
-    // -- State Management --
+    // State
     const [stats, setStats] = useState({
-        totalEmployees: 0,
         benchCount: 0,
-        projectsCount: 0, // Placeholder
-        activeRequests: 0 // Placeholder
+        activeRequests: 0
     });
     const [employees, setEmployees] = useState([]);
-    const [benchUsers, setBenchUsers] = useState([]);
+
 
     // Onboarding State
     const [formData, setFormData] = useState({
@@ -61,7 +60,7 @@ const HRDashboard = () => {
     const [catalogSkills, setCatalogSkills] = useState([]);
     const [talentResults, setTalentResults] = useState(null);
     const [talentLoading, setTalentLoading] = useState(false);
-    const [talentError, setTalentError] = useState(null);
+
 
     // Edit/Delete State
     const [isEditing, setIsEditing] = useState(false);
@@ -82,7 +81,7 @@ const HRDashboard = () => {
 
     const [peopleTab, setPeopleTab] = useState('EMPLOYEES'); // 'EMPLOYEES', 'MANAGERS', 'HRS'
 
-    // -- Effects --
+    // Effects
     useEffect(() => {
         if (role === 'HR') {
             fetchInitialData();
@@ -95,8 +94,18 @@ const HRDashboard = () => {
             fetchEmployees(),
             fetchHRs(),
             fetchBenchUsers(),
-            fetchCatalog()
+            fetchCatalog(),
+            fetchPendingRequestsCount()
         ]);
+    };
+
+    const fetchPendingRequestsCount = async () => {
+        try {
+            const response = await allocationsApi.getPendingRequests();
+            setStats(prev => ({ ...prev, activeRequests: response.data.length }));
+        } catch (err) {
+            console.error('Failed to fetch pending requests count:', err);
+        }
     };
 
     const fetchManagers = async () => {
@@ -121,7 +130,6 @@ const HRDashboard = () => {
         try {
             const response = await api.get('/users/employees');
             setEmployees(response.data);
-            setStats(prev => ({ ...prev, totalEmployees: response.data.length }));
         } catch (err) {
             console.error('Failed to fetch employees:', err);
         }
@@ -130,7 +138,7 @@ const HRDashboard = () => {
     const fetchBenchUsers = async () => {
         try {
             const response = await api.get('/users/bench');
-            setBenchUsers(response.data);
+            // setBenchUsers(response.data);
             setStats(prev => ({ ...prev, benchCount: response.data.length }));
         } catch (err) {
             console.error('Failed to fetch bench users:', err);
@@ -284,7 +292,6 @@ const HRDashboard = () => {
         if (searchSkills.length === 0) return;
 
         setTalentLoading(true);
-        setTalentError(null);
         setTalentResults([]);
 
         try {
@@ -293,7 +300,7 @@ const HRDashboard = () => {
             setTalentResults(response.data);
         } catch (err) {
             console.error('Failed to search talent:', err);
-            setTalentError('Error occurred while searching for talent.');
+            // setTalentError('Error occurred while searching for talent.');
         } finally {
             setTalentLoading(false);
         }
@@ -352,7 +359,7 @@ const HRDashboard = () => {
 
     const renderOverview = () => (
         <div className="fade-in">
-            <div className="row g-4">
+            <div className="row g-4 mb-4">
                 <StatCard
                     title="Employee Management"
                     value={employees.length + managers.length + hrs.length}
@@ -371,10 +378,14 @@ const HRDashboard = () => {
                     icon="bi-journal-code"
                     onClick={() => setActiveSection('catalog')}
                 />
-
-                {/* Force break to put Talent and Projects on next row */}
-                <div className="w-100"></div>
-
+                <StatCard
+                    title="Approvals"
+                    value={stats.activeRequests}
+                    icon="bi-check-circle"
+                    onClick={() => setActiveSection('approvals')}
+                />
+            </div>
+            <div className="row g-4">
                 <StatCard
                     title="Talent Search"
                     value="Find"
@@ -988,7 +999,6 @@ const HRDashboard = () => {
                 </div>
             </div>
 
-            {/* Modals */}
             {isEditing && renderEditModal()}
             {isDeleting && renderDeleteModal()}
 

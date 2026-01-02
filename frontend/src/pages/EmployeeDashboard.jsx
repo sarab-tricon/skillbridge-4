@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import { allocationsApi } from '../api/allocations';
 import ProfileSection from '../components/ProfileSection';
@@ -8,7 +7,6 @@ import AllocationCard from '../components/AllocationCard';
 
 
 const EmployeeDashboard = () => {
-    const { user } = useAuth();
     const [activeSection, setActiveSection] = useState(() => {
         return localStorage.getItem('employeeActiveSection') || 'overview';
     });
@@ -18,7 +16,6 @@ const EmployeeDashboard = () => {
         localStorage.setItem('employeeActiveSection', activeSection);
     }, [activeSection]);
 
-    // Section States
     // Section States
     const [skills, setSkills] = useState([]);
     const [allocation, setAllocation] = useState(null);
@@ -205,20 +202,7 @@ const EmployeeDashboard = () => {
         }
     };
 
-    const handleDeleteSkill = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this skill?')) return;
-        setAddSkillError(null);
-        setSuccessMessage(null);
-        try {
-            await api.delete(`/skills/${id}`);
-            setSuccessMessage('Skill deleted successfully.');
-            fetchSkills();
-            setTimeout(() => setSuccessMessage(null), 3000);
-        } catch (err) {
-            setAddSkillError(err.response?.data?.message || 'Failed to delete skill.');
-            console.error('Failed to delete skill', err);
-        }
-    };
+
 
     const handleRequestAllocation = async (e) => {
         e.preventDefault();
@@ -254,54 +238,104 @@ const EmployeeDashboard = () => {
         return (
             <div className="row g-3 g-md-4">
                 {/* My Skills Card */}
-                <div className="col-md-4">
-                    <div className="card h-100 shadow-sm border-0 border-top-primary">
-                        <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
-                            <i className="bi bi-person-badge h1 text-accent mb-2"></i>
-                            <h2 className="card-title fw-bold h5">My Skills</h2>
-                            <div className="mb-3">
-                                <p className="h2 fw-bold text-accent mb-0">
-                                    {loadingSkills ? '...' : skills.filter(s => s.status === 'APPROVED').length}
-                                </p>
+                <div className="col-md-3 mb-4">
+                    <div className="card h-100 shadow-sm border-0 summary-card"
+                        style={{ borderLeft: '5px solid var(--color-accent)' }}
+                        onClick={() => setActiveSection('skills')}
+                    >
+                        <div className="card-body d-flex flex-column" style={{ cursor: 'pointer' }}>
+                            <div className="d-flex align-items-center justify-content-between mb-3">
+                                <div>
+                                    <span className="text-muted text-uppercase mb-2 d-block" style={{ fontSize: '0.75rem', letterSpacing: '1px', fontWeight: '700' }}>My Skills</span>
+                                    <h2 className="fw-bold mb-0 text-dark">
+                                        {loadingSkills ? '...' : skills.filter(s => s.status === 'APPROVED').length}
+                                    </h2>
+                                </div>
+                                <div className="rounded-circle p-3 d-flex align-items-center justify-content-center"
+                                    style={{ backgroundColor: 'rgba(181, 64, 0, 0.1)', width: '50px', height: '50px' }}>
+                                    <i className="bi bi-star fs-4" style={{ color: 'var(--color-primary)' }}></i>
+                                </div>
                             </div>
                             <div className="mt-auto">
-                                <button className="btn btn-outline-accent btn-sm mt-2 px-4 rounded-pill" onClick={() => setActiveSection('skills')}>Manage</button>
+                                <button className="btn btn-outline-accent btn-sm rounded-pill px-4 fw-bold w-100">View Details</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Assignments Card */}
-                <div className="col-md-4">
-                    <div className="card h-100 shadow-sm border-0 border-top-primary">
-                        <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
-                            <i className="bi bi-briefcase h1 text-accent mb-2"></i>
-                            <h2 className="card-title fw-bold h5">Assignments</h2>
-                            <div className="mb-3">
-                                <p className="h2 fw-bold text-accent mb-0">
-                                    {loadingAlloc ? '...' : projectCount}
-                                </p>
+                <div className="col-md-3 mb-4">
+                    <div className="card h-100 shadow-sm border-0 summary-card"
+                        style={{ borderLeft: '5px solid var(--color-accent)' }}
+                        onClick={() => setActiveSection('allocation')}
+                    >
+                        <div className="card-body d-flex flex-column" style={{ cursor: 'pointer' }}>
+                            <div className="d-flex align-items-center justify-content-between mb-3">
+                                <div>
+                                    <span className="text-muted text-uppercase mb-2 d-block" style={{ fontSize: '0.75rem', letterSpacing: '1px', fontWeight: '700' }}>Assignments</span>
+                                    <h2 className="fw-bold mb-0 text-dark">
+                                        {loadingAlloc ? '...' : projectCount}
+                                    </h2>
+                                </div>
+                                <div className="rounded-circle p-3 d-flex align-items-center justify-content-center"
+                                    style={{ backgroundColor: 'rgba(181, 64, 0, 0.1)', width: '50px', height: '50px' }}>
+                                    <i className="bi bi-diagram-3 fs-4" style={{ color: 'var(--color-primary)' }}></i>
+                                </div>
                             </div>
                             <div className="mt-auto">
-                                <button className="btn btn-outline-accent btn-sm mt-2 px-4 rounded-pill" onClick={() => setActiveSection('utilization')}>View Details</button>
+                                <button className="btn btn-outline-accent btn-sm rounded-pill px-4 fw-bold w-100">View Details</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Utilization Card */}
-                <div className="col-md-4">
-                    <div className="card h-100 shadow-sm border-0 border-top-primary">
-                        <div className="card-body p-3 p-md-4 text-center d-flex flex-column">
-                            <i className="bi bi-graph-up h1 text-accent mb-2"></i>
-                            <h2 className="card-title fw-bold h5">Utilization</h2>
-                            <div className="mb-3">
-                                <p className="h2 fw-bold text-accent mb-0">
-                                    {displayUtilization}%
-                                </p>
+                <div className="col-md-3 mb-4">
+                    <div className="card h-100 shadow-sm border-0 summary-card"
+                        style={{ borderLeft: '5px solid var(--color-accent)' }}
+                        onClick={() => setActiveSection('utilization')}
+                    >
+                        <div className="card-body d-flex flex-column" style={{ cursor: 'pointer' }}>
+                            <div className="d-flex align-items-center justify-content-between mb-3">
+                                <div>
+                                    <span className="text-muted text-uppercase mb-2 d-block" style={{ fontSize: '0.75rem', letterSpacing: '1px', fontWeight: '700' }}>Utilization</span>
+                                    <h2 className="fw-bold mb-0 text-dark">
+                                        {displayUtilization}%
+                                    </h2>
+                                </div>
+                                <div className="rounded-circle p-3 d-flex align-items-center justify-content-center"
+                                    style={{ backgroundColor: 'rgba(181, 64, 0, 0.1)', width: '50px', height: '50px' }}>
+                                    <i className="bi bi-graph-up fs-4" style={{ color: 'var(--color-primary)' }}></i>
+                                </div>
                             </div>
                             <div className="mt-auto">
-                                <button className="btn btn-outline-accent btn-sm mt-2 px-4 rounded-pill" onClick={() => setActiveSection('utilization')}>Detailed Stats</button>
+                                <button className="btn btn-outline-accent btn-sm rounded-pill px-4 fw-bold w-100">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Profile Card */}
+                <div className="col-md-3 mb-4">
+                    <div className="card h-100 shadow-sm border-0 summary-card"
+                        style={{ borderLeft: '5px solid var(--color-accent)' }}
+                        onClick={() => setActiveSection('profile')}
+                    >
+                        <div className="card-body d-flex flex-column" style={{ cursor: 'pointer' }}>
+                            <div className="d-flex align-items-center justify-content-between mb-3">
+                                <div>
+                                    <span className="text-muted text-uppercase mb-2 d-block" style={{ fontSize: '0.75rem', letterSpacing: '1px', fontWeight: '700' }}>My Profile</span>
+                                    <h2 className="fw-bold mb-0 text-dark">
+                                        <i className="bi bi-person-circle"></i>
+                                    </h2>
+                                </div>
+                                <div className="rounded-circle p-3 d-flex align-items-center justify-content-center"
+                                    style={{ backgroundColor: 'rgba(181, 64, 0, 0.1)', width: '50px', height: '50px' }}>
+                                    <i className="bi bi-person-circle fs-4" style={{ color: 'var(--color-primary)' }}></i>
+                                </div>
+                            </div>
+                            <div className="mt-auto">
+                                <button className="btn btn-outline-accent btn-sm rounded-pill px-4 fw-bold w-100">View Details</button>
                             </div>
                         </div>
                     </div>
@@ -740,7 +774,7 @@ const EmployeeDashboard = () => {
                                     {activeSection === 'overview' && 'Dashboard Overview'}
                                     {activeSection === 'skills' && 'Skill Management'}
                                     {activeSection === 'allocation' && 'My Projects'}
-                                    {activeSection === 'utilization' && 'Personal Utilization'}
+                                    {activeSection === 'utilization' && 'Utilization'}
                                     {activeSection === 'profile' && 'My Profile'}
                                 </h1>
                             </div>
@@ -796,9 +830,6 @@ const EmployeeDashboard = () => {
                 .border-accent {
                     border-color: var(--color-primary) !important;
                 }
-                .border-top-primary {
-                    border-top: 4px solid var(--color-primary) !important;
-                }
                 .text-accent {
                     color: var(--color-primary) !important;
                 }
@@ -808,9 +839,6 @@ const EmployeeDashboard = () => {
                 }
                 .spinner-border.text-primary {
                     color: var(--color-primary) !important;
-                }
-                .text-accent {
-                    color: var(--color-primary);
                 }
                 .animate-fade-in {
                     animation: fadeIn 0.4s ease-out;
