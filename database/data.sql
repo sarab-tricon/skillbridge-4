@@ -8,6 +8,10 @@ VALUES
 (gen_random_uuid(), 'hr@skillbridge.com', '$2a$10$wSsqt.9XbX5I1.Ue9p5.I.mG7oG2R5m6e4wW1fGj7Y4R9e3yqG7m6', 'HR', 'Admin', 'HR')
 ON CONFLICT (email) DO NOTHING;
 
+
+
+
+--number 2
 -- 2. Master Skill Catalog Seeding
 INSERT INTO skills (id, name, category, description)
 VALUES 
